@@ -1,0 +1,19 @@
+{
+  "name": "code-art",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aleksei-berezkin/code-art.git"
+  },
+  "author": "Aleksei Berezkin",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/aleksei-berezkin/code-art/issues"
+  },
+  "homepage": "https://github.com/aleksei-berezkin/code-art#readme"
+}
