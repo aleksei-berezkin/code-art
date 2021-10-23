@@ -1,2 +1,2 @@
-# code-art
+# Code Art
 WIP
