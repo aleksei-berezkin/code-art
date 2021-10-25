@@ -50,6 +50,10 @@ module.exports = {
                     'css-loader',
                 ],
             },
+            {
+                test: /\.shader/,
+                type: 'asset/source',
+            },
         ],
     },
     mode,
