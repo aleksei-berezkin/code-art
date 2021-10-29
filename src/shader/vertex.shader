@@ -1,12 +1,13 @@
 #version 300 es
  
+uniform vec2 u_resolution;
+
 // an attribute is an input (in) to a vertex shader.
 // It will receive data from a buffer
 in vec2 a_position;
+in vec4 a_color;
 
 out vec4 v_color;
-
-uniform vec2 u_resolution;
 
 // all shaders have a main function
 void main() {
@@ -18,9 +19,5 @@ void main() {
 
   gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
 
-  // Clip space goes -1.0 to +1.0
-  // Color space goes from 0.0 to 1.0
-  // Less than 0 is black, greater than 1 is white
-  float val = (gl_Position[0] + gl_Position[1]) * .5 + .5;
-  v_color = vec4(val, val, val, 1);
+  v_color = a_color;
 }
