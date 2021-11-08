@@ -4,11 +4,14 @@
 // to pick one. highp is a good default. It means "high precision"
 precision highp float;
 
-in vec4 v_color;
+// our texture
+uniform sampler2D u_image;
+// the texCoords passed in from the vertex shader.
+in vec2 v_texCoord;
 
 // we need to declare an output for the fragment shader
 out vec4 outColor;
 
 void main() {
-    outColor = v_color;
+    outColor = texture(u_image, v_texCoord);
 }

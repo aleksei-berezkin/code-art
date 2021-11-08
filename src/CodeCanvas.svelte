@@ -7,6 +7,7 @@
     import fragmentShaderSource from './shader/fragment.shader';
     import { createShader } from './createShader';
     import { createProgram } from './createProgram';
+    import {loadImage} from "./loadImage";
 
     let canvasEl: HTMLCanvasElement;
 
@@ -28,10 +29,10 @@
         // ---- Push vertices to buffer ----
         gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
 
-        const x1 = Math.random() * gl.canvas.width;
-        const y1 = Math.random() * gl.canvas.height;
-        const x2 = Math.random() * gl.canvas.width;
-        const y2 = Math.random() * gl.canvas.height;
+        const x1 = 0;
+        const y1 = 0;
+        const x2 = gl.canvas.width;
+        const y2 = gl.canvas.height;
 
         // Rectangle
         const twoTriangles = [
@@ -51,52 +52,65 @@
         gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
         // ---- / ----
 
-        // ---- Push color to buffer ----
-        gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+        loadImage('SamplePic.jpg')
+            .then(img => {
+                // ---- Push texture ----
+                // make unit 0 the active texture unit
+                // (i.e, the unit all other texture commands will affect.)
+                gl.activeTexture(gl.TEXTURE0 + 0);
 
-        const [r1, g1, b1, r2, g2, b2] = Array.from({length: 6}).map(() => Math.random());
-        gl.bufferData(
-            gl.ARRAY_BUFFER,
-            new Float32Array([
-                r1, g1, b1, 1,
-                r1, g1, b1, 1,
-                r1, g1, b1, 1,
-                r2, g2, b2, 1,
-                r2, g2, b2, 1,
-                r2, g2, b2, 1,
-            ]),
-            gl.STATIC_DRAW,
-        );
-        // ---- / ----
+                // Create and bind texture to 'texture unit '0' 2D bind point
+                gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
 
-        // Pull color from buffer to attribute
-        const colorLocation = gl.getAttribLocation(program, 'a_color');
-        gl.enableVertexAttribArray(colorLocation);
-        gl.vertexAttribPointer(colorLocation, 4, gl.FLOAT, false, 0, 0);
-        // ---- / ----
+                // Set the parameters so we don't need mips and so we're not filtering
+                // and we don't repeat
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
-        // Tell it to use our program (pair of shaders)
-        gl.useProgram(program);
+                // Upload the image into the texture.
+                const mipLevel = 0;               // the largest mip
+                const internalFormat = gl.RGBA;   // format we want in the texture
+                const srcFormat = gl.RGBA;        // format of data we are supplying
+                const srcType = gl.UNSIGNED_BYTE  // type of data we are supplying
+                gl.texImage2D(gl.TEXTURE_2D,
+                    mipLevel,
+                    internalFormat,
+                    srcFormat,
+                    srcType,
+                    img);
+                // ---- / ----
 
-        // ---- Create and bind resolution uniform ----
-        const resolutionUniformLocation = gl.getUniformLocation(program, 'u_resolution');
-        gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
-        // ---- / ----
+                // Tell it to use our program (pair of shaders)
+                gl.useProgram(program);
+        
+                // ---- Create and bind resolution uniform ----
+                const resolutionUniformLocation = gl.getUniformLocation(program, 'u_resolution');
+                gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
+                // ---- / ----
 
-        // Translate -1...+1 to:
-        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-
-        // Clear the canvas
-        gl.clearColor(0, 0, 0, 0);
-        gl.clear(gl.COLOR_BUFFER_BIT);
-
-        gl.drawArrays(gl.TRIANGLES, 0, 6);
+                // ---- Create and bind texture uniform ----
+                const imageLocation = gl.getUniformLocation(program, 'u_image');
+                gl.uniform1i(imageLocation, 0);
+                // ---- / ----
+        
+                // Translate -1...+1 to:
+                gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+        
+                // Clear the canvas
+                gl.clearColor(0, 0, 0, 0);
+                gl.clear(gl.COLOR_BUFFER_BIT);
+        
+                gl.drawArrays(gl.TRIANGLES, 0, 6);
+            })
+        
     });
 </script>
 
 <style>
     canvas {
-        aspect-ratio: 16/9;
+        aspect-ratio: 3/2;
         max-width: 1280px;
         width: 90%;
     }
