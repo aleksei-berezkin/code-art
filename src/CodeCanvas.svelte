@@ -25,17 +25,15 @@
         const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
         const program = createProgram(gl, vertexShader, fragmentShader);
 
-        // ---- Populate vertices ----
-        const positionAttributeLocation = gl.getAttribLocation(program, 'a_position');
+        // ---- Push vertices to buffer ----
         gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-        gl.enableVertexAttribArray(positionAttributeLocation);
 
-        // Generate rectangle
         const x1 = Math.random() * gl.canvas.width;
         const y1 = Math.random() * gl.canvas.height;
         const x2 = Math.random() * gl.canvas.width;
         const y2 = Math.random() * gl.canvas.height;
 
+        // Rectangle
         const twoTriangles = [
             x1, y1,
             x1, y2,
@@ -45,15 +43,17 @@
             x2, y2,
         ];
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(twoTriangles), gl.STATIC_DRAW);
+        // ---- / ----
+
+        // ---- Pull vertices from buffer to attribute ----
+        const positionAttributeLocation = gl.getAttribLocation(program, 'a_position');
+        gl.enableVertexAttribArray(positionAttributeLocation);
         gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
         // ---- / ----
 
-        // ---- Populate color ----
-        const colorLocation = gl.getAttribLocation(program, 'a_color');
+        // ---- Push color to buffer ----
         gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-        gl.enableVertexAttribArray(colorLocation);
 
-        // Generate colors
         const [r1, g1, b1, r2, g2, b2] = Array.from({length: 6}).map(() => Math.random());
         gl.bufferData(
             gl.ARRAY_BUFFER,
@@ -67,6 +67,11 @@
             ]),
             gl.STATIC_DRAW,
         );
+        // ---- / ----
+
+        // Pull color from buffer to attribute
+        const colorLocation = gl.getAttribLocation(program, 'a_color');
+        gl.enableVertexAttribArray(colorLocation);
         gl.vertexAttribPointer(colorLocation, 4, gl.FLOAT, false, 0, 0);
         // ---- / ----
 
