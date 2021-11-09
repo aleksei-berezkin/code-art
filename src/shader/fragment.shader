@@ -13,5 +13,15 @@ in vec2 v_texCoord;
 out vec4 outColor;
 
 void main() {
-    outColor = texture(u_image, v_texCoord);
+    vec2 onePixel = vec2(1) / vec2(textureSize(u_image, 0));
+    float mul = 2.0;
+
+    // Average (blur)
+    outColor = (
+        texture(u_image, v_texCoord) +
+        mul * texture(u_image, v_texCoord + vec2( onePixel.x, 0)) +
+        mul * texture(u_image, v_texCoord + vec2(-onePixel.x, 0)) +
+        mul * texture(u_image, v_texCoord + vec2(0,  onePixel.y)) +
+        mul * texture(u_image, v_texCoord + vec2(0, -onePixel.y))
+    ) / (1.0 + mul * 4.0);
 }
