@@ -9,19 +9,31 @@ uniform sampler2D u_image;
 // the texCoords passed in from the vertex shader.
 in vec2 v_texCoord;
 
+// Kernel
+uniform float u_kernel[9];
+uniform int u_kSize;
+
 // we need to declare an output for the fragment shader
 out vec4 outColor;
 
 void main() {
     vec2 onePixel = vec2(1) / vec2(textureSize(u_image, 0));
-    float mul = 2.0;
+
+    int fromPos = (-u_kSize + 1) / 2;
+
+    outColor = vec4(0);
+    float w = 0.0;
+
+    for (int row = 0; row <= u_kSize; row++) {
+        for (int col = 0; col <= u_kSize; col++) {
+            float k = u_kernel[row * u_kSize + col];
+            vec2 d = vec2(onePixel.x * float(fromPos + col), onePixel.y * float(fromPos + row));
+
+            outColor = outColor + k * texture(u_image, v_texCoord + d);
+            w += k;
+        }
+    }
 
     // Average (blur)
-    outColor = (
-        texture(u_image, v_texCoord) +
-        mul * texture(u_image, v_texCoord + vec2( onePixel.x, 0)) +
-        mul * texture(u_image, v_texCoord + vec2(-onePixel.x, 0)) +
-        mul * texture(u_image, v_texCoord + vec2(0,  onePixel.y)) +
-        mul * texture(u_image, v_texCoord + vec2(0, -onePixel.y))
-    ) / (1.0 + mul * 4.0);
+    outColor /= w;
 }

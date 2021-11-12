@@ -95,6 +95,22 @@
                 gl.uniform1i(imageLocation, 0);
                 // ---- / ----
         
+                // ---- Create and bind kernel uniforms ----
+                const kSize = 13;
+                if (kSize % 2 !== 1) {
+                    throw new Error(`Not odd: ${kSize}`);
+                }
+
+                const kernelLocation = gl.getUniformLocation(program, 'u_kernel[0]');
+                gl.uniform1fv(
+                    kernelLocation,
+                    Array.from({length: kSize ** 2}).map(() => 1),
+                );
+
+                const kernelSizeLocation = gl.getUniformLocation(program, 'u_kSize');
+                gl.uniform1i(kernelSizeLocation, kSize);
+                // ---- / ----
+
                 // Translate -1...+1 to:
                 gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
         
