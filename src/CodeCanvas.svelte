@@ -7,7 +7,7 @@
     import fragmentShaderSource from './shader/fragment.shader';
     import { createShader } from './createShader';
     import { createProgram } from './createProgram';
-    import {loadImage} from "./loadImage";
+    import { loadImage } from './loadImage';
 
     let canvasEl: HTMLCanvasElement;
 
@@ -21,9 +21,14 @@
     onMount(() => {
         resizeHandler();
 
+        const kSize = 19;
+        if (kSize % 2 !== 1) {
+            throw new Error(`Not odd: ${kSize}`);
+        }
+
         const gl = canvasEl.getContext('webgl2');
         const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
-        const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+        const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource.replace('_kLen_', kSize ** 2));
         const program = createProgram(gl, vertexShader, fragmentShader);
 
         // ---- Push vertices to buffer ----
@@ -52,7 +57,7 @@
         gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
         // ---- / ----
 
-        loadImage('SamplePic.jpg')
+        loadImage('SamplePic2.jpg')
             .then(img => {
                 // ---- Push texture ----
                 // make unit 0 the active texture unit
@@ -96,16 +101,18 @@
                 // ---- / ----
         
                 // ---- Create and bind kernel uniforms ----
-                const kSize = 13;
-                if (kSize % 2 !== 1) {
-                    throw new Error(`Not odd: ${kSize}`);
-                }
+                const center = (kSize - 1) / 2;
+                const r = (kSize - 1) - center;
 
-                const kernelLocation = gl.getUniformLocation(program, 'u_kernel[0]');
-                gl.uniform1fv(
-                    kernelLocation,
-                    Array.from({length: kSize ** 2}).map(() => 1),
-                );
+                const kernel = Array.from({length: kSize ** 2}).map((_, i) => {
+                    const row = Math.floor(i / kSize);
+                    const col = i % kSize;
+                    const _r = Math.sqrt((row - center) ** 2 + (col - center) ** 2);
+                    return _r <= r ? 1 : 0;
+                });
+
+                const kernelLocation = gl.getUniformLocation(program, 'u_kernel');
+                gl.uniform1fv(kernelLocation, kernel);
 
                 const kernelSizeLocation = gl.getUniformLocation(program, 'u_kSize');
                 gl.uniform1i(kernelSizeLocation, kSize);
