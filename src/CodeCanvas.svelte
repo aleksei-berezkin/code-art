@@ -40,15 +40,13 @@
         const y2 = gl.canvas.height;
 
         // Rectangle
-        const twoTriangles = [
+        const triangleStrip = [
             x1, y1,
-            x1, y2,
-            x2, y1,
             x1, y2,
             x2, y1,
             x2, y2,
         ];
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(twoTriangles), gl.STATIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triangleStrip), gl.STATIC_DRAW);
         // ---- / ----
 
         // ---- Pull vertices from buffer to attribute ----
@@ -125,7 +123,7 @@
                 gl.clearColor(0, 0, 0, 0);
                 gl.clear(gl.COLOR_BUFFER_BIT);
         
-                gl.drawArrays(gl.TRIANGLES, 0, 6);
+                gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
             }));
         
     });
