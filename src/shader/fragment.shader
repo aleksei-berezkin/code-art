@@ -4,8 +4,10 @@
 // to pick one. highp is a good default. It means "high precision"
 precision highp float;
 
-// our texture
-uniform sampler2D u_image;
+// our textures
+uniform sampler2D u_image0;
+uniform sampler2D u_image1;
+
 // the texCoords passed in from the vertex shader.
 in vec2 v_texCoord;
 
@@ -17,7 +19,7 @@ uniform int u_kSize;
 out vec4 outColor;
 
 void main() {
-    vec2 onePixel = vec2(1) / vec2(textureSize(u_image, 0));
+    vec2 onePixel = vec2(1) / vec2(textureSize(u_image0, 0));
 
     int fromPos = (-u_kSize + 1) / 2;
 
@@ -29,10 +31,11 @@ void main() {
             float k = u_kernel[row * u_kSize + col];
             vec2 d = vec2(onePixel.x * float(fromPos + col), onePixel.y * float(fromPos + row));
 
-            resColor += k * texture(u_image, v_texCoord + d);
+            resColor += k * texture(u_image0, v_texCoord + d);
+
             w += k;
         }
     }
 
-    outColor = resColor / w;
+    outColor = .5 * resColor / w + .5 * texture(u_image1, v_texCoord);
 }

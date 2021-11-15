@@ -57,12 +57,12 @@
         gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
         // ---- / ----
 
-        loadImage('SamplePic2.jpg')
-            .then(img => {
+        Promise.all([loadImage('SamplePic.jpg'), loadImage('SamplePic2.jpg')])
+            .then(images => images.forEach((img, i) => {
                 // ---- Push texture ----
                 // make unit 0 the active texture unit
                 // (i.e, the unit all other texture commands will affect.)
-                gl.activeTexture(gl.TEXTURE0 + 0);
+                gl.activeTexture(i == 0 ? gl.TEXTURE0 : gl.TEXTURE1);
 
                 // Create and bind texture to 'texture unit '0' 2D bind point
                 gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
@@ -96,8 +96,8 @@
                 // ---- / ----
 
                 // ---- Create and bind texture uniform ----
-                const imageLocation = gl.getUniformLocation(program, 'u_image');
-                gl.uniform1i(imageLocation, 0);
+                const imageLocation = gl.getUniformLocation(program, `u_image${i}`);
+                gl.uniform1i(imageLocation, i);
                 // ---- / ----
         
                 // ---- Create and bind kernel uniforms ----
@@ -126,7 +126,7 @@
                 gl.clear(gl.COLOR_BUFFER_BIT);
         
                 gl.drawArrays(gl.TRIANGLES, 0, 6);
-            })
+            }));
         
     });
 </script>
