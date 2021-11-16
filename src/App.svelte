@@ -1,6 +1,7 @@
 <script lang='ts'>
     import Blur from './Blur.svelte';
     import { Router, Route } from 'svelte-routing';
+    import TwoD from "./TwoD.svelte";
 </script>
 
 <style>
@@ -26,7 +27,8 @@
 
 <main>
     <Router url=''>
-        <Route path='/blur' component={ Blur }/>
+        <Route path='/blur' component={ Blur } />
+        <Route path='/' component={ TwoD } />
     </Router>
 </main>
 
