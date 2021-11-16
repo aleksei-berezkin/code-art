@@ -11,6 +11,8 @@ export function createShader(gl: WebGL2RenderingContext, type: GLenum, source: s
         return shader;
     }
 
-    console.log(gl.getShaderInfoLog(shader));
+    const msg = gl.getShaderInfoLog(shader);
     gl.deleteShader(shader);
+
+    throw new Error(String(msg));
 }

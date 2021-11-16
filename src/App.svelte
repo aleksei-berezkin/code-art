@@ -1,5 +1,6 @@
 <script lang='ts'>
-    import CodeCanvas from './CodeCanvas.svelte';
+    import Blur from './Blur.svelte';
+    import { Router, Route } from 'svelte-routing';
 </script>
 
 <style>
@@ -24,7 +25,9 @@
 <header>Code Art</header>
 
 <main>
-    <CodeCanvas/>
+    <Router url=''>
+        <Route path='/blur' component={ Blur }/>
+    </Router>
 </main>
 
 <footer>

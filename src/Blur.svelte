@@ -3,8 +3,8 @@
 
 <script lang='ts'>
     import { onMount } from 'svelte';
-    import vertexShaderSource from './shader/vertex.shader';
-    import fragmentShaderSource from './shader/fragment.shader';
+    import vertexShaderSource from './shader/blurVertex.shader';
+    import fragmentShaderSource from './shader/blurFragment.shader';
     import { createShader } from './createShader';
     import { createProgram } from './createProgram';
     import { loadImage } from './loadImage';
@@ -28,7 +28,7 @@
 
         const gl = canvasEl.getContext('webgl2');
         const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
-        const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource.replace('_kLen_', kSize ** 2));
+        const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource.replace('_kLen_', String(kSize ** 2)));
         const program = createProgram(gl, vertexShader, fragmentShader);
 
         // ---- Push vertices to buffer ----

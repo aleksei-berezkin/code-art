@@ -12,6 +12,8 @@ export function createProgram(gl: WebGL2RenderingContext, vertexShader: WebGLSha
         return program;
     }
 
-    console.log(gl.getProgramInfoLog(program));
+    const message = gl.getProgramInfoLog(program);
     gl.deleteProgram(program);
+
+    throw new Error(String(message));
 }
