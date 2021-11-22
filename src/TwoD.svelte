@@ -64,7 +64,6 @@
 
         // ---- Push vertices to buffer ----
         gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(fTriangles), gl.STATIC_DRAW);
         // ---- / ----
 
