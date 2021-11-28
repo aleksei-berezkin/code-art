@@ -3,6 +3,7 @@ import { createProgram } from './createProgram';
 import vertexShaderSource from './shader/twoDVertex.shader';
 import fragmentShaderSource from './shader/twoDFragment.shader';
 import type { Transformations } from './txType';
+import {getRotateZMat, getScaleMat, getTranslateMat, mul} from "./matrices";
 
 // F
 const xThickness = .06;
@@ -53,14 +54,17 @@ export function drawScene(canvasEl: HTMLCanvasElement, rgb: [number, number, num
     // ---- / ----
 
     // ---- Create and bind transformations uniform ----
-    const scaleUniformLocation = gl.getUniformLocation(program, 'u_scale');
-    gl.uniform2f(scaleUniformLocation, 1 + tfs['scale x'] * 2, 1 + tfs['scale y'] * 2);
+    const txMat =
+        mul(
+            getTranslateMat(tfs['translate x'], tfs['translate y'], 0),
+            mul(
+                getRotateZMat(tfs['angle'] * Math.PI),
+                getScaleMat(1 + tfs['scale x'] * 2, 1 + tfs['scale y'] * 2, 1),
+            ),
+        );
 
-    const angleUniformLocation = gl.getUniformLocation(program, 'u_angle');
-    gl.uniform1f(angleUniformLocation, tfs['angle'] * Math.PI);
-
-    const translateUniformLocation = gl.getUniformLocation(program, 'u_translate');
-    gl.uniform2f(translateUniformLocation, tfs['translate x'], tfs['translate y']);
+    const txLocation = gl.getUniformLocation(program, 'u_tx');
+    gl.uniformMatrix4fv(txLocation, true, txMat);
     // ---- / -----
 
     // Translate -1...+1 to:
