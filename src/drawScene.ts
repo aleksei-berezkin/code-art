@@ -1,9 +1,10 @@
-import { createShader } from './createShader';
-import { createProgram } from './createProgram';
+import {createShader} from './createShader';
+import {createProgram} from './createProgram';
 import vertexShaderSource from './shader/twoDVertex.shader';
 import fragmentShaderSource from './shader/twoDFragment.shader';
-import type { Transformations } from './txType';
-import {getRotateZMat, getScaleMat, getTranslateMat, mul} from "./matrices";
+import type {Transformations} from './txType';
+import {getRotateZMat, getScaleMat, getTranslateMat, mul, transpose} from "./matrices";
+import {rect} from "./rect";
 
 // F
 const xThickness = .06;
@@ -64,7 +65,7 @@ export function drawScene(canvasEl: HTMLCanvasElement, rgb: [number, number, num
         );
 
     const txLocation = gl.getUniformLocation(program, 'u_tx');
-    gl.uniformMatrix4fv(txLocation, true, txMat);
+    gl.uniformMatrix4fv(txLocation, false, txMat);
     // ---- / -----
 
     // Translate -1...+1 to:
@@ -78,6 +79,3 @@ export function drawScene(canvasEl: HTMLCanvasElement, rgb: [number, number, num
     gl.drawArrays(gl.TRIANGLES, 0, fTriangles.length / 2);
 }
 
-function rect(x1: number, y1: number, x2: number, y2: number) {
-    return [x1, y1,   x2, y1,   x2, y2,   x1, y1,   x1, y2,   x2, y2];
-}

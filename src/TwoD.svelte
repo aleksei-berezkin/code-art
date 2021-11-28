@@ -16,6 +16,7 @@
     import { onMount } from 'svelte';
     import { drawScene } from './drawScene';
     import { allTx, Transformations, TxType } from './txType';
+    import {drawGridScene} from "./drawGridScene";
 
     function toId(tx: string) {
         return 'two-d-slider-' + tx.replace(/\s/g, '-');
@@ -34,7 +35,7 @@
 
     onMount(() => {
         handleResize();
-        drawScene(canvasEl, rgb, transformations);
+        drawGridScene(canvasEl, transformations);
     });
 
     function handleResize() {
@@ -48,7 +49,7 @@
         const inputEl = (e.target as HTMLInputElement);
         const tx = inputEl.dataset.tx as TxType;
         transformations[tx] = Number(inputEl.value);
-        drawScene(canvasEl, rgb, transformations);
+        drawGridScene(canvasEl, transformations);
     }
 </script>
 
