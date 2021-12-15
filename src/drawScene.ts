@@ -59,7 +59,7 @@ export function drawScene(canvasEl: HTMLCanvasElement, rgb: [number, number, num
         mul(
             getTranslateMat(tfs['translate x'], tfs['translate y'], 0),
             mul(
-                getRotateZMat(tfs['angle'] * Math.PI),
+                getRotateZMat(tfs['angle z'] * Math.PI),
                 getScaleMat(1 + tfs['scale x'] * 2, 1 + tfs['scale y'] * 2, 1),
             ),
         );

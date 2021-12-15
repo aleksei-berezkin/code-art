@@ -1,3 +1,8 @@
+/**
+ * All matrices are in "math" notation where row is row, column is column, or, in other words,
+ * matrix' slice is a row. When passed as uniforms matrices get transposed.
+ */
+
 export type Mat4 = [
     number, number, number, number,
     number, number, number, number,
@@ -7,7 +12,11 @@ export type Mat4 = [
 
 const size = 4;
 
-export function mul(A: Mat4, B: Mat4) {
+export function mul(...A: Mat4[]): Mat4 {
+    return A.reduce(mul2);
+}
+
+function mul2(A: Mat4, B: Mat4) {
     const C = [];
     for (let r = 0; r < size; r++) {
         for (let c = 0; c < size; c++) {
@@ -19,6 +28,18 @@ export function mul(A: Mat4, B: Mat4) {
         }
     }
     return asMat4(C);
+}
+
+export function vMul(A: Mat4, x: [number, number, number, number]) {
+    const v = [];
+    for (let r = 0; r < size; r++) {
+        let s = 0;
+        for (let c = 0; c < size; c++) {
+            s += A[ix(r, c)] * x[c];
+        }
+        v.push(s);
+    }
+    return v;
 }
 
 export function transpose(A: Mat4) {
@@ -37,7 +58,7 @@ function ix(r: number, c: number) {
 
 const sizeSq = size ** 2;
 
-function asMat4(A: number[]): Mat4 {
+export function asMat4(A: number[]): Mat4 {
     if (A.length === sizeSq) {
         return A as Mat4;
     }
@@ -58,6 +79,24 @@ export function getRotateZMat(angleRad: number) {
         Math.cos(angleRad),  Math.sin(angleRad), 0, 0,
         -Math.sin(angleRad), Math.cos(angleRad), 0, 0,
         0, 0, 1, 0,
+        0, 0, 0, 1,
+    ]);
+}
+
+export function getRotateXMat(angleRad: number) {
+    return asMat4([
+        1, 0, 0, 0,
+        0, Math.cos(angleRad),  Math.sin(angleRad), 0,
+        0, -Math.sin(angleRad), Math.cos(angleRad), 0,
+        0, 0, 0, 1,
+    ]);
+}
+
+export function getRotateYMat(angleRad: number) {
+    return asMat4([
+        Math.cos(angleRad), 0, Math.sin(angleRad), 0,
+        0, 1, 0, 0,
+        -Math.sin(angleRad), 0, Math.cos(angleRad), 0,
         0, 0, 0, 1,
     ]);
 }

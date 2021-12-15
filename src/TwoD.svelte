@@ -1,6 +1,6 @@
 <section>
     <div class='sliders'>
-        {#each allTx as tx}
+        {#each allTxWithoutScale as tx}
             <div class='slider-wr'>
                 <label for={toId(tx)}>{tx}</label>
                 <input id={toId(tx)} data-tx={tx} type='range' min='-1' max='1' step='any' value='0' on:input={handleTxChange}/>
@@ -15,7 +15,7 @@
 <script lang='ts'>
     import { onMount } from 'svelte';
     import { drawScene } from './drawScene';
-    import { allTx, Transformations, TxType } from './txType';
+    import {allTx, allTxWithoutScale, Transformations, TxType} from './txType';
     import {drawGridScene} from "./drawGridScene";
 
     function toId(tx: string) {
@@ -23,14 +23,16 @@
     }
 
     let canvasEl: HTMLCanvasElement;
-    const rgb = [Math.random(), Math.random(), Math.random()];
 
     const transformations: Transformations = {
         'scale x': 0,
         'scale y': 0,
-        'angle': 0,
+        'angle x': 0,
+        'angle y': 0,
+        'angle z': 0,
         'translate x': 0,
         'translate y': 0,
+        'translate z': 0,
     };
 
     onMount(() => {
