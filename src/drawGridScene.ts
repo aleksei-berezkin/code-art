@@ -19,12 +19,12 @@ export function drawGridScene(canvasEl: HTMLCanvasElement, tfs: Transformations)
     const program = createProgram(gl, vertexShader, fragmentShader);
 
     const pixelSpace = makePixelSpace(canvasEl.width, canvasEl.height);
-    const overlapX = 4.5;
-    const overlapY = 3.5
+    const xExtension = 4.5;
+    const yExtension = 3.5
     const grid = createGrid(
-        pixelSpace.fromX * overlapX, pixelSpace.fromY * overlapY,
-        pixelSpace.toX * overlapX, pixelSpace.toY * overlapY,
-        pixelSpace.baseZ,
+        pixelSpace.xMin * xExtension, pixelSpace.yMin * yExtension,
+        pixelSpace.xMax * xExtension, pixelSpace.yMax * yExtension,
+        0,
         48, 72,
     );
 
@@ -57,11 +57,11 @@ export function drawGridScene(canvasEl: HTMLCanvasElement, tfs: Transformations)
     const txMatPixels =
         mul(
             getTranslateMat(
-                tfs['translate x'] * pixelSpace.toX,
-                tfs['translate y'] * pixelSpace.toY,
-                tfs['translate z'] * pixelSpace.baseDepth * 8,
+                tfs['translate x'] * pixelSpace.xMin,
+                tfs['translate y'] * pixelSpace.yMin,
+                tfs['translate z'] * pixelSpace.zBase * 8,
             ),
-            getRotateXMat(tfs['angle x'] * Math.PI / 4),
+            getRotateXMat(-tfs['angle x'] * Math.PI / 4),
             getRotateYMat(-tfs['angle y'] * Math.PI / 2),
             getRotateZMat(-tfs['angle z'] * Math.PI),
             getScaleMat(1 + tfs['scale x'], 1 + tfs['scale y'], 1),
@@ -69,13 +69,13 @@ export function drawGridScene(canvasEl: HTMLCanvasElement, tfs: Transformations)
 
     const toClipSpaceMat = asMat4([
         // -toX ... +toX -> -1 ... +1
-        1 / pixelSpace.toX, 0, 0, 0,
+        1 / pixelSpace.xMax, 0, 0, 0,
         // -toY ... +toY -> -1 ... +1
-        0, 1 / pixelSpace.fromY, 0, 0,
+        0, 1 / pixelSpace.yMax, 0, 0,
         // fromZ ... toZ -> -1 ... +1 (won't be divided by w)
-        0, 0, 2 / pixelSpace.zSpan, -1 - 2 * pixelSpace.fromZ / pixelSpace.zSpan,
+        0, 0, 2 / pixelSpace.zSpan, -1 - 2 * pixelSpace.zMin / pixelSpace.zSpan,
         // -baseDepth ... baseDepth -> 0 ... +2
-        0, 0, 1 / pixelSpace.baseDepth, 1,
+        0, 0, 1 / pixelSpace.zBase, 1,
     ]);
 
     const txMat = mul(toClipSpaceMat, txMatPixels);
@@ -102,30 +102,28 @@ export function drawGridScene(canvasEl: HTMLCanvasElement, tfs: Transformations)
 
 /**
  * Pixel space (x, y) goes from top-left (-w/2, -h/2) to bottom-right (w/2, h/2).
- * Z goes from -baseDepth to +large_val with z = baseZ = 0 being
- * a depth at which an object with height=h is fully visible, and z=-baseDepth
- * being an eye position.
+ * Z goes from -zBase to +large_val*zBase where z=-zBase is an eye position,
+ * and z=0 is a depth at which an object with height=h is fully visible.
  * 
  * Vertical view angle is 115 deg (like that of human) so the following equation is valid:
- * tan(155deg / 2) = (h/2) / baseDepth
+ * tan(155deg / 2) = (h/2) / zBase
  * 
- * An object at z=+baseDepth (2 * baseDepth distance from an eye) is twice smaller than that
- * at z=0, so w = (baseDepth + z) / baseDepth = 1 + z / baseDepth
+ * An object at z=+zBase (2*zBase distance from an eye) is twice smaller than that
+ * at z=0, so w = (zBase + z) / zBase = 1 + z / zBase
  */
 function makePixelSpace(w: number, h: number) {
-    const baseDepth = h / 2 / Math.tan(degToRag(115) / 2);
-    const fromZ = -baseDepth;
-    const toZ = baseDepth * 1000;
+    const zBase = h / 2 / Math.tan(degToRag(115) / 2);
+    const zMin = -zBase;
+    const zMax = zBase * 1000;
     return {
-        fromX: -w/2,
-        fromY: -h/2,
-        toX: w/2,
-        toY: h/2,
-        baseDepth,
-        fromZ,
-        baseZ: 0,
-        toZ,
-        zSpan: toZ - fromZ,
+        xMin: -w/2,
+        yMin: -h/2,
+        xMax: w/2,
+        yMax: h/2,
+        zMin,
+        zBase,
+        zMax,
+        zSpan: zMax - zMin,
     };
 }
 

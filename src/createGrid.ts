@@ -1,10 +1,10 @@
 import { rect3dConstZ, vertexSize3d } from './rect';
 
-export function createGrid(fromX: number, fromY: number, toX: number, toY: number, z: number, cellWidth: number, cellHeight: number): Grid {
+export function createGrid(xMin: number, yMin: number, xMax: number, yMax: number, z: number, cellWidth: number, cellHeight: number): Grid {
     const vertices = [];
     const colors = [];
-    for (let y = fromY; y <= toY; y += cellHeight) {
-        for (let x = fromX; x <= toX; x += cellWidth) {
+    for (let y = yMin; y <= yMax; y += cellHeight) {
+        for (let x = xMin; x <= xMax; x += cellWidth) {
             const rectVertices = rect3dConstZ(x, y, x + cellWidth, y + cellHeight, z)
             vertices.push(...rectVertices);
 
