@@ -19,11 +19,16 @@ export function drawGridScene(canvasEl: HTMLCanvasElement, tfs: Transformations)
     const program = createProgram(gl, vertexShader, fragmentShader);
 
     const pixelSpace = makePixelSpace(canvasEl.width, canvasEl.height);
-    const xExtension = 4.5;
-    const yExtension = 3.5
+
+    const xRotAngle = -tfs['angle x'] * Math.PI / 4;
+    const yRotAngle = -tfs['angle y'] * Math.PI / 2;
+    const zRotAngle = -tfs['angle z'] * Math.PI;
+
+    const ext = calcExtensions(pixelSpace, xRotAngle, yRotAngle, zRotAngle);
+
     const grid = createGrid(
-        pixelSpace.xMin * xExtension, pixelSpace.yMin * yExtension,
-        pixelSpace.xMax * xExtension, pixelSpace.yMax * yExtension,
+        pixelSpace.xMin * ext.xMin, pixelSpace.yMin * ext.yMin,
+        pixelSpace.xMax * ext.xMax, pixelSpace.yMax * ext.yMax,
         0,
         48, 72,
     );
@@ -61,9 +66,9 @@ export function drawGridScene(canvasEl: HTMLCanvasElement, tfs: Transformations)
                 tfs['translate y'] * pixelSpace.yMin,
                 tfs['translate z'] * pixelSpace.zBase * 8,
             ),
-            getRotateXMat(-tfs['angle x'] * Math.PI / 4),
-            getRotateYMat(-tfs['angle y'] * Math.PI / 2),
-            getRotateZMat(-tfs['angle z'] * Math.PI),
+            getRotateXMat(xRotAngle),
+            getRotateYMat(yRotAngle),
+            getRotateZMat(zRotAngle),
             getScaleMat(1 + tfs['scale x'], 1 + tfs['scale y'], 1),
         );
 
@@ -112,10 +117,14 @@ export function drawGridScene(canvasEl: HTMLCanvasElement, tfs: Transformations)
  * at z=0, so w = (zBase + z) / zBase = 1 + z / zBase
  */
 function makePixelSpace(w: number, h: number) {
-    const zBase = h / 2 / Math.tan(degToRag(115) / 2);
+    const viewAngleV = degToRag(115);
+    const zBase = h / 2 / Math.tan(viewAngleV / 2);
+    const viewAngleH = Math.atan(w / 2 / zBase) * 2;
     const zMin = -zBase;
     const zMax = zBase * 1000;
     return {
+        viewAngleH,
+        viewAngleV,
         xMin: -w/2,
         yMin: -h/2,
         xMax: w/2,
@@ -129,4 +138,29 @@ function makePixelSpace(w: number, h: number) {
 
 function degToRag(deg: number) {
     return deg / 360 * 2 * Math.PI;
+}
+
+type PixelSpace = ReturnType<typeof makePixelSpace>;
+
+function calcExtensions(pixelSpace: PixelSpace, xRotAngle: number, yRotAngle: number, zRotAngle: number) {
+    const viewAngleH = pixelSpace.viewAngleH;
+    const maxYRot = Math.PI / 2 - viewAngleH / 2 - .001;
+    const _yRotAngle = pluck(-maxYRot, yRotAngle, maxYRot);
+
+    const xMinByY = pluck(0, Math.sin(Math.PI / 2 + viewAngleH / 2) / Math.sin(Math.PI / 2 - _yRotAngle - viewAngleH / 2), 32.0);
+    const xMaxByY = pluck(0, Math.sin(Math.PI / 2 + viewAngleH / 2) / Math.sin(Math.PI / 2 + _yRotAngle - viewAngleH / 2), 32.0);
+    const xByY = Math.max(xMinByY, xMaxByY);
+
+    const w = pixelSpace.xMax * xByY * Math.sin(Math.abs(_yRotAngle)) / pixelSpace.zBase;
+
+    return {
+        xMin: xMinByY,
+        xMax: xMaxByY,
+        yMin: pluck(1, 1 + w, 4),
+        yMax: pluck(1, 1 + w, 4),
+    };
+}
+
+function pluck(min: number, a: number, max: number) {
+    return Math.max(min, Math.min(a, max));
 }
