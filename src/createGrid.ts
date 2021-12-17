@@ -1,5 +1,6 @@
 import { rect3dConstZ, vertexSize3d } from './rect';
 
+// TODO origin at 0,0 to avoid colors change on xMin, yMin change
 export function createGrid(xMin: number, yMin: number, xMax: number, yMax: number, z: number, cellWidth: number, cellHeight: number): Grid {
     const vertices = [];
     const colors = [];

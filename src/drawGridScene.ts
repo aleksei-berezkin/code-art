@@ -26,6 +26,7 @@ export function drawGridScene(canvasEl: HTMLCanvasElement, tfs: Transformations)
 
     const ext = calcExtensions(pixelSpace, xRotAngle, yRotAngle, zRotAngle);
 
+    // TODO bottleneck, try wasm
     const grid = createGrid(
         pixelSpace.xMin * ext.xMin, pixelSpace.yMin * ext.yMin,
         pixelSpace.xMax * ext.xMax, pixelSpace.yMax * ext.yMax,
