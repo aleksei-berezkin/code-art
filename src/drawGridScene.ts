@@ -81,7 +81,7 @@ export function drawGridScene(canvasEl: HTMLCanvasElement, tfs: Transformations)
         0, 1 / pixelSpace.yMax, 0, 0,
         // fromZ ... toZ -> -1 ... +1 (won't be divided by w)
         0, 0, 2 / pixelSpace.zSpan, -1 - 2 * pixelSpace.zMin / pixelSpace.zSpan,
-        // -baseDepth ... baseDepth -> 0 ... +2
+        // -zBas ... zBase -> 0 ... +2
         0, 0, 1 / pixelSpace.zBase, 1,
     ]);
 

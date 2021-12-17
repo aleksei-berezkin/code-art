@@ -4,8 +4,10 @@ import { rect3dConstZ, vertexSize3d } from './rect';
 export function createGrid(xMin: number, yMin: number, xMax: number, yMax: number, z: number, cellWidth: number, cellHeight: number): Grid {
     const vertices = [];
     const colors = [];
-    for (let y = yMin; y <= yMax; y += cellHeight) {
-        for (let x = xMin; x <= xMax; x += cellWidth) {
+    const _xMin = Math.floor(xMin / cellWidth) * cellWidth;
+    const _yMin = Math.floor(yMin / cellHeight) * cellHeight;
+    for (let y = _yMin; y <= yMax; y += cellHeight) {
+        for (let x = _xMin; x <= xMax; x += cellWidth) {
             const rectVertices = rect3dConstZ(x, y, x + cellWidth, y + cellHeight, z)
             vertices.push(...rectVertices);
 
