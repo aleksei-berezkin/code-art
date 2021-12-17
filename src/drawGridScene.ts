@@ -18,19 +18,18 @@ export function drawGridScene(canvasEl: HTMLCanvasElement, tfs: Transformations)
     const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
     const program = createProgram(gl, vertexShader, fragmentShader);
 
-    const pixelSpace = makePixelSpace(canvasEl.width, canvasEl.height);
+    const pSp = makePixelSpace(canvasEl.width, canvasEl.height);
 
     const xRotAngle = -tfs['angle x'] * Math.PI / 4;
     const yRotAngle = -tfs['angle y'] * Math.PI / 2;
     const zRotAngle = tfs['angle z'] * Math.PI;
 
-    const ext = calcExtensions(pixelSpace, xRotAngle, yRotAngle, zRotAngle);
-    console.log(ext);
+    const ext = calcExtensions(pSp, xRotAngle, yRotAngle, zRotAngle);
 
     // TODO bottleneck, try wasm
     const grid = createGrid(
-        pixelSpace.xMin * ext.xMin, pixelSpace.yMin * ext.yMin,
-        pixelSpace.xMax * ext.xMax, pixelSpace.yMax * ext.yMax,
+        pSp.xMin * ext.xMin, pSp.yMin * ext.yMin,
+        pSp.xMax * ext.xMax, pSp.yMax * ext.yMax,
         0,
         48, 72,
     );
@@ -64,9 +63,9 @@ export function drawGridScene(canvasEl: HTMLCanvasElement, tfs: Transformations)
     const txMatPixels =
         mul(
             getTranslateMat(
-                tfs['translate x'] * pixelSpace.xMin,
-                tfs['translate y'] * pixelSpace.yMin,
-                tfs['translate z'] * pixelSpace.zBase * 8,
+                tfs['translate x'] * pSp.xMin,
+                tfs['translate y'] * pSp.yMin,
+                tfs['translate z'] * pSp.zBase * 8,
             ),
             getRotateXMat(xRotAngle),
             getRotateYMat(yRotAngle),
@@ -75,14 +74,14 @@ export function drawGridScene(canvasEl: HTMLCanvasElement, tfs: Transformations)
         );
 
     const toClipSpaceMat = asMat4([
-        // -toX ... +toX -> -1 ... +1
-        1 / pixelSpace.xMax, 0, 0, 0,
-        // -toY ... +toY -> -1 ... +1
-        0, 1 / pixelSpace.yMax, 0, 0,
-        // fromZ ... toZ -> -1 ... +1 (won't be divided by w)
-        0, 0, 2 / pixelSpace.zSpan, -1 - 2 * pixelSpace.zMin / pixelSpace.zSpan,
-        // -zBas ... zBase -> 0 ... +2
-        0, 0, 1 / pixelSpace.zBase, 1,
+        // xMin(==-xMax) ... xMax -> -1 ... +1
+        1 / pSp.xMax, 0, 0, 0,
+        // yMin(==-yMax) ... yMax -> -1 ... +1
+        0, 1 / pSp.yMax, 0, 0,
+        // zMin ... zMax -> -1 ... +1 (won't be divided by w)
+        0, 0, 2 / pSp.zSpan, -1 - 2 * pSp.zMin / pSp.zSpan,
+        // zMin(==-zBase)...zBase...zMax -> 0...+2...(zSpan/zBase)
+        0, 0, 1 / pSp.zBase, 1,
     ]);
 
     const txMat = mul(toClipSpaceMat, txMatPixels);
