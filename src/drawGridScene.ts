@@ -1,11 +1,11 @@
-import { createShader } from './createShader';
-import { createProgram } from './createProgram';
+import {createShader} from './createShader';
+import {createProgram} from './createProgram';
 import vertexShaderSource from './shader/gridVertex.shader';
 import fragmentShaderSource from './shader/gridFragment.shader';
-import type { Transformations } from './txType';
-import { asMat4, getRotateXMat, getRotateYMat, getRotateZMat, getScaleMat, getTranslateMat, mul } from './matrices';
-import { createGrid } from './createGrid';
-import { vertexSize3d } from './rect';
+import type {Transformations} from './txType';
+import {asMat4, getRotateXMat, getRotateYMat, getRotateZMat, getScaleMat, getTranslateMat, mul} from './matrices';
+import {createGrid} from './createGrid';
+import {vertexSize3d} from './rect';
 
 const bgColor = [.2, .2, .3, 1] as const;
 export function drawGridScene(canvasEl: HTMLCanvasElement, tfs: Transformations) {
@@ -22,7 +22,7 @@ export function drawGridScene(canvasEl: HTMLCanvasElement, tfs: Transformations)
 
     const xRotAngle = -tfs['angle x'] * Math.PI / 4;
     const yRotAngle = -tfs['angle y'] * Math.PI / 2;
-    const zRotAngle = -tfs['angle z'] * Math.PI;
+    const zRotAngle = tfs['angle z'] * Math.PI;
 
     const ext = calcExtensions(pixelSpace, xRotAngle, yRotAngle, zRotAngle);
 
@@ -140,24 +140,50 @@ function degToRag(deg: number) {
     return deg / 360 * 2 * Math.PI;
 }
 
+function radToDeg(deg: number) {
+    return deg / 2 / Math.PI * 360;
+}
+
 type PixelSpace = ReturnType<typeof makePixelSpace>;
 
 function calcExtensions(pixelSpace: PixelSpace, xRotAngle: number, yRotAngle: number, zRotAngle: number) {
-    const viewAngleH = pixelSpace.viewAngleH;
-    const maxYRot = Math.PI / 2 - viewAngleH / 2 - .001;
-    const _yRotAngle = pluck(-maxYRot, yRotAngle, maxYRot);
+    const {viewAngleH, viewAngleV} = pixelSpace;
 
+    const maxYRot = Math.PI / 2 - viewAngleH / 2 - .01;
+    const maxXRot = Math.PI / 2 - viewAngleV / 2 - .01;
+    const _yRotAngle = pluck(-maxYRot, yRotAngle, maxYRot);
+    const _xRotAngle = pluck(-maxXRot, xRotAngle, maxXRot);
+
+    // Sine theorem
     const xMinByY = pluck(0, Math.sin(Math.PI / 2 + viewAngleH / 2) / Math.sin(Math.PI / 2 - _yRotAngle - viewAngleH / 2), 32.0);
     const xMaxByY = pluck(0, Math.sin(Math.PI / 2 + viewAngleH / 2) / Math.sin(Math.PI / 2 + _yRotAngle - viewAngleH / 2), 32.0);
-    const xByY = Math.max(xMinByY, xMaxByY);
 
-    const w = pixelSpace.xMax * xByY * Math.sin(Math.abs(_yRotAngle)) / pixelSpace.zBase;
+    const yMinByX = pluck(0, Math.sin(Math.PI / 2 + viewAngleV / 2) / Math.sin(Math.PI / 2 - _xRotAngle - viewAngleV / 2), 12.0);
+    const yMaxByX = pluck(0, Math.sin(Math.PI / 2 + viewAngleV / 2) / Math.sin(Math.PI / 2 + _xRotAngle - viewAngleV / 2), 12.0);
+
+    // Z distance from farthest point
+    const fudgeByYRot = pixelSpace.xMax * Math.max(xMinByY, xMaxByY) * Math.sin(Math.abs(_yRotAngle)) / pixelSpace.zBase + 1;
+    const fudgeByXRot = pixelSpace.yMax * Math.max(yMinByX, yMaxByX) * Math.sin(Math.abs(_xRotAngle)) / pixelSpace.zBase + 1;
+
+    const clipByZRot = pixelSpace.xMax / pixelSpace.yMax * Math.abs(zRotAngle) / Math.PI * 2 + 1; 
+    /*
+     * Just multiplying fudges in 3d space is incorrect: when both angles are nonzero result fudge is larger.
+     * The following is empirically picked factor working for moderate angles..
+     */
+    const extraFudge = 1 + (40 * Math.abs(xRotAngle) * Math.abs(yRotAngle)) ** 1.8;
+
+    const extraFudges = {
+        xMin: yRotAngle > 0 ? extraFudge : 1,
+        xMax: yRotAngle < 0 ? extraFudge : 1,
+        yMin: xRotAngle > 0 ? extraFudge : 1,
+        yMax: xRotAngle < 0 ? extraFudge : 1,
+    };
 
     return {
-        xMin: xMinByY,
-        xMax: xMaxByY,
-        yMin: pluck(1, 1 + w, 4),
-        yMax: pluck(1, 1 + w, 4),
+        xMin: pluck(0, xMinByY * fudgeByXRot * extraFudges.xMin * clipByZRot, 20),
+        xMax: pluck(0, xMaxByY * fudgeByXRot * extraFudges.xMax * clipByZRot, 20),
+        yMin: pluck(0, yMinByX * fudgeByYRot * extraFudges.yMin * clipByZRot, 20),
+        yMax: pluck(0, yMaxByX * fudgeByYRot * extraFudges.yMax * clipByZRot, 20),
     };
 }
 
