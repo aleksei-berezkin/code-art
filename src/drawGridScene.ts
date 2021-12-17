@@ -25,6 +25,7 @@ export function drawGridScene(canvasEl: HTMLCanvasElement, tfs: Transformations)
     const zRotAngle = tfs['angle z'] * Math.PI;
 
     const ext = calcExtensions(pixelSpace, xRotAngle, yRotAngle, zRotAngle);
+    console.log(ext);
 
     // TODO bottleneck, try wasm
     const grid = createGrid(
@@ -155,6 +156,7 @@ function calcExtensions(pixelSpace: PixelSpace, xRotAngle: number, yRotAngle: nu
     const _yRotAngle = pluck(-maxYRot, yRotAngle, maxYRot);
     const _xRotAngle = pluck(-maxXRot, xRotAngle, maxXRot);
 
+    // FIXME  pluck here and below kind of duplicate
     // Sine theorem
     const xMinByY = pluck(0, Math.sin(Math.PI / 2 + viewAngleH / 2) / Math.sin(Math.PI / 2 - _yRotAngle - viewAngleH / 2), 32.0);
     const xMaxByY = pluck(0, Math.sin(Math.PI / 2 + viewAngleH / 2) / Math.sin(Math.PI / 2 + _yRotAngle - viewAngleH / 2), 32.0);
@@ -171,7 +173,7 @@ function calcExtensions(pixelSpace: PixelSpace, xRotAngle: number, yRotAngle: nu
      * Just multiplying fudges in 3d space is incorrect: when both angles are nonzero result fudge is larger.
      * The following is empirically picked factor working for moderate angles..
      */
-    const extraFudge = 1 + (40 * Math.abs(xRotAngle) * Math.abs(yRotAngle)) ** 1.8;
+    const extraFudge = 1 + (40 * Math.abs(xRotAngle) * Math.abs(yRotAngle)) ** 2.9;
 
     const extraFudges = {
         xMin: yRotAngle > 0 ? extraFudge : 1,
