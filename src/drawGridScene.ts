@@ -156,28 +156,29 @@ function calcExtensions(pixelSpace: PixelSpace, xRotAngle: number, yRotAngle: nu
     const _yRotAngle = pluck(-maxYRot, yRotAngle, maxYRot);
     const _xRotAngle = pluck(-maxXRot, xRotAngle, maxXRot);
 
-    // FIXME  pluck here and below kind of duplicate
     // Sine theorem
-    const xMinByY = pluck(0, Math.sin(Math.PI / 2 + viewAngleH / 2) / Math.sin(Math.PI / 2 - _yRotAngle - viewAngleH / 2), 32.0);
-    const xMaxByY = pluck(0, Math.sin(Math.PI / 2 + viewAngleH / 2) / Math.sin(Math.PI / 2 + _yRotAngle - viewAngleH / 2), 32.0);
+    const xMinByY = Math.sin(Math.PI / 2 + viewAngleH / 2) / Math.sin(Math.PI / 2 - _yRotAngle - viewAngleH / 2);
+    const xMaxByY = Math.sin(Math.PI / 2 + viewAngleH / 2) / Math.sin(Math.PI / 2 + _yRotAngle - viewAngleH / 2);
 
-    const yMinByX = pluck(0, Math.sin(Math.PI / 2 + viewAngleV / 2) / Math.sin(Math.PI / 2 - _xRotAngle - viewAngleV / 2), 12.0);
-    const yMaxByX = pluck(0, Math.sin(Math.PI / 2 + viewAngleV / 2) / Math.sin(Math.PI / 2 + _xRotAngle - viewAngleV / 2), 12.0);
+    const yMinByX = Math.sin(Math.PI / 2 + viewAngleV / 2) / Math.sin(Math.PI / 2 - _xRotAngle - viewAngleV / 2);
+    const yMaxByX = Math.sin(Math.PI / 2 + viewAngleV / 2) / Math.sin(Math.PI / 2 + _xRotAngle - viewAngleV / 2);
 
     // Z distance from farthest point
     const fudgeByYRot = pixelSpace.xMax * Math.max(xMinByY, xMaxByY) * Math.sin(Math.abs(_yRotAngle)) / pixelSpace.zBase + 1;
     const fudgeByXRot = pixelSpace.yMax * Math.max(yMinByX, yMaxByX) * Math.sin(Math.abs(_xRotAngle)) / pixelSpace.zBase + 1;
 
-    const clipByZRot = pixelSpace.xMax / pixelSpace.yMax * Math.abs(zRotAngle) / Math.PI * 2 + 1; 
+    const ratio = pixelSpace.xMax / pixelSpace.yMax;
+    const clipByZRot = ratio * Math.abs(zRotAngle) / Math.PI * 2 + 1; 
     /*
-     * Just multiplying fudges in 3d space is incorrect: when both angles are nonzero result fudge is larger.
-     * The following is empirically picked factor working for moderate angles..
+     * Just multiplying independently calculated fudges in 3d space is incorrect,
+     * but I can't imagine correct 3d geometry. The following is empiric formula
+     * works for moderate angles.
      */
-    const extraFudge = 1 + (40 * Math.abs(xRotAngle) * Math.abs(yRotAngle)) ** 2.9;
+    const extraFudge = 1 + (60 * Math.abs(xRotAngle) * Math.abs(yRotAngle)) ** 1.9;
 
     const extraFudges = {
-        xMin: yRotAngle > 0 ? extraFudge : 1,
-        xMax: yRotAngle < 0 ? extraFudge : 1,
+        xMin: yRotAngle > 0 ? extraFudge * ratio : 1,
+        xMax: yRotAngle < 0 ? extraFudge * ratio : 1,
         yMin: xRotAngle > 0 ? extraFudge : 1,
         yMax: xRotAngle < 0 ? extraFudge : 1,
     };
