@@ -8,12 +8,12 @@
     import { createShader } from './createShader';
     import { createProgram } from './createProgram';
     import { loadImage } from './loadImage';
+    import { dpr } from './getDpr';
 
     let canvasEl: HTMLCanvasElement;
 
     function resizeHandler() {
         const canvasRect = canvasEl.getBoundingClientRect();
-        const dpr = window.devicePixelRatio || 1;
         canvasEl.width = canvasRect.width * dpr;
         canvasEl.height = canvasRect.height * dpr;
     }

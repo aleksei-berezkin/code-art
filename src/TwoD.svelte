@@ -1,3 +1,4 @@
+<canvas class='rasterize-font-canvas' bind:this={ rasterizeFontCanvasEl }></canvas>
 <section>
     <div class='sliders'>
         {#each allTxWithoutScale as tx}
@@ -7,7 +8,7 @@
             </div>
         {/each}
     </div>
-    <canvas bind:this={ canvasEl }></canvas>
+    <canvas class='code-canvas' bind:this={ codeCanvasEl }></canvas>
 </section>
     
 <svelte:window on:resize={ handleResize }/>
@@ -17,12 +18,17 @@
     import { drawScene } from './drawScene';
     import {allTx, allTxWithoutScale, Transformations, TxType} from './txType';
     import {drawGridScene} from "./drawGridScene";
+    import {rasterizeFont} from "./rasterizeFont";
+    import {getSource} from "./getSource";
 
     function toId(tx: string) {
         return 'two-d-slider-' + tx.replace(/\s/g, '-');
     }
 
-    let canvasEl: HTMLCanvasElement;
+    let codeCanvasEl: HTMLCanvasElement;
+    let rasterizeFontCanvasEl: HTMLCanvasElement;
+
+    const source = getSource();
 
     const transformations: Transformations = {
         'scale x': 0,
@@ -36,26 +42,35 @@
     };
 
     onMount(() => {
-        handleResize();
-        drawGridScene(canvasEl, transformations);
+        source.then(src => {
+            handleResize();
+            rasterizeFont(src, rasterizeFontCanvasEl, 72);
+            drawGridScene(codeCanvasEl, transformations);
+        })
     });
 
     function handleResize() {
-        const canvasRect = canvasEl.getBoundingClientRect();
+        const canvasRect = codeCanvasEl.getBoundingClientRect();
         const dpr = window.devicePixelRatio || 1;
-        canvasEl.width = canvasRect.width * dpr;
-        canvasEl.height = canvasRect.height * dpr;
+        codeCanvasEl.width = canvasRect.width * dpr;
+        codeCanvasEl.height = canvasRect.height * dpr;
     }
 
     function handleTxChange(e: Event) {
         const inputEl = (e.target as HTMLInputElement);
         const tx = inputEl.dataset.tx as TxType;
         transformations[tx] = Number(inputEl.value);
-        drawGridScene(canvasEl, transformations);
+        drawGridScene(codeCanvasEl, transformations);
     }
 </script>
 
 <style>
+    .rasterize-font-canvas {
+        font-family: Menlo, Consolas, monospace;
+        width: 2048px;
+        height: 512px;
+    }
+
     section {
         align-items: center;
         display: flex;
@@ -78,7 +93,7 @@
         padding-right: 0;
     }
 
-    canvas {
+    .code-canvas {
         aspect-ratio: 3/2;
         max-width: 1280px;
         width: 90%;
