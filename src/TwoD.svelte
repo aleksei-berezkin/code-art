@@ -1,4 +1,4 @@
-<canvas class='rasterize-font-canvas' bind:this={ rasterizeFontCanvasEl }></canvas>
+<canvas class='rasterize-font-canvas' bind:this={ rasterCanvasEl }></canvas>
 <section>
     <div class='sliders'>
         {#each allTxWithoutScale as tx}
@@ -18,7 +18,7 @@
     import { drawScene } from './drawScene';
     import {allTx, allTxWithoutScale, Transformations, TxType} from './txType';
     import {drawGridScene} from "./drawGridScene";
-    import {rasterizeFont} from "./rasterizeFont";
+    import {rasterizeFont, RasterLetter} from "./rasterizeFont";
     import {getSource} from "./getSource";
 
     function toId(tx: string) {
@@ -26,7 +26,7 @@
     }
 
     let codeCanvasEl: HTMLCanvasElement;
-    let rasterizeFontCanvasEl: HTMLCanvasElement;
+    let rasterCanvasEl: HTMLCanvasElement;
 
     const source = getSource();
 
@@ -41,11 +41,14 @@
         'translate z': 0,
     };
 
+    const  fontSize = 72;
+    let lettersMap: Map<string, RasterLetter>;
+
     onMount(() => {
+        handleResize();
         source.then(src => {
-            handleResize();
-            rasterizeFont(src, rasterizeFontCanvasEl, 72);
-            drawGridScene(codeCanvasEl, transformations);
+            lettersMap = rasterizeFont(src, rasterCanvasEl, fontSize);
+            drawGridScene(codeCanvasEl, rasterCanvasEl, transformations, src, fontSize, lettersMap);
         })
     });
 
@@ -60,7 +63,7 @@
         const inputEl = (e.target as HTMLInputElement);
         const tx = inputEl.dataset.tx as TxType;
         transformations[tx] = Number(inputEl.value);
-        drawGridScene(codeCanvasEl, transformations);
+        source.then(src => drawGridScene(codeCanvasEl, rasterCanvasEl, transformations, src, fontSize, lettersMap));
     }
 </script>
 

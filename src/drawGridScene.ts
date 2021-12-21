@@ -5,10 +5,14 @@ import fragmentShaderSource from './shader/gridFragment.shader';
 import type {Transformations} from './txType';
 import {asMat4, getRotateXMat, getRotateYMat, getRotateZMat, getScaleMat, getTranslateMat, mul} from './matrices';
 import {createGrid} from './createGrid';
-import {vertexSize3d} from './rect';
+import {vertexSize2d, vertexSize3d} from './rect';
+import type {RasterLetter} from "./rasterizeFont";
 
 const bgColor = [.2, .2, .3, 1] as const;
-export function drawGridScene(canvasEl: HTMLCanvasElement, tfs: Transformations) {
+export function drawGridScene(canvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement,
+                              tfs: Transformations,
+                              source: string, fontSize: number, lettersMap: Map<string, RasterLetter>,
+) {
     const gl = canvasEl.getContext('webgl2');
     if (!gl) {
         throw new Error('webgl2 not supported');
@@ -31,7 +35,7 @@ export function drawGridScene(canvasEl: HTMLCanvasElement, tfs: Transformations)
         pSp.xMin * ext.xMin, pSp.yMin * ext.yMin,
         pSp.xMax * ext.xMax, pSp.yMax * ext.yMax,
         0,
-        48, 72,
+        source, fontSize, lettersMap
     );
 
     // ---- Push vertices to buffer ----
@@ -45,6 +49,17 @@ export function drawGridScene(canvasEl: HTMLCanvasElement, tfs: Transformations)
     gl.vertexAttribPointer(positionAttributeLocation, vertexSize3d, gl.FLOAT, false, 0, 0);
     // ---- / ----
 
+    // ---- Push tex coords to buffer ----
+    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(grid.texPosition), gl.STATIC_DRAW);
+    // ---- / ----
+
+    // ---- Pull tex coords to attr ----
+    const texPositionAttributeLocation = gl.getAttribLocation(program, 'a_texPosition');
+    gl.enableVertexAttribArray(texPositionAttributeLocation);
+    gl.vertexAttribPointer(texPositionAttributeLocation, vertexSize2d, gl.FLOAT, false, 0, 0);
+    // ---- / ----
+
     // ---- Push colors to buffer ----
     gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(grid.colors), gl.STATIC_DRAW);
@@ -56,8 +71,41 @@ export function drawGridScene(canvasEl: HTMLCanvasElement, tfs: Transformations)
     gl.vertexAttribPointer(colorAttributeLocation, 4, gl.FLOAT, false, 0, 0);
     // ---- / ----
 
+    // ---- Push texture ----
+    // make unit 0 the active texture unit
+    // (i.e, the unit all other texture commands will affect.)
+    gl.activeTexture(gl.TEXTURE0);
+
+    // Create and bind texture to 'texture unit '0' 2D bind point
+    gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
+
+    // Set the parameters so we don't need mips and so we're not filtering
+    // and we don't repeat
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+    // Upload the image into the texture.
+    const mipLevel = 0;               // the largest mip
+    const internalFormat = gl.RGBA;   // format we want in the texture
+    const srcFormat = gl.RGBA;        // format of data we are supplying
+    const srcType = gl.UNSIGNED_BYTE  // type of data we are supplying
+    gl.texImage2D(gl.TEXTURE_2D,
+        mipLevel,
+        internalFormat,
+        srcFormat,
+        srcType,
+        rasterCanvasEl);
+    // ---- / ----
+
     // Tell it to use our program (pair of shaders)
     gl.useProgram(program);
+
+    // ---- Create and bind texture uniform ----
+    const imageLocation = gl.getUniformLocation(program, 'u_letters');
+    gl.uniform1i(imageLocation, 0);
+    // ---- / ----
 
     // ---- Create and bind transformations uniform ----
     const txMatPixels =
@@ -70,7 +118,7 @@ export function drawGridScene(canvasEl: HTMLCanvasElement, tfs: Transformations)
             getRotateXMat(xRotAngle),
             getRotateYMat(yRotAngle),
             getRotateZMat(zRotAngle),
-            getScaleMat(1 + tfs['scale x'], 1 + tfs['scale y'], 1),
+            getScaleMat(1 + tfs['scale x'], -1 * (1 + tfs['scale y']), 1),
         );
 
     const toClipSpaceMat = asMat4([
@@ -159,8 +207,8 @@ function calcExtensions(pixelSpace: PixelSpace, xRotAngle: number, yRotAngle: nu
     const xMinByY = Math.sin(Math.PI / 2 + viewAngleH / 2) / Math.sin(Math.PI / 2 - _yRotAngle - viewAngleH / 2);
     const xMaxByY = Math.sin(Math.PI / 2 + viewAngleH / 2) / Math.sin(Math.PI / 2 + _yRotAngle - viewAngleH / 2);
 
-    const yMinByX = Math.sin(Math.PI / 2 + viewAngleV / 2) / Math.sin(Math.PI / 2 - _xRotAngle - viewAngleV / 2);
-    const yMaxByX = Math.sin(Math.PI / 2 + viewAngleV / 2) / Math.sin(Math.PI / 2 + _xRotAngle - viewAngleV / 2);
+    const yMinByX = Math.sin(Math.PI / 2 + viewAngleV / 2) / Math.sin(Math.PI / 2 + _xRotAngle - viewAngleV / 2);
+    const yMaxByX = Math.sin(Math.PI / 2 + viewAngleV / 2) / Math.sin(Math.PI / 2 - _xRotAngle - viewAngleV / 2);
 
     // Z distance from farthest point
     const fudgeByYRot = pixelSpace.xMax * Math.max(xMinByY, xMaxByY) * Math.sin(Math.abs(_yRotAngle)) / pixelSpace.zBase + 1;
@@ -173,13 +221,13 @@ function calcExtensions(pixelSpace: PixelSpace, xRotAngle: number, yRotAngle: nu
      * but I can't imagine correct 3d geometry. The following is empiric formula
      * works for moderate angles.
      */
-    const extraFudge = 1 + (60 * Math.abs(xRotAngle) * Math.abs(yRotAngle)) ** 1.9;
+    const extraFudge = 1 + (20 * Math.abs(xRotAngle) * Math.abs(yRotAngle)) ** 1.9;
 
     const extraFudges = {
-        xMin: yRotAngle > 0 ? extraFudge * ratio : 1,
-        xMax: yRotAngle < 0 ? extraFudge * ratio : 1,
-        yMin: xRotAngle > 0 ? extraFudge : 1,
-        yMax: xRotAngle < 0 ? extraFudge : 1,
+        xMin: yRotAngle > 0 ? extraFudge : 1,
+        xMax: yRotAngle < 0 ? extraFudge : 1,
+        yMin: xRotAngle < 0 ? extraFudge : 1,
+        yMax: xRotAngle > 0 ? extraFudge : 1,
     };
 
     return {
