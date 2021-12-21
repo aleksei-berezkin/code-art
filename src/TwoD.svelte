@@ -15,11 +15,10 @@
 
 <script lang='ts'>
     import { onMount } from 'svelte';
-    import { drawScene } from './drawScene';
-    import {allTx, allTxWithoutScale, Transformations, TxType} from './txType';
-    import {drawGridScene} from "./drawGridScene";
-    import {rasterizeFont, RasterLetter} from "./rasterizeFont";
-    import {getSource} from "./getSource";
+    import { allTxWithoutScale, Transformations, TxType} from './txType';
+    import { drawGridScene } from './drawGridScene';
+    import { rasterizeFont, RasterLetter } from './rasterizeFont';
+    import { getSource } from './getSource';
 
     function toId(tx: string) {
         return 'two-d-slider-' + tx.replace(/\s/g, '-');
