@@ -1,12 +1,12 @@
-import {createShader} from './createShader';
-import {createProgram} from './createProgram';
+import { createShader } from './createShader';
+import { createProgram } from './createProgram';
 import vertexShaderSource from './shader/gridVertex.shader';
 import fragmentShaderSource from './shader/gridFragment.shader';
-import type {Transformations} from './txType';
-import {asMat4, getRotateXMat, getRotateYMat, getRotateZMat, getScaleMat, getTranslateMat, mul} from './matrices';
-import {createGrid} from './createGrid';
-import {vertexSize2d, vertexSize3d} from './rect';
-import type {RasterLetter} from "./rasterizeFont";
+import type { Transformations } from './txType';
+import { asMat4, getRotateXMat, getRotateYMat, getRotateZMat, getScaleMat, getTranslateMat, mul } from './matrices';
+import { createGrid } from './createGrid';
+import { vertexSize2d, vertexSize3d } from './rect2d';
+import type { RasterLetter } from './rasterizeFont';
 
 const bgColor = [.2, .2, .3, 1] as const;
 export function drawGridScene(canvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement,
@@ -38,76 +38,52 @@ export function drawGridScene(canvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLC
         source, fontSize, lettersMap
     );
 
-    // ---- Push vertices to buffer ----
+    // Grid vertices
     gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(grid.vertices), gl.STATIC_DRAW);
-    // ---- / ----
+    const positionAttribLoc = gl.getAttribLocation(program, 'a_position');
+    gl.enableVertexAttribArray(positionAttribLoc);
+    gl.vertexAttribPointer(positionAttribLoc, vertexSize3d, gl.FLOAT, false, 0, 0);
 
-    // ---- Pull vertices from buffer to attribute ----
-    const positionAttributeLocation = gl.getAttribLocation(program, 'a_position');
-    gl.enableVertexAttribArray(positionAttributeLocation);
-    gl.vertexAttribPointer(positionAttributeLocation, vertexSize3d, gl.FLOAT, false, 0, 0);
-    // ---- / ----
-
-    // ---- Push tex coords to buffer ----
+    // Glyphs coords in texture
     gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(grid.texPosition), gl.STATIC_DRAW);
-    // ---- / ----
+    const texPositionAttribLoc = gl.getAttribLocation(program, 'a_texPosition');
+    gl.enableVertexAttribArray(texPositionAttribLoc);
+    gl.vertexAttribPointer(texPositionAttribLoc, vertexSize2d, gl.FLOAT, false, 0, 0);
 
-    // ---- Pull tex coords to attr ----
-    const texPositionAttributeLocation = gl.getAttribLocation(program, 'a_texPosition');
-    gl.enableVertexAttribArray(texPositionAttributeLocation);
-    gl.vertexAttribPointer(texPositionAttributeLocation, vertexSize2d, gl.FLOAT, false, 0, 0);
-    // ---- / ----
-
-    // ---- Push colors to buffer ----
+    // Colors
     gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(grid.colors), gl.STATIC_DRAW);
-    // ---- / ----
+    const colorAttribLoc = gl.getAttribLocation(program, 'a_color');
+    gl.enableVertexAttribArray(colorAttribLoc);
+    gl.vertexAttribPointer(colorAttribLoc, 4, gl.FLOAT, false, 0, 0);
 
-    // ---- Pull colors from buffer to attribute ----
-    const colorAttributeLocation = gl.getAttribLocation(program, 'a_color');
-    gl.enableVertexAttribArray(colorAttributeLocation);
-    gl.vertexAttribPointer(colorAttributeLocation, 4, gl.FLOAT, false, 0, 0);
-    // ---- / ----
-
-    // ---- Push texture ----
-    // make unit 0 the active texture unit
-    // (i.e, the unit all other texture commands will affect.)
+    // Upload glyph texture
     gl.activeTexture(gl.TEXTURE0);
-
-    // Create and bind texture to 'texture unit '0' 2D bind point
     gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
-
-    // Set the parameters so we don't need mips and so we're not filtering
-    // and we don't repeat
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-
-    // Upload the image into the texture.
-    const mipLevel = 0;               // the largest mip
-    const internalFormat = gl.RGBA;   // format we want in the texture
-    const srcFormat = gl.RGBA;        // format of data we are supplying
-    const srcType = gl.UNSIGNED_BYTE  // type of data we are supplying
     gl.texImage2D(gl.TEXTURE_2D,
-        mipLevel,
-        internalFormat,
-        srcFormat,
-        srcType,
-        rasterCanvasEl);
-    // ---- / ----
+        0,
+        gl.RGBA,
+        gl.RGBA,
+        gl.UNSIGNED_BYTE,
+        rasterCanvasEl,
+    );
 
-    // Tell it to use our program (pair of shaders)
+    // Using program, setting uniforms
     gl.useProgram(program);
 
-    // ---- Create and bind texture uniform ----
-    const imageLocation = gl.getUniformLocation(program, 'u_letters');
-    gl.uniform1i(imageLocation, 0);
-    // ---- / ----
+    // Texture (level) uniform
+    gl.uniform1i(
+        gl.getUniformLocation(program, 'u_letters'),
+        0,
+    );
 
-    // ---- Create and bind transformations uniform ----
+    // Transform scene then transform to clip space
     const txMatPixels =
         mul(
             getTranslateMat(
@@ -134,14 +110,17 @@ export function drawGridScene(canvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLC
 
     const txMat = mul(toClipSpaceMat, txMatPixels);
 
-    const txLocation = gl.getUniformLocation(program, 'u_tx');
-    gl.uniformMatrix4fv(txLocation, false, txMat);
-    // ---- / -----
+    gl.uniformMatrix4fv(
+        gl.getUniformLocation(program, 'u_tx'),
+        false,
+        txMat,
+    );
 
-    // ---- Bg uniform
-    const bgLocation = gl.getUniformLocation(program, 'u_bg');
-    gl.uniform4fv(bgLocation, bgColor);
-    // ---- / ----
+    // Bg
+    gl.uniform4fv(
+        gl.getUniformLocation(program, 'u_bg'),
+        bgColor,
+    );
 
     // Translate -1...+1 to:
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);

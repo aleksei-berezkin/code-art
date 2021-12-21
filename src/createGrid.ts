@@ -1,4 +1,4 @@
-import {rect, rect3dConstZ, vertexSize3d } from './rect';
+import {rect2d, rect3dConstZ, vertexSize3d } from './rect2d';
 import type {RasterLetter} from "./rasterizeFont";
 import {fontSizeMultiplier} from "./rasterizeFont";
 
@@ -38,7 +38,7 @@ export function createGrid(xMin: number, yMin: number,
             )
             vertices.push(...rectVertices);
 
-            texPosition.push(...rect(
+            texPosition.push(...rect2d(
                 r.x, r.baseline - r.ascent,
                 r.x + r.w, r.baseline + r.descent,
             ));
