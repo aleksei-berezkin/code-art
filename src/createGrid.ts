@@ -1,4 +1,4 @@
-import {rect2d, rect3dConstZ, vertexSize3d } from './rect2d';
+import {rect2d, rect3dConstZ, vertexSize3d } from './rect';
 import type {RasterLetter} from "./rasterizeFont";
 import {fontSizeMultiplier} from "./rasterizeFont";
 

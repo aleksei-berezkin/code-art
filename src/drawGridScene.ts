@@ -5,7 +5,7 @@ import fragmentShaderSource from './shader/gridFragment.shader';
 import type { Transformations } from './txType';
 import { asMat4, getRotateXMat, getRotateYMat, getRotateZMat, getScaleMat, getTranslateMat, mul } from './matrices';
 import { createGrid } from './createGrid';
-import { vertexSize2d, vertexSize3d } from './rect2d';
+import { vertexSize2d, vertexSize3d } from './rect';
 import type { RasterLetter } from './rasterizeFont';
 
 const bgColor = [.2, .2, .3, 1] as const;

@@ -1,6 +1,6 @@
 <script lang='ts'>
     import { Router, Route } from 'svelte-routing';
-    import TwoD from "./TwoD.svelte";
+    import Code from './Code.svelte';
 </script>
 
 <style>
@@ -16,7 +16,7 @@
 
 <main>
     <Router url=''>
-        <Route path='/' component={ TwoD } />
+        <Route path='/' component={ Code } />
     </Router>
 </main>
 
