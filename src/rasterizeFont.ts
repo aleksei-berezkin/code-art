@@ -66,6 +66,7 @@ function getAlphabet(source: string) {
     for (let ch = 0; ch < 32; ch++) {
         alphabet.delete(String.fromCharCode(ch));
     }
+    alphabet.add(' ');  // If it happens that no spaces, only tabs
     return alphabet;
 }
 

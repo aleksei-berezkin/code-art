@@ -68,9 +68,12 @@
 
 <style>
     .rasterize-font-canvas {
-        font-family: Menlo, Consolas, monospace;
-        width: 2048px;
         height: 256px;
+        left: 0;
+        position: absolute;
+        transform: translateY(-150%);
+        top: 0;
+        width: 2048px;
     }
 
     section {
