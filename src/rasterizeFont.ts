@@ -19,18 +19,20 @@ export function rasterizeFont(source: string, canvasEl: HTMLCanvasElement, fontS
     }
     setWH(canvasEl);
 
+    const _fontSize = fontSize * fontSizeMultiplier;
+    const xMin = _fontSize * (spaceH - 1);
+    const xMax = canvasEl.width -1.5 *  _fontSize;
+    const alphabet = getAlphabet(source);
+    const height = estimateNeededCanvasHeight(ctx, xMin, xMax, _fontSize, alphabet.size);
+    canvasEl.style.height = `${height}px`;
+    setWH(canvasEl);
+
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvasEl.width, canvasEl.height);
 
-    const alphabet = new Set(source);
-    alphabet.delete('\n');
-    alphabet.delete('\r');
-
-    const _fontSize = fontSize * fontSizeMultiplier;
     ctx.fillStyle = 'white';
     ctx.font = `${_fontSize}px monospace`;
 
-    const xMin = _fontSize * (spaceH - 1);
     let x = xMin;
     let baseline = _fontSize;
     const rasterItems: Map<string, RasterLetter> = new Map();
@@ -50,13 +52,28 @@ export function rasterizeFont(source: string, canvasEl: HTMLCanvasElement, fontS
         );
     
         x += tm.width * spaceH;
-        if (x >= canvasEl.width -1.5 *  _fontSize) {
+        if (x >= xMax) {
             x = xMin;
             baseline += _fontSize * spaceV;
         }
     }
 
     return rasterItems;
+}
+
+function getAlphabet(source: string) {
+    const alphabet = new Set(source);
+    for (let ch = 0; ch < 32; ch++) {
+        alphabet.delete(String.fromCharCode(ch));
+    }
+    return alphabet;
+}
+
+function estimateNeededCanvasHeight(ctx: CanvasRenderingContext2D, xMin: number, xMax: number, fontSize: number, alphabetSize: number) {
+    const { width } = ctx.measureText('W');
+    const glyphsPerLine = Math.floor((xMax - xMin) / width / spaceH);
+    const linesEstimate = Math.ceil(alphabetSize / glyphsPerLine) + 1.5;
+    return Math.ceil(linesEstimate * fontSize * spaceV);
 }
 
 function setWH(canvasEL: HTMLCanvasElement) {

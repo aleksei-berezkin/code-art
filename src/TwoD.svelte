@@ -70,7 +70,7 @@
     .rasterize-font-canvas {
         font-family: Menlo, Consolas, monospace;
         width: 2048px;
-        height: 512px;
+        height: 256px;
     }
 
     section {
