@@ -17,7 +17,8 @@ export async function getSource(): Promise<Source> {
     if (source) {
         return source;
     }
-    const r = await fetch('https://unpkg.com/react-dom@17.0.2/umd/react-dom.production.min.js');
+    // const r = await fetch('https://unpkg.com/react-dom@17.0.2/umd/react-dom.production.min.js');
+    const r = await fetch('https://unpkg.com/lodash@4.17.21/lodash.min.js');
     if (source) {
         return source;
     }

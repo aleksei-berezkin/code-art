@@ -32,6 +32,10 @@ export function createGrid(xMin: number, yMin: number,
             continue;
         }
 
+        if (x > xMax) {
+            continue;
+        }
+
         if (letter.charCodeAt(0) < 32) {
             if (letter === '\t') {
                 letter = ' ';
