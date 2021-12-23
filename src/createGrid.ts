@@ -1,11 +1,12 @@
 import {rect2d, rect3dConstZ, vertexSize3d } from './rect';
 import type {RasterLetter} from "./rasterizeFont";
 import {fontSizeMultiplier} from "./rasterizeFont";
+import type {Source} from "./getSource";
 
 export function createGrid(xMin: number, yMin: number,
                            xMax: number, yMax: number,
                            z: number,
-                           source: string, fontSize: number, lettersMap: Map<string, RasterLetter>,
+                           source: Source, fontSize: number, lettersMap: Map<string, RasterLetter>,
 ): Grid {
     const vertices = [];
     const texPosition = [];
@@ -20,8 +21,8 @@ export function createGrid(xMin: number, yMin: number,
 
     let x = _xMin;
     let y = _yMin;
-    for (let i = 0; i < source.length; i++) {
-        let letter = source[i];
+    for (let i = 0; i < source.text.length; i++) {
+        let letter = source.text[i];
         if (letter === '\n') {
             x = _xMin;
             y += fontSize;
@@ -54,10 +55,7 @@ export function createGrid(xMin: number, yMin: number,
             r.x + r.w, r.baseline + r.descent,
         ));
 
-        const color = !!/[$_a-zA-Z]/.exec(letter) ? [1, .8, .9, 1]
-            : !!/[0-9]/.exec(letter) ? [.8, .8, 1, 1]
-            : !!/["']/.exec(letter) ? [.8, 1, .7, 1]
-            : [1, 1, 1, 1];
+        const color = source.colors[i] || [1, 1, 1, 1];
         const verticesNum = rectVertices.length / vertexSize3d;
         colors.push(
             ...Array.from({length: verticesNum})

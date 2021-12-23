@@ -1,4 +1,5 @@
 import { dpr } from './getDpr';
+import type {Source} from "./getSource";
 
 export type RasterLetter = {
     baseline: number,
@@ -12,7 +13,7 @@ export const fontSizeMultiplier = 2;
 const spaceV = 1.1;
 const spaceH = 1.15;
 
-export function rasterizeFont(source: string, canvasEl: HTMLCanvasElement, fontSize: number) {
+export function rasterizeFont(source: Source, canvasEl: HTMLCanvasElement, fontSize: number) {
     const ctx = canvasEl.getContext('2d');
     if (!ctx) {
         throw new Error('No 2d context');
@@ -22,7 +23,7 @@ export function rasterizeFont(source: string, canvasEl: HTMLCanvasElement, fontS
     const _fontSize = fontSize * fontSizeMultiplier;
     const xMin = _fontSize * (spaceH - 1);
     const xMax = canvasEl.width -1.5 *  _fontSize;
-    const alphabet = getAlphabet(source);
+    const alphabet = getAlphabet(source.text);
     const height = estimateNeededCanvasHeight(ctx, xMin, xMax, _fontSize, alphabet.size);
     canvasEl.style.height = `${height}px`;
     setWH(canvasEl);

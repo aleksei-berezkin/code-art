@@ -7,11 +7,12 @@ import { asMat4, getRotateXMat, getRotateYMat, getRotateZMat, getScaleMat, getTr
 import { createGrid } from './createGrid';
 import { vertexSize2d, vertexSize3d } from './rect';
 import type { RasterLetter } from './rasterizeFont';
+import type { Source } from './getSource';
 
 const bgColor = [.2, .2, .3, 1] as const;
 export function drawGridScene(canvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement,
                               tfs: Transformations,
-                              source: string, fontSize: number, lettersMap: Map<string, RasterLetter>,
+                              source: Source, fontSize: number, lettersMap: Map<string, RasterLetter>,
 ) {
     const gl = canvasEl.getContext('webgl2');
     if (!gl) {
