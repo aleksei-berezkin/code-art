@@ -8,8 +8,9 @@ import { createGrid } from './createGrid';
 import { vertexSize2d, vertexSize3d } from './rect';
 import type { RasterLetter } from './rasterizeFont';
 import type { Source } from './getSource';
+import { hexToRgba } from './hexToRgba';
 
-const bgColor = [.2, .2, .3, 1] as const;
+const bgColor = hexToRgba('#1e1e1e');
 export function drawGridScene(canvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement,
                               tfs: Transformations,
                               source: Source, fontSize: number, lettersMap: Map<string, RasterLetter>,

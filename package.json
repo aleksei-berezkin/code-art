@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "acorn": "^8.6.0",
+    "acorn-loose": "^8.2.1",
     "acorn-walk": "^8.2.0",
     "svelte": "^3.44.2",
     "svelte-loader": "^3.1.2",
