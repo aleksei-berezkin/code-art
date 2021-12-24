@@ -32,18 +32,21 @@
     const transformations: Transformations = {
         'scale x': 0,
         'scale y': 0,
-        'angle x': 0,
-        'angle y': 0,
-        'angle z': 0,
+        'angle x': -.25 + Math.random() * .5,
+        'angle y': -.2 + Math.random() * .4,
+        'angle z': -.05 + Math.random() * .1,
         'translate x': 0,
         'translate y': 0,
         'translate z': 0,
     };
 
-    const  fontSize = 72;
+    const fontSize = 72;
     let lettersMap: Map<string, RasterLetter>;
 
     onMount(() => {
+        (['angle x', 'angle y', 'angle z'] as TxType[]).forEach(tx =>
+            (document.getElementById(toId(tx)) as HTMLInputElement).value = transformations[tx]
+        );
         handleResize();
         source.then(src => {
             lettersMap = rasterizeFont(src, rasterCanvasEl, fontSize);
