@@ -2,7 +2,7 @@ import { createShader } from './createShader';
 import { createProgram } from './createProgram';
 import vertexShaderSource from './shader/gridVertex.shader';
 import fragmentShaderSource from './shader/gridFragment.shader';
-import type { Transformations } from './txType';
+import type { Transformations } from './Transformations';
 import { asMat4, getRotateXMat, getRotateYMat, getRotateZMat, getScaleMat, getTranslateMat, mul } from './matrices';
 import { createGrid } from './createGrid';
 import { vertexSize2d, vertexSize3d } from './rect';
@@ -26,9 +26,9 @@ export function drawGridScene(canvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLC
 
     const pSp = makePixelSpace(canvasEl.width, canvasEl.height);
 
-    const xRotAngle = -tfs['angle x'] * Math.PI / 4;
-    const yRotAngle = -tfs['angle y'] * Math.PI / 2;
-    const zRotAngle = tfs['angle z'] * Math.PI;
+    const xRotAngle = -tfs['angle x'].val;
+    const yRotAngle = -tfs['angle y'].val;
+    const zRotAngle = tfs['angle z'].val;
 
     const ext = calcExtensions(pSp, xRotAngle, yRotAngle, zRotAngle);
 
@@ -89,14 +89,14 @@ export function drawGridScene(canvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLC
     const txMatPixels =
         mul(
             getTranslateMat(
-                tfs['translate x'] * pSp.xMin,
-                tfs['translate y'] * pSp.yMin,
-                tfs['translate z'] * pSp.zBase * 8,
+                tfs['translate x'].val / 100 * pSp.w,
+                tfs['translate y'].val / 100 * pSp.h,
+                tfs['translate z'].val / 100 * pSp.zBase,
             ),
             getRotateXMat(xRotAngle),
             getRotateYMat(yRotAngle),
             getRotateZMat(zRotAngle),
-            getScaleMat(1 + tfs['scale x'], -1 * (1 + tfs['scale y']), 1),
+            getScaleMat(1, -1, 1),
         );
 
     const toClipSpaceMat = asMat4([
@@ -153,6 +153,8 @@ function makePixelSpace(w: number, h: number) {
     const zMin = -zBase;
     const zMax = zBase * 1000;
     return {
+        w,
+        h,
         viewAngleH,
         viewAngleV,
         xMin: -w/2,
