@@ -1,4 +1,4 @@
-export type RGBA = [number, number, number, number];
+import type { RGBA } from './ColorScheme';
 
 export function hexToRgba(hex: string): RGBA {
     const grp = /#([0-9a-fA-F]{6,8})/.exec(hex)![1];

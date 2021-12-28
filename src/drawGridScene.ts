@@ -8,11 +8,9 @@ import {createGrid} from './createGrid';
 import {vertexSize2d, vertexSize3d} from './rect';
 import type {RasterLetter} from './rasterizeFont';
 import type {Source} from './getSource';
-import {hexToRgba} from './hexToRgba';
 import {pluck} from './pluck';
 import {degToRag} from './degToRad';
 
-const bgColor = hexToRgba('#1e1e1e');
 export function drawGridScene(canvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement,
                               tfs: Transformations,
                               source: Source, fontSize: number, lettersMap: Map<string, RasterLetter>,
@@ -124,14 +122,14 @@ export function drawGridScene(canvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLC
     // Bg
     gl.uniform4fv(
         gl.getUniformLocation(program, 'u_bg'),
-        bgColor,
+        source.bgColor,
     );
 
     // Translate -1...+1 to:
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
     // Clear the canvas
-    gl.clearColor(...bgColor);
+    gl.clearColor(...source.bgColor);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
     // Go
