@@ -10,7 +10,8 @@ let source: Source | undefined = undefined;
 
 export type Source = {
     text: string,
-    colors: RGBA[],    // index = pos in text
+    colors: RGBA[],         // index = pos in text
+    linesOffsets: number[], // index = pos in text
 }
 
 export async function getSource(): Promise<Source> {
@@ -23,11 +24,11 @@ export async function getSource(): Promise<Source> {
         return source;
     }
     const text = await r.text();
-    source = {
+    return {
         text,
         colors: highlight(text),
-    }
-    return source;
+        linesOffsets: getLinesOffsets(text),
+    };
 }
 
 const commentColor = hexToRgba('#6a9954');
@@ -86,4 +87,14 @@ function highlight(text: string): RGBA[] {
     );
     
     return colors;
+}
+
+function getLinesOffsets(text: string): number[] {
+    const offsets: number[] = [0];
+    for (let i = 0; i < text.length; i++) {
+        if (text[i] === '\n' && i < text.length - 1) {
+            offsets.push(i + 1);
+        }
+    }
+    return offsets;
 }

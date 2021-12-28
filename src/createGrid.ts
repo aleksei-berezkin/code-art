@@ -2,10 +2,12 @@ import {rect2d, rect3dConstZ, vertexSize3d } from './rect';
 import type {RasterLetter} from "./rasterizeFont";
 import {fontSizeMultiplier} from "./rasterizeFont";
 import type {Source} from "./getSource";
+import {pluck} from "./pluck";
 
 export function createGrid(xMin: number, yMin: number,
                            xMax: number, yMax: number,
                            z: number,
+                           scrollFraction: number,
                            source: Source, fontSize: number, lettersMap: Map<string, RasterLetter>,
 ): Grid {
     const vertices = [];
@@ -13,18 +15,16 @@ export function createGrid(xMin: number, yMin: number,
     const colors = [];
 
     const lRasters = [...lettersMap.values()];
-    const avgW = lRasters.reduce((sum, r) => sum + r.w, 0) / lRasters.length;
-    const maxAscent = lRasters.reduce((max, r) => r.ascent > max ? r.ascent : max, 0);
+    const maxAscent = lRasters.reduce((max, r) => r.ascent > max ? r.ascent : max, 0) / fontSizeMultiplier;
 
-    const _xMin = Math.floor(xMin / avgW) * avgW;
-    const _yMin = Math.floor(yMin / fontSize) * fontSize;
+    const posMin = getPosMin(source, Math.ceil((yMax - yMin) / fontSize), scrollFraction);
 
-    let x = _xMin;
-    let y = _yMin;
-    for (let i = 0; i < source.text.length; i++) {
+    let x = xMin;
+    let y = yMin;
+    for (let i = posMin; i < source.text.length; i++) {
         let letter = source.text[i];
         if (letter === '\n') {
-            x = _xMin;
+            x = xMin;
             y += fontSize;
             if (y > yMax) {
                 break;
@@ -76,4 +76,16 @@ export type Grid = {
     vertices: number[],
     texPosition: number[],
     colors: number[],
+}
+
+function getPosMin(source: Source, linesNum: number, scrollFraction: number) {
+    if (source.linesOffsets.length <= linesNum) {
+        return 0;
+    }
+    const fromLine = pluck(
+        0,
+        Math.round((source.linesOffsets.length - linesNum) * scrollFraction),
+        source.linesOffsets.length - 1,
+    );
+    return source.linesOffsets[fromLine];
 }

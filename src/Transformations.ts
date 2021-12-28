@@ -12,4 +12,5 @@ export type TxType =
     | 'angle z'
     | 'translate x'
     | 'translate y'
-    | 'translate z';
+    | 'translate z'
+    | 'scroll';

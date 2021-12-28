@@ -1,14 +1,16 @@
-import { createShader } from './createShader';
-import { createProgram } from './createProgram';
+import {createShader} from './createShader';
+import {createProgram} from './createProgram';
 import vertexShaderSource from './shader/gridVertex.shader';
 import fragmentShaderSource from './shader/gridFragment.shader';
-import type { Transformations } from './Transformations';
-import { asMat4, getRotateXMat, getRotateYMat, getRotateZMat, getScaleMat, getTranslateMat, mul } from './matrices';
-import { createGrid } from './createGrid';
-import { vertexSize2d, vertexSize3d } from './rect';
-import type { RasterLetter } from './rasterizeFont';
-import type { Source } from './getSource';
-import { hexToRgba } from './hexToRgba';
+import type {Transformations} from './Transformations';
+import {asMat4, getRotateXMat, getRotateYMat, getRotateZMat, getScaleMat, getTranslateMat, mul} from './matrices';
+import {createGrid} from './createGrid';
+import {vertexSize2d, vertexSize3d} from './rect';
+import type {RasterLetter} from './rasterizeFont';
+import type {Source} from './getSource';
+import {hexToRgba} from './hexToRgba';
+import {pluck} from './pluck';
+import {degToRag} from './degToRad';
 
 const bgColor = hexToRgba('#1e1e1e');
 export function drawGridScene(canvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement,
@@ -37,6 +39,7 @@ export function drawGridScene(canvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLC
         pSp.xMin * ext.xMin, pSp.yMin * ext.yMin,
         pSp.xMax * ext.xMax, pSp.yMax * ext.yMax,
         0,
+        tfs.scroll.val / 100,
         source, fontSize, lettersMap
     );
 
@@ -168,10 +171,6 @@ function makePixelSpace(w: number, h: number) {
     };
 }
 
-function degToRag(deg: number) {
-    return deg / 360 * 2 * Math.PI;
-}
-
 function radToDeg(deg: number) {
     return deg / 2 / Math.PI * 360;
 }
@@ -219,8 +218,4 @@ function calcExtensions(pixelSpace: PixelSpace, xRotAngle: number, yRotAngle: nu
         yMin: pluck(0, yMinByX * fudgeByYRot * extraFudges.yMin * clipByZRot, 20),
         yMax: pluck(0, yMaxByX * fudgeByYRot * extraFudges.yMax * clipByZRot, 20),
     };
-}
-
-function pluck(min: number, a: number, max: number) {
-    return Math.max(min, Math.min(a, max));
 }

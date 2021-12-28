@@ -22,6 +22,7 @@
     import { rasterizeFont, RasterLetter } from './rasterizeFont';
     import { getSource } from './getSource';
     import { dpr } from './getDpr';
+    import { degToRag } from './degToRad';
 
     function toId(tx: string) {
         return 'two-d-slider-' + tx.replace(/\s/g, '-');
@@ -32,7 +33,7 @@
         if (tx === 'angle x' || tx === 'angle y' || tx === 'angle z') {
             s = `${val / Math.PI * 180}\u00B0`;
         }
-        if (tx === 'translate x' || tx === 'translate y' || tx === 'translate z') {
+        if (tx === 'translate x' || tx === 'translate y' || tx === 'translate z' || tx === 'scroll') {
             s = `${val}%`;
         }
         return s.replace(/-/, '\u2212');
@@ -45,19 +46,19 @@
 
     const transformations: Transformations = {
         'angle x': {
-            min: -Math.PI / 8,
-            val: (-.25 + Math.random() * .5) * Math.PI / 8,
-            max: Math.PI / 8,
+            min: degToRag(-20),
+            val: degToRag(-15) + Math.random() * degToRag(30),
+            max: degToRag(20),
         },
         'angle y': {
-            min: -Math.PI / 8,
-            val: (-.2 + Math.random() * .4) * Math.PI / 8,
-            max: Math.PI / 8,
+            min: degToRag(-20),
+            val: degToRag(-15) + Math.random() * degToRag(30),
+            max: degToRag(20),
         },
         'angle z': {
-            min: -Math.PI,
-            val: (-.05 + Math.random() * .1) * Math.PI,
-            max: Math.PI,
+            min: -Math.PI / 2,
+            val: (-.05 + Math.random() * .1) * Math.PI / 2,
+            max: Math.PI / 2,
         },
         'translate x': {
             // percent
@@ -73,6 +74,11 @@
         'translate z': {
             min: -100,
             val: 0,
+            max: 100,
+        },
+        'scroll': {
+            min: 0,
+            val: Math.random() * 100,
             max: 100,
         },
     };
@@ -135,8 +141,8 @@
     }
 
     .slider-min {
-        padding-left: 1em;
-        text-align: left;
+        padding-right: 1em;
+        text-align: right;
         width: 4em;
     }
 
