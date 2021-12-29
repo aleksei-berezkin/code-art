@@ -18,11 +18,11 @@
 <script lang='ts'>
     import { onMount } from 'svelte';
     import { Transformations, TxType } from './Transformations';
-    import { drawGridScene } from './drawGridScene';
+    import { drawCodeScene } from './drawCodeScene';
     import { rasterizeFont, RasterLetter } from './rasterizeFont';
     import { getSource } from './getSource';
-    import { dpr } from './getDpr';
-    import { degToRag } from './degToRad';
+    import { dpr } from './util/dpr';
+    import { degToRag } from './util/degToRad';
 
     function toId(tx: string) {
         return 'two-d-slider-' + tx.replace(/\s/g, '-');
@@ -90,7 +90,7 @@
         handleResize();
         source.then(src => {
             lettersMap = rasterizeFont(src, rasterCanvasEl, fontSize);
-            drawGridScene(codeCanvasEl, rasterCanvasEl, transformations, src, fontSize, lettersMap);
+            drawCodeScene(codeCanvasEl, rasterCanvasEl, transformations, src, fontSize, lettersMap);
         })
     });
 
@@ -104,7 +104,7 @@
         const inputEl = (e.target as HTMLInputElement);
         const tx = inputEl.dataset.tx as TxType;
         transformations[tx].val = Number(inputEl.value);
-        source.then(src => drawGridScene(codeCanvasEl, rasterCanvasEl, transformations, src, fontSize, lettersMap));
+        source.then(src => drawCodeScene(codeCanvasEl, rasterCanvasEl, transformations, src, fontSize, lettersMap));
     }
 </script>
 

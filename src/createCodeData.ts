@@ -1,13 +1,13 @@
-import { rect2d, vertexSize2d } from './rect';
+import { rect2d, vertexSize2d } from './util/rect';
 import type { RasterLetter } from './rasterizeFont';
 import { fontSizeMultiplier } from './rasterizeFont';
 import type { Source } from './getSource';
-import { pluck } from './pluck';
+import { pluck } from './util/pluck';
 
-export function createGrid(xMin: number, yMin: number,
-                           xMax: number, yMax: number,
-                           scrollFraction: number,
-                           source: Source, fontSize: number, lettersMap: Map<string, RasterLetter>,
+export function createCodeData(xMin: number, yMin: number,
+                               xMax: number, yMax: number,
+                               scrollFraction: number,
+                               source: Source, fontSize: number, lettersMap: Map<string, RasterLetter>,
 ): Grid {
     const vertices = [];
     const texPosition = [];

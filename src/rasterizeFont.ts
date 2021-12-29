@@ -1,4 +1,4 @@
-import { dpr } from './getDpr';
+import { dpr } from './util/dpr';
 import type {Source} from "./getSource";
 
 export type RasterLetter = {

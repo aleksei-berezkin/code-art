@@ -3,8 +3,8 @@ import * as acorn from 'acorn';
 import * as acornLoose from 'acorn-loose';
 import * as acornWalk from 'acorn-walk';
 import type { Options, Token } from 'acorn';
-import type { ColorScheme, ColorSchemeName, RGB } from './ColorScheme';
-import { colorSchemes } from './ColorScheme';
+import type { ColorScheme, RGB } from './ColorScheme';
+import { ColorSchemeName, colorSchemes } from './colorSchemes';
 
 let source: Source | undefined = undefined;
 

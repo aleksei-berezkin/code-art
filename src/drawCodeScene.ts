@@ -1,18 +1,18 @@
-import { createShader } from './createShader';
-import { createProgram } from './createProgram';
+import { createShader } from './util/createShader';
+import { createProgram } from './util/createProgram';
 import vertexShaderSource from './shader/gridVertex.shader';
 import fragmentShaderSource from './shader/gridFragment.shader';
 import type { Transformations } from './Transformations';
-import { asMat4, getRotateXMat, getRotateYMat, getRotateZMat, getScaleMat, getTranslateMat, mul } from './matrices';
-import { createGrid } from './createGrid';
-import { vertexSize2d } from './rect';
+import { asMat4, getRotateXMat, getRotateYMat, getRotateZMat, getScaleMat, getTranslateMat, mul } from './util/matrices';
+import { createCodeData } from './createCodeData';
+import { vertexSize2d } from './util/rect';
 import type { RasterLetter } from './rasterizeFont';
 import type { Source } from './getSource';
-import { pluck } from './pluck';
-import { degToRag } from './degToRad';
+import { pluck } from './util/pluck';
+import { degToRag } from './util/degToRad';
 import { rgbSize } from './ColorScheme';
 
-export function drawGridScene(canvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement,
+export function drawCodeScene(canvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement,
                               tfs: Transformations,
                               source: Source, fontSize: number, lettersMap: Map<string, RasterLetter>,
 ) {
@@ -34,7 +34,7 @@ export function drawGridScene(canvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLC
     const ext = calcExtensions(pSp, xRotAngle, yRotAngle, zRotAngle);
 
     // TODO bottleneck, try wasm
-    const grid = createGrid(
+    const grid = createCodeData(
         pSp.xMin * ext.xMin, pSp.yMin * ext.yMin,
         pSp.xMax * ext.xMax, pSp.yMax * ext.yMax,
         tfs.scroll.val / 100,
