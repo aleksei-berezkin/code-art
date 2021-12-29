@@ -1,14 +1,14 @@
 #version 300 es
 
 uniform mat4 u_tx;
-uniform vec4 u_bg;
+uniform vec3 u_bg;
 
 in vec4 a_position;
 in vec2 a_texPosition;
-in vec4 a_color;
+in vec3 a_color;
 
 out vec2 v_texPosition;
-out vec4 v_color;
+out vec3 v_color;
 
 void main() {
     // Swap vector and matrix instead of transposing
@@ -19,5 +19,5 @@ void main() {
     gl_Position = vec4(pos.xy / w, pos.z, 1);
 
     v_texPosition = a_texPosition;
-    v_color = vec4(a_color.rgb / w, 1) + vec4(u_bg.rgb * (1.0 - 1.0 / w), 0);
+    v_color = a_color / w + u_bg * (1.0 - 1.0 / w);
 }

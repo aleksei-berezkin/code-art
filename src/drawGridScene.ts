@@ -10,6 +10,7 @@ import type { RasterLetter } from './rasterizeFont';
 import type { Source } from './getSource';
 import { pluck } from './pluck';
 import { degToRag } from './degToRad';
+import { rgbSize } from './ColorScheme';
 
 export function drawGridScene(canvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement,
                               tfs: Transformations,
@@ -59,7 +60,7 @@ export function drawGridScene(canvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLC
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(grid.colors), gl.STATIC_DRAW);
     const colorAttribLoc = gl.getAttribLocation(program, 'a_color');
     gl.enableVertexAttribArray(colorAttribLoc);
-    gl.vertexAttribPointer(colorAttribLoc, 4, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(colorAttribLoc, rgbSize, gl.FLOAT, false, 0, 0);
 
     // Upload glyph texture
     gl.activeTexture(gl.TEXTURE0);
@@ -119,7 +120,7 @@ export function drawGridScene(canvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLC
     );
 
     // Bg
-    gl.uniform4fv(
+    gl.uniform3fv(
         gl.getUniformLocation(program, 'u_bg'),
         source.bgColor,
     );
@@ -128,7 +129,7 @@ export function drawGridScene(canvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLC
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
     // Clear the canvas
-    gl.clearColor(...source.bgColor);
+    gl.clearColor(...source.bgColor, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
     // Go

@@ -3,15 +3,15 @@ import * as acorn from 'acorn';
 import * as acornLoose from 'acorn-loose';
 import * as acornWalk from 'acorn-walk';
 import type { Options, Token } from 'acorn';
-import type { ColorScheme, ColorSchemeName, RGBA } from './ColorScheme';
+import type { ColorScheme, ColorSchemeName, RGB } from './ColorScheme';
 import { colorSchemes } from './ColorScheme';
 
 let source: Source | undefined = undefined;
 
 export type Source = {
     text: string,
-    bgColor: RGBA,
-    colors: RGBA[],         // index = pos in text
+    bgColor: RGB,
+    colors: RGB[],         // index = pos in text
     linesOffsets: number[], // index = pos in text
 }
 
@@ -40,9 +40,9 @@ function getRandomColorScheme(): ColorScheme {
     return colorSchemes[name];
 }
 
-function highlight(text: string, scheme: ColorScheme): RGBA[] {
-    const colors: RGBA[] = [];
-    function colorize(start: number, end: number, color: RGBA) {
+function highlight(text: string, scheme: ColorScheme): RGB[] {
+    const colors: RGB[] = [];
+    function colorize(start: number, end: number, color: RGB) {
         for (let i = start; i < end; i++) {
             colors[i] = color;
         }

@@ -57,7 +57,7 @@ export function createGrid(xMin: number, yMin: number,
             r.x + r.w, r.baseline + r.descent,
         ));
 
-        const color = source.colors[i] || [1, 1, 1, 1];
+        const color = source.colors[i] || [1, 1, 1];
         const verticesNum = rectVertices.length / vertexSize2d;
         colors.push(
             ...Array.from({length: verticesNum})
@@ -73,6 +73,7 @@ export function createGrid(xMin: number, yMin: number,
 export type Grid = {
     // only x, y; z is left default = 0
     vertices: number[],
+    // only x, y
     texPosition: number[],
     colors: number[],
 }
