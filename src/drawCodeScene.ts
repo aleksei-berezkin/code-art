@@ -6,7 +6,7 @@ import type { Transformations } from './Transformations';
 import { asMat4, getRotateXMat, getRotateYMat, getRotateZMat, getScaleMat, getTranslateMat, mul } from './util/matrices';
 import { createCodeData } from './createCodeData';
 import { vertexSize2d } from './util/rect';
-import type { RasterLetter } from './rasterizeFont';
+import type { GlyphRaster } from './rasterizeFont';
 import type { Source } from './getSource';
 import { pluck } from './util/pluck';
 import { degToRag } from './util/degToRad';
@@ -14,7 +14,7 @@ import { rgbSize } from './ColorScheme';
 
 export function drawCodeScene(canvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement,
                               tfs: Transformations,
-                              source: Source, fontSize: number, lettersMap: Map<string, RasterLetter>,
+                              source: Source, glyphRaster: GlyphRaster,
 ) {
     const gl = canvasEl.getContext('webgl2');
     if (!gl) {
@@ -33,12 +33,11 @@ export function drawCodeScene(canvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLC
 
     const ext = calcExtensions(pSp, xRotAngle, yRotAngle, zRotAngle);
 
-    // TODO bottleneck, try wasm
     const grid = createCodeData(
         pSp.xMin * ext.xMin, pSp.yMin * ext.yMin,
         pSp.xMax * ext.xMax, pSp.yMax * ext.yMax,
-        tfs.scroll.val / 100,
-        source, fontSize, lettersMap
+        tfs.scroll.val / 100, tfs['font size'].val,
+        source, glyphRaster
     );
 
     // Grid vertices

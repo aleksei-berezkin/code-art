@@ -1,4 +1,4 @@
-<canvas class='rasterize-font-canvas' bind:this={ rasterCanvasEl }></canvas>
+<canvas class='rasterize-font-canvas' bind:this={ rasterCanvasEl } width='2048'></canvas>
 <section>
     <div class='sliders'>
         {#each Object.entries(transformations) as tx}
@@ -19,7 +19,7 @@
     import { onMount } from 'svelte';
     import { Transformations, TxType } from './Transformations';
     import { drawCodeScene } from './drawCodeScene';
-    import { rasterizeFont, RasterLetter } from './rasterizeFont';
+    import { rasterizeFont, GlyphRaster} from './rasterizeFont';
     import { getSource } from './getSource';
     import { dpr } from './util/dpr';
     import { degToRag } from './util/degToRad';
@@ -35,6 +35,9 @@
         }
         if (tx === 'translate x' || tx === 'translate y' || tx === 'translate z' || tx === 'scroll') {
             s = `${val}%`;
+        }
+        if (tx === 'font size') {
+            s = String(val);
         }
         return s.replace(/-/, '\u2212');
     }
@@ -81,16 +84,20 @@
             val: Math.random() * 100,
             max: 100,
         },
+        'font size': {
+            min: 5,
+            val: 36,
+            max: 120,
+        }
     };
 
-    const fontSize = 72;
-    let lettersMap: Map<string, RasterLetter>;
+    let glyphRaster: GlyphRaster;
 
     onMount(() => {
         handleResize();
         source.then(src => {
-            lettersMap = rasterizeFont(src, rasterCanvasEl, fontSize);
-            drawCodeScene(codeCanvasEl, rasterCanvasEl, transformations, src, fontSize, lettersMap);
+            glyphRaster = rasterizeFont(src, rasterCanvasEl, transformations['font size'].val);
+            drawCodeScene(codeCanvasEl, rasterCanvasEl, transformations, src, glyphRaster);
         })
     });
 
@@ -104,13 +111,17 @@
         const inputEl = (e.target as HTMLInputElement);
         const tx = inputEl.dataset.tx as TxType;
         transformations[tx].val = Number(inputEl.value);
-        source.then(src => drawCodeScene(codeCanvasEl, rasterCanvasEl, transformations, src, fontSize, lettersMap));
+        source.then(src => {
+            if (tx === 'font size') {
+                glyphRaster = rasterizeFont(src, rasterCanvasEl, transformations['font size'].val);
+            }
+            drawCodeScene(codeCanvasEl, rasterCanvasEl, transformations, src, glyphRaster);
+        });
     }
 </script>
 
 <style>
     .rasterize-font-canvas {
-        height: 256px;
         left: 0;
         position: absolute;
         transform: translateY(-150%);

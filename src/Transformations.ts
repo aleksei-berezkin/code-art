@@ -13,4 +13,5 @@ export type TxType =
     | 'translate x'
     | 'translate y'
     | 'translate z'
-    | 'scroll';
+    | 'scroll'
+    | 'font size';

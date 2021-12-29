@@ -1,20 +1,21 @@
 import { rect2d, vertexSize2d } from './util/rect';
-import type { RasterLetter } from './rasterizeFont';
-import { fontSizeMultiplier } from './rasterizeFont';
+import type { GlyphRaster } from './rasterizeFont';
 import type { Source } from './getSource';
 import { pluck } from './util/pluck';
+import { dpr } from './util/dpr';
 
 export function createCodeData(xMin: number, yMin: number,
                                xMax: number, yMax: number,
                                scrollFraction: number,
-                               source: Source, fontSize: number, lettersMap: Map<string, RasterLetter>,
+                               fontSize: number,
+                               source: Source, glyphRaster: GlyphRaster,
 ): Grid {
     const vertices = [];
     const texPosition = [];
     const colors = [];
 
-    const lRasters = [...lettersMap.values()];
-    const maxAscent = lRasters.reduce((max, r) => r.ascent > max ? r.ascent : max, 0) / fontSizeMultiplier;
+    const lRasters = [...glyphRaster.glyphs.values()];
+    const maxAscent = lRasters.reduce((max, r) => r.ascent > max ? r.ascent : max, 0) / glyphRaster.sizeRatio;
 
     const posMin = getPosMin(source, Math.ceil((yMax - yMin) / fontSize), scrollFraction);
 
@@ -24,7 +25,7 @@ export function createCodeData(xMin: number, yMin: number,
         let letter = source.text[i];
         if (letter === '\n') {
             x = xMin;
-            y += fontSize;
+            y += fontSize * dpr;
             if (y > yMax) {
                 break;
             }
@@ -44,11 +45,13 @@ export function createCodeData(xMin: number, yMin: number,
         }
 
         const baseline = y + maxAscent;
-        const r = lettersMap.get(letter)!;
+        const r = glyphRaster.glyphs.get(letter)!;
 
         const rectVertices = rect2d(
-            x, baseline - r.ascent / fontSizeMultiplier,
-            x + r.w / fontSizeMultiplier, baseline + r.descent / fontSizeMultiplier,
+            x,
+            baseline - r.ascent / glyphRaster.sizeRatio * dpr,
+            x + r.w / glyphRaster.sizeRatio * dpr,
+            baseline + r.descent / glyphRaster.sizeRatio * dpr,
         )
         vertices.push(...rectVertices);
 
@@ -64,7 +67,7 @@ export function createCodeData(xMin: number, yMin: number,
                 .flatMap(() => color)
         );
 
-        x += r.w / fontSizeMultiplier;
+        x += r.w / glyphRaster.sizeRatio * dpr;
     }
 
     return {vertices, texPosition, colors};
