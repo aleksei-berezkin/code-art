@@ -1,15 +1,15 @@
-import {createShader} from './createShader';
-import {createProgram} from './createProgram';
+import { createShader } from './createShader';
+import { createProgram } from './createProgram';
 import vertexShaderSource from './shader/gridVertex.shader';
 import fragmentShaderSource from './shader/gridFragment.shader';
-import type {Transformations} from './Transformations';
-import {asMat4, getRotateXMat, getRotateYMat, getRotateZMat, getScaleMat, getTranslateMat, mul} from './matrices';
-import {createGrid} from './createGrid';
-import {vertexSize2d, vertexSize3d} from './rect';
-import type {RasterLetter} from './rasterizeFont';
-import type {Source} from './getSource';
-import {pluck} from './pluck';
-import {degToRag} from './degToRad';
+import type { Transformations } from './Transformations';
+import { asMat4, getRotateXMat, getRotateYMat, getRotateZMat, getScaleMat, getTranslateMat, mul } from './matrices';
+import { createGrid } from './createGrid';
+import { vertexSize2d } from './rect';
+import type { RasterLetter } from './rasterizeFont';
+import type { Source } from './getSource';
+import { pluck } from './pluck';
+import { degToRag } from './degToRad';
 
 export function drawGridScene(canvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement,
                               tfs: Transformations,
@@ -36,7 +36,6 @@ export function drawGridScene(canvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLC
     const grid = createGrid(
         pSp.xMin * ext.xMin, pSp.yMin * ext.yMin,
         pSp.xMax * ext.xMax, pSp.yMax * ext.yMax,
-        0,
         tfs.scroll.val / 100,
         source, fontSize, lettersMap
     );
@@ -46,7 +45,7 @@ export function drawGridScene(canvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLC
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(grid.vertices), gl.STATIC_DRAW);
     const positionAttribLoc = gl.getAttribLocation(program, 'a_position');
     gl.enableVertexAttribArray(positionAttribLoc);
-    gl.vertexAttribPointer(positionAttribLoc, vertexSize3d, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(positionAttribLoc, vertexSize2d, gl.FLOAT, false, 0, 0);
 
     // Glyphs coords in texture
     gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
@@ -133,7 +132,7 @@ export function drawGridScene(canvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLC
     gl.clear(gl.COLOR_BUFFER_BIT);
 
     // Go
-    gl.drawArrays(gl.TRIANGLES, 0, grid.vertices.length / vertexSize3d);
+    gl.drawArrays(gl.TRIANGLES, 0, grid.vertices.length / vertexSize2d);
 }
 
 /**

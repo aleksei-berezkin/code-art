@@ -1,12 +1,11 @@
-import {rect2d, rect3dConstZ, vertexSize3d } from './rect';
-import type {RasterLetter} from "./rasterizeFont";
-import {fontSizeMultiplier} from "./rasterizeFont";
-import type {Source} from "./getSource";
-import {pluck} from "./pluck";
+import { rect2d, vertexSize2d } from './rect';
+import type { RasterLetter } from './rasterizeFont';
+import { fontSizeMultiplier } from './rasterizeFont';
+import type { Source } from './getSource';
+import { pluck } from './pluck';
 
 export function createGrid(xMin: number, yMin: number,
                            xMax: number, yMax: number,
-                           z: number,
                            scrollFraction: number,
                            source: Source, fontSize: number, lettersMap: Map<string, RasterLetter>,
 ): Grid {
@@ -47,10 +46,9 @@ export function createGrid(xMin: number, yMin: number,
         const baseline = y + maxAscent;
         const r = lettersMap.get(letter)!;
 
-        const rectVertices = rect3dConstZ(
+        const rectVertices = rect2d(
             x, baseline - r.ascent / fontSizeMultiplier,
             x + r.w / fontSizeMultiplier, baseline + r.descent / fontSizeMultiplier,
-            z,
         )
         vertices.push(...rectVertices);
 
@@ -60,7 +58,7 @@ export function createGrid(xMin: number, yMin: number,
         ));
 
         const color = source.colors[i] || [1, 1, 1, 1];
-        const verticesNum = rectVertices.length / vertexSize3d;
+        const verticesNum = rectVertices.length / vertexSize2d;
         colors.push(
             ...Array.from({length: verticesNum})
                 .flatMap(() => color)
@@ -73,6 +71,7 @@ export function createGrid(xMin: number, yMin: number,
 }
 
 export type Grid = {
+    // only x, y; z is left default = 0
     vertices: number[],
     texPosition: number[],
     colors: number[],
