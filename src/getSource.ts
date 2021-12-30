@@ -5,14 +5,15 @@ import * as acornWalk from 'acorn-walk';
 import type { Options, Token } from 'acorn';
 import type { ColorScheme, RGB } from './ColorScheme';
 import { ColorSchemeName, colorSchemes } from './colorSchemes';
+import { randomItem } from './util/randomItem';
 
 let source: Source | undefined = undefined;
 
 export type Source = {
     text: string,
     bgColor: RGB,
-    colors: RGB[],         // index = pos in text
-    linesOffsets: number[], // index = pos in text
+    colors: RGB[],          // index = pos in text
+    linesOffsets: number[], // value = pos in text
 }
 
 export async function getSource(): Promise<Source> {
@@ -36,7 +37,7 @@ export async function getSource(): Promise<Source> {
 
 function getRandomColorScheme(): ColorScheme {
     const names = Object.keys(colorSchemes) as ColorSchemeName[];
-    const name = names[Math.floor(Math.random() * names.length)];
+    const name = randomItem(names);
     return colorSchemes[name];
 }
 
@@ -75,6 +76,7 @@ function highlight(text: string, scheme: ColorScheme): RGB[] {
         },
     };
 
+    // noinspection JSUnusedGlobalSymbols
     acornWalk.simple(
         acornLoose.parse(text, options),
         {
