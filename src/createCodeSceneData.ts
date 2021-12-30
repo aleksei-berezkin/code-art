@@ -5,13 +5,13 @@ import { pluck } from './util/pluck';
 import { dpr } from './util/dpr';
 import type { CodeColorization } from './colorizeCode';
 
-export function createCodeData(xMin: number, yMin: number,
-                               xMax: number, yMax: number,
-                               scrollFraction: number,
-                               fontSize: number,
-                               source: Source, codeColorization: CodeColorization,
-                               glyphRaster: GlyphRaster,
-): Grid {
+export function createCodeSceneData(xMin: number, yMin: number,
+                                    xMax: number, yMax: number,
+                                    scrollFraction: number,
+                                    fontSize: number,
+                                    source: Source, codeColorization: CodeColorization,
+                                    glyphRaster: GlyphRaster,
+): CodeSceneData {
     const vertices = [];
     const texPosition = [];
     const colors = [];
@@ -75,7 +75,7 @@ export function createCodeData(xMin: number, yMin: number,
     return {vertices, texPosition, colors};
 }
 
-export type Grid = {
+export type CodeSceneData = {
     // only x, y; z is left default = 0
     vertices: number[],
     // only x, y

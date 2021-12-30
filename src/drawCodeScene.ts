@@ -1,10 +1,10 @@
 import { createShader } from './util/createShader';
 import { createProgram } from './util/createProgram';
-import vertexShaderSource from './shader/gridVertex.shader';
-import fragmentShaderSource from './shader/gridFragment.shader';
+import vertexShaderSource from './shader/codeVertex.shader';
+import fragmentShaderSource from './shader/codeFragment.shader';
 import type { Transformations } from './Transformations';
 import { asMat4, getRotateXMat, getRotateYMat, getRotateZMat, getScaleMat, getTranslateMat, mul } from './util/matrices';
-import { createCodeData } from './createCodeData';
+import { createCodeSceneData } from './createCodeSceneData';
 import { vertexSize2d } from './util/rect';
 import type { GlyphRaster } from './rasterizeFont';
 import type { Source } from './getSource';
@@ -35,30 +35,30 @@ export function drawCodeScene(canvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLC
 
     const ext = calcExtensions(pSp, xRotAngle, yRotAngle, zRotAngle);
 
-    const grid = createCodeData(
+    const sceneData = createCodeSceneData(
         pSp.xMin * ext.xMin, pSp.yMin * ext.yMin,
         pSp.xMax * ext.xMax, pSp.yMax * ext.yMax,
         tfs.scroll.val / 100, tfs['font size'].val,
         source, codeColorization, glyphRaster
     );
 
-    // Grid vertices
+    // Code vertices
     gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(grid.vertices), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sceneData.vertices), gl.STATIC_DRAW);
     const positionAttribLoc = gl.getAttribLocation(program, 'a_position');
     gl.enableVertexAttribArray(positionAttribLoc);
     gl.vertexAttribPointer(positionAttribLoc, vertexSize2d, gl.FLOAT, false, 0, 0);
 
     // Glyphs coords in texture
     gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(grid.texPosition), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sceneData.texPosition), gl.STATIC_DRAW);
     const texPositionAttribLoc = gl.getAttribLocation(program, 'a_texPosition');
     gl.enableVertexAttribArray(texPositionAttribLoc);
     gl.vertexAttribPointer(texPositionAttribLoc, vertexSize2d, gl.FLOAT, false, 0, 0);
 
     // Colors
     gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(grid.colors), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sceneData.colors), gl.STATIC_DRAW);
     const colorAttribLoc = gl.getAttribLocation(program, 'a_color');
     gl.enableVertexAttribArray(colorAttribLoc);
     gl.vertexAttribPointer(colorAttribLoc, rgbSize, gl.FLOAT, false, 0, 0);
@@ -134,7 +134,7 @@ export function drawCodeScene(canvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLC
     gl.clear(gl.COLOR_BUFFER_BIT);
 
     // Go
-    gl.drawArrays(gl.TRIANGLES, 0, grid.vertices.length / vertexSize2d);
+    gl.drawArrays(gl.TRIANGLES, 0, sceneData.vertices.length / vertexSize2d);
 }
 
 /**
