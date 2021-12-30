@@ -1,3 +1,72 @@
+<style>
+    .rasterize-font-canvas {
+        left: 0;
+        position: absolute;
+        transform: translateY(-150%);
+        top: 0;
+        width: 2048px;
+    }
+
+    section {
+        align-items: center;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .sliders {
+    }
+
+    .slider-wr {
+        align-items: center;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        margin-bottom: .5em;
+    }
+
+    .slider-label {
+        flex-grow: 1;
+        text-align: left;
+    }
+
+    .slider-min {
+        padding-right: 1em;
+        text-align: right;
+        width: 4em;
+    }
+
+    .slider-slider {
+        margin: 0;
+        max-width: 50vw;
+        padding: 0;
+        width: 240px;
+    }
+
+    .slider-max {
+        width: 4em;
+        text-align: right;
+    }
+
+    .color-scheme-wr {
+        align-items: center;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        margin-bottom: .5em;
+    }
+
+    .color-scheme-select {
+        margin-right: 4em;
+        width: 240px;
+    }
+
+    .code-canvas {
+        aspect-ratio: 3/2;
+        max-width: 1280px;
+        width: 90%;
+    }
+</style>
+
 <canvas class='rasterize-font-canvas' bind:this={ rasterCanvasEl } width='2048'></canvas>
 <section>
     <div class='sliders'>
@@ -9,6 +78,14 @@
                 <div class='slider-max'>{toLabelNum(tx[0], tx[1].max)}</div>
             </div>
         {/each}
+        <div class='color-scheme-wr'>
+            <label class='color-scheme-label' for={toId('scheme')}>color scheme</label>
+            <select class='color-scheme-select' id={toId('scheme')} bind:value={selectedColorSchemeName} on:change={handleColorSchemeChange}>
+                {#each colorSchemeNames as scheme}
+                    <option value={scheme}>{scheme}</option>
+                {/each}
+            </select>
+        </div>
     </div>
     <canvas class='code-canvas' bind:this={ codeCanvasEl }></canvas>
 </section>
@@ -20,12 +97,15 @@
     import { Transformations, TxType } from './Transformations';
     import { drawCodeScene } from './drawCodeScene';
     import { rasterizeFont, GlyphRaster} from './rasterizeFont';
-    import { getSource } from './getSource';
+    import { getSource, Source } from './getSource';
     import { dpr } from './util/dpr';
     import { degToRag } from './util/degToRad';
+    import { colorSchemeNames } from './colorSchemes';
+    import { randomItem } from './util/randomItem';
+    import { colorizeCode } from './colorizeCode';
 
-    function toId(tx: string) {
-        return 'two-d-slider-' + tx.replace(/\s/g, '-');
+    function toId(k: string) {
+        return 'code-scene-control-' + k.replace(/\s/g, '-');
     }
 
     function toLabelNum(tx: TxType, val: number) {
@@ -91,14 +171,16 @@
         }
     };
 
+    let selectedColorSchemeName = randomItem(colorSchemeNames);
+
     let glyphRaster: GlyphRaster;
 
     onMount(() => {
         handleResize();
         source.then(src => {
-            glyphRaster = rasterizeFont(src, rasterCanvasEl, transformations['font size'].val);
-            drawCodeScene(codeCanvasEl, rasterCanvasEl, transformations, src, glyphRaster);
-        })
+            _rasterizeFont(src);
+            _drawCodeScene(src);
+        });
     });
 
     function handleResize() {
@@ -113,65 +195,21 @@
         transformations[tx].val = Number(inputEl.value);
         source.then(src => {
             if (tx === 'font size') {
-                glyphRaster = rasterizeFont(src, rasterCanvasEl, transformations['font size'].val);
+                _rasterizeFont(src);
             }
-            drawCodeScene(codeCanvasEl, rasterCanvasEl, transformations, src, glyphRaster);
+            _drawCodeScene(src);
         });
     }
+
+    function handleColorSchemeChange() {
+        source.then(src => _drawCodeScene(src));
+    }
+
+    function _rasterizeFont(source: Source) {
+        glyphRaster = rasterizeFont(source, rasterCanvasEl, transformations['font size'].val);
+    }
+
+    function _drawCodeScene(source: Source) {
+        drawCodeScene(codeCanvasEl, rasterCanvasEl, transformations, source, colorizeCode(source, selectedColorSchemeName), glyphRaster);
+    }
 </script>
-
-<style>
-    .rasterize-font-canvas {
-        left: 0;
-        position: absolute;
-        transform: translateY(-150%);
-        top: 0;
-        width: 2048px;
-    }
-
-    section {
-        align-items: center;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .sliders {
-    }
-
-    .slider-wr {
-        align-items: center;
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        margin-bottom: .5em;
-    }
-
-    .slider-label {
-        flex-grow: 1;
-        text-align: left;
-    }
-
-    .slider-min {
-        padding-right: 1em;
-        text-align: right;
-        width: 4em;
-    }
-
-    .slider-slider {
-        margin: 0;
-        max-width: 50vw;
-        padding: 0;
-        width: 240px;
-    }
-
-    .slider-max {
-        width: 4em;
-        text-align: right;
-    }
-
-    .code-canvas {
-        aspect-ratio: 3/2;
-        max-width: 1280px;
-        width: 90%;
-    }
-</style>

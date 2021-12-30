@@ -1,9 +1,6 @@
-import type { ColorScheme } from './ColorScheme';
 import type { RGB } from './ColorScheme';
 
-export type ColorSchemeName = 'VS Code Dark+' | 'IntelliJ Darkula' | 'Chrome Dark' | 'Sahara' | 'Ocean' | 'Rainbow';
-
-export const colorSchemes: { [k in ColorSchemeName]: ColorScheme } = {
+export const colorSchemes = {
     'VS Code Dark+': {
         background: hexToRgb('#1e1e1e'),
         comment: hexToRgb('#6a9954'),
@@ -49,7 +46,7 @@ export const colorSchemes: { [k in ColorSchemeName]: ColorScheme } = {
         default: hexToRgb('#c5cee1'),
     },
     'Ocean': {
-        background: hexToRgb('#102820'),
+        background: hexToRgb('#102028'),
         comment: hexToRgb('#78889d'),
         number: hexToRgb('#77d2a5'),
         string: hexToRgb('#96ab93'),
@@ -64,13 +61,28 @@ export const colorSchemes: { [k in ColorSchemeName]: ColorScheme } = {
         comment: hexToRgb('#bdbdbd'),
         number: hexToRgb('#ff8c16'),
         string: hexToRgb('#f1d230'),
-        name: hexToRgb('#7485ef'),
-        member: hexToRgb('#5fc9d9'),
+        name: hexToRgb('#be405d'),
+        member: hexToRgb('#7485ef'),
         keyword1: hexToRgb('#3bbd1a'),
-        keyword2: hexToRgb('#bd1537'),
+        keyword2: hexToRgb('#5fc9d9'),
         default: hexToRgb('#a9a9a9'),
     },
+    'Forest': {
+        background: hexToRgb('#082412'),
+        comment: hexToRgb('#6f776f'),
+        number: hexToRgb('#ecbc85'),
+        string: hexToRgb('#5bafb9'),
+        name: hexToRgb('#78dca7'),
+        member: hexToRgb('#41a43e'),
+        keyword1: hexToRgb('#9ed04b'),
+        keyword2: hexToRgb('#b67757'),
+        default: hexToRgb('#abb0ab'),
+    },
 };
+
+export type ColorSchemeName = keyof typeof colorSchemes;
+
+export const colorSchemeNames = Object.keys(colorSchemes) as ColorSchemeName[];
 
 function hexToRgb(hex: string): RGB {
     const grp = /#([0-9a-fA-F]{6})/.exec(hex)![1];

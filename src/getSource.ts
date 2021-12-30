@@ -1,18 +1,9 @@
-import * as acorn from 'acorn';
-// @ts-ignore
-import * as acornLoose from 'acorn-loose';
-import * as acornWalk from 'acorn-walk';
-import type { Options, Token } from 'acorn';
-import type { ColorScheme, RGB } from './ColorScheme';
-import { ColorSchemeName, colorSchemes } from './colorSchemes';
-import { randomItem } from './util/randomItem';
-
 let source: Source | undefined = undefined;
 
 export type Source = {
+    id: string,
+    lang: 'js',
     text: string,
-    bgColor: RGB,
-    colors: RGB[],          // index = pos in text
     linesOffsets: number[], // value = pos in text
 }
 
@@ -20,75 +11,19 @@ export async function getSource(): Promise<Source> {
     if (source) {
         return source;
     }
-    // const r = await fetch('https://unpkg.com/react-dom@17.0.2/umd/react-dom.production.min.js');
-    const r = await fetch('https://unpkg.com/lodash@4.17.21/lodash.min.js');
+    const url = 'https://unpkg.com/react-dom@17.0.2/umd/react-dom.production.min.js';
+    // const url = 'https://unpkg.com/lodash@4.17.21/lodash.min.js';
+    const r = await fetch(url);
     if (source) {
         return source;
     }
     const text = await r.text();
-    const colorScheme = getRandomColorScheme();
     return {
+        id: url,
+        lang: 'js',
         text,
-        bgColor: colorScheme.background,
-        colors: highlight(text, colorScheme),
         linesOffsets: getLinesOffsets(text),
     };
-}
-
-function getRandomColorScheme(): ColorScheme {
-    const names = Object.keys(colorSchemes) as ColorSchemeName[];
-    const name = randomItem(names);
-    return colorSchemes[name];
-}
-
-function highlight(text: string, scheme: ColorScheme): RGB[] {
-    const colors: RGB[] = [];
-    function colorize(start: number, end: number, color: RGB) {
-        for (let i = start; i < end; i++) {
-            colors[i] = color;
-        }
-    }
-
-    const options: Options = {
-        ecmaVersion: 'latest',
-        onComment(isBlock, text, start, end) {
-            colorize(start, end, scheme.comment);
-        },
-        onToken(token: Token) {
-            let color;
-            if (acorn.tokTypes.num === token.type) {
-                color = scheme.number;
-            } else if (acorn.tokTypes.string === token.type) {
-                color = scheme.string;
-            } else if (acorn.tokTypes.name === token.type) {
-                color = scheme.name;
-            } else if (['class', 'const', 'false', 'function', 'in', 'let', 'new', 'null', 'of', 'this', 'true', 'undefined', 'var']
-                .includes(token.type.keyword)
-            ) {
-                color = scheme.keyword1;
-            } else if (token.type.keyword) {
-                color = scheme.keyword2;
-            } else {
-                color = scheme.default;
-            }
-
-            colorize(token.start, token.end, color);
-        },
-    };
-
-    // noinspection JSUnusedGlobalSymbols
-    acornWalk.simple(
-        acornLoose.parse(text, options),
-        {
-            MemberExpression(node: any) {
-                if (!node.computed) {
-                    colorize(node.property.start, node.property.end, scheme.member);
-                }
-            },
-        },
-    );
-    
-    return colors;
 }
 
 function getLinesOffsets(text: string): number[] {

@@ -3,12 +3,14 @@ import type { GlyphRaster } from './rasterizeFont';
 import type { Source } from './getSource';
 import { pluck } from './util/pluck';
 import { dpr } from './util/dpr';
+import type { CodeColorization } from './colorizeCode';
 
 export function createCodeData(xMin: number, yMin: number,
                                xMax: number, yMax: number,
                                scrollFraction: number,
                                fontSize: number,
-                               source: Source, glyphRaster: GlyphRaster,
+                               source: Source, codeColorization: CodeColorization,
+                               glyphRaster: GlyphRaster,
 ): Grid {
     const vertices = [];
     const texPosition = [];
@@ -60,7 +62,7 @@ export function createCodeData(xMin: number, yMin: number,
             r.x + r.w, r.baseline + r.descent,
         ));
 
-        const color = source.colors[i] || [1, 1, 1];
+        const color = codeColorization.colors[i] || [1, 1, 1];
         const verticesNum = rectVertices.length / vertexSize2d;
         colors.push(
             ...Array.from({length: verticesNum})

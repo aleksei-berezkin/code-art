@@ -11,10 +11,12 @@ import type { Source } from './getSource';
 import { pluck } from './util/pluck';
 import { degToRag } from './util/degToRad';
 import { rgbSize } from './ColorScheme';
+import type { CodeColorization } from './colorizeCode';
 
 export function drawCodeScene(canvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement,
                               tfs: Transformations,
-                              source: Source, glyphRaster: GlyphRaster,
+                              source: Source, codeColorization: CodeColorization,
+                              glyphRaster: GlyphRaster,
 ) {
     const gl = canvasEl.getContext('webgl2');
     if (!gl) {
@@ -37,7 +39,7 @@ export function drawCodeScene(canvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLC
         pSp.xMin * ext.xMin, pSp.yMin * ext.yMin,
         pSp.xMax * ext.xMax, pSp.yMax * ext.yMax,
         tfs.scroll.val / 100, tfs['font size'].val,
-        source, glyphRaster
+        source, codeColorization, glyphRaster
     );
 
     // Grid vertices
@@ -121,14 +123,14 @@ export function drawCodeScene(canvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLC
     // Bg
     gl.uniform3fv(
         gl.getUniformLocation(program, 'u_bg'),
-        source.bgColor,
+        codeColorization.bgColor,
     );
 
     // Translate -1...+1 to:
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
     // Clear the canvas
-    gl.clearColor(...source.bgColor, 1);
+    gl.clearColor(...codeColorization.bgColor, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
     // Go
@@ -166,10 +168,6 @@ function makePixelSpace(w: number, h: number) {
         zMax,
         zSpan: zMax - zMin,
     };
-}
-
-function radToDeg(deg: number) {
-    return deg / 2 / Math.PI * 360;
 }
 
 type PixelSpace = ReturnType<typeof makePixelSpace>;
