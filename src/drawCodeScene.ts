@@ -20,6 +20,8 @@ import { pluck } from './util/pluck';
 import { degToRag } from './util/degToRad';
 import { RGB, rgbSize } from './ColorScheme';
 import type { CodeColorization } from './colorizeCode';
+import { uploadArrayToAttribute } from './util/uploadArrayToAttribute';
+import { uploadTexture } from './util/uploadTexture';
 
 export type CodeSceneDrawn = {
     verticesArray: Float32Array,
@@ -68,50 +70,20 @@ export function drawCodeScene(canvasEl: HTMLCanvasElement,
         glyphRaster,
     );
 
-    // Code vertices
-    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
     const verticesArray = new Float32Array(sceneData.vertices);
-    gl.bufferData(gl.ARRAY_BUFFER, verticesArray, gl.STATIC_DRAW);
-    const positionAttribLoc = gl.getAttribLocation(program, 'a_position');
-    gl.enableVertexAttribArray(positionAttribLoc);
-    gl.vertexAttribPointer(positionAttribLoc, vertexSize2d, gl.FLOAT, false, 0, 0);
+    uploadArrayToAttribute('a_position', verticesArray, vertexSize2d, program, gl);
 
-    // Glyphs coords in texture
-    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sceneData.texPosition), gl.STATIC_DRAW);
-    const texPositionAttribLoc = gl.getAttribLocation(program, 'a_texPosition');
-    gl.enableVertexAttribArray(texPositionAttribLoc);
-    gl.vertexAttribPointer(texPositionAttribLoc, vertexSize2d, gl.FLOAT, false, 0, 0);
+    uploadArrayToAttribute('a_texPosition', new Float32Array(sceneData.texPosition), vertexSize2d, program, gl);
 
-    // Colors
-    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sceneData.colors), gl.STATIC_DRAW);
-    const colorAttribLoc = gl.getAttribLocation(program, 'a_color');
-    gl.enableVertexAttribArray(colorAttribLoc);
-    gl.vertexAttribPointer(colorAttribLoc, rgbSize, gl.FLOAT, false, 0, 0);
+    uploadArrayToAttribute('a_color', new Float32Array(sceneData.colors), rgbSize, program, gl);
 
-    // Upload glyph texture
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texImage2D(gl.TEXTURE_2D,
-        0,
-        gl.RGBA,
-        gl.RGBA,
-        gl.UNSIGNED_BYTE,
-        rasterCanvasEl,
-    );
+    uploadTexture(rasterCanvasEl, gl.TEXTURE0, gl);
 
-    // Using program, setting uniforms
     gl.useProgram(program);
 
-    // Texture (level) uniform
     gl.uniform1i(
         gl.getUniformLocation(program, 'u_letters'),
-        0,
+        gl.TEXTURE0,
     );
 
     // Transform scene then transform to clip space
@@ -146,20 +118,16 @@ export function drawCodeScene(canvasEl: HTMLCanvasElement,
         txMat,
     );
 
-    // Bg
     gl.uniform3fv(
         gl.getUniformLocation(program, 'u_bg'),
         codeColorization.bgColor,
     );
 
-    // Translate -1...+1 to:
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
-    // Clear the canvas
     gl.clearColor(...codeColorization.bgColor, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
-    // Go
     gl.drawArrays(gl.TRIANGLES, 0, sceneData.vertices.length / vertexSize2d);
 
     return {verticesArray, txMat, bgColor: codeColorization.bgColor};

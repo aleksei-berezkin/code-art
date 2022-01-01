@@ -30,28 +30,6 @@ function mul2(A: Mat4, B: Mat4) {
     return asMat4(C);
 }
 
-export function vMul(A: Mat4, x: [number, number, number, number]) {
-    const v = [];
-    for (let r = 0; r < size; r++) {
-        let s = 0;
-        for (let c = 0; c < size; c++) {
-            s += A[ix(r, c)] * x[c];
-        }
-        v.push(s);
-    }
-    return v;
-}
-
-export function transpose(A: Mat4) {
-    const C = [];
-    for (let c = 0; c < size; c++) {
-        for (let r = 0; r < size; r++) {
-            C.push(A[ix(r, c)]);
-        }
-    }
-    return asMat4(C);
-}
-
 function ix(r: number, c: number) {
     return r * size + c;
 }
@@ -63,15 +41,6 @@ export function asMat4(A: number[]): Mat4 {
         return A as Mat4;
     }
     throw new Error(`Bad size=${A.length}`)
-}
-
-export function getScaleMat(scaleX: number, scaleY: number, scaleZ: number) {
-    return asMat4([
-        scaleX, 0, 0, 0,
-        0, scaleY, 0, 0,
-        0, 0, scaleZ, 0,
-        0, 0, 0, 1,
-    ]);
 }
 
 export function getRotateZMat(angleRad: number) {
