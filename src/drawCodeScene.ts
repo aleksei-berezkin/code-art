@@ -166,8 +166,10 @@ export function drawCodeScene(canvasEl: HTMLCanvasElement,
 }
 
 /**
+ * See figures/01_PixelSpace.png
+ * 
  * Pixel space (x, y) goes from top-left (-w/2, -h/2) to bottom-right (w/2, h/2).
- * Z goes from -zBase to +large_val*zBase where z=-zBase is an eye position,
+ * Z goes from -zBase to +large_val*zBase where z=-zBase is a camera position,
  * and z=0 is a depth at which an object with height=h is fully visible.
  * 
  * Vertical view angle is 115 deg (like that of human) so the following equation is valid:
@@ -208,14 +210,14 @@ function calcExtensions(pixelSpace: PixelSpace, xRotAngle: number, yRotAngle: nu
     const _yRotAngle = pluck(-maxYRot, yRotAngle, maxYRot);
     const _xRotAngle = pluck(-maxXRot, xRotAngle, maxXRot);
 
-    // Sine theorem
+    // See figures/02_ExtensionByRotation.png
     const xMinByY = Math.sin(Math.PI / 2 + viewAngleH / 2) / Math.sin(Math.PI / 2 - _yRotAngle - viewAngleH / 2);
     const xMaxByY = Math.sin(Math.PI / 2 + viewAngleH / 2) / Math.sin(Math.PI / 2 + _yRotAngle - viewAngleH / 2);
 
     const yMinByX = Math.sin(Math.PI / 2 + viewAngleV / 2) / Math.sin(Math.PI / 2 - _xRotAngle - viewAngleV / 2);
     const yMaxByX = Math.sin(Math.PI / 2 + viewAngleV / 2) / Math.sin(Math.PI / 2 + _xRotAngle - viewAngleV / 2);
 
-    // Z distance from farthest point
+    // See figures/03_FudgeByRotation.png
     const fudgeByYRot = pixelSpace.xMax * Math.max(xMinByY, xMaxByY) * Math.sin(Math.abs(_yRotAngle)) / pixelSpace.zBase + 1;
     const fudgeByXRot = pixelSpace.yMax * Math.max(yMinByX, yMaxByX) * Math.sin(Math.abs(_xRotAngle)) / pixelSpace.zBase + 1;
 
