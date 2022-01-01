@@ -12,6 +12,7 @@ import type { CodeColorization } from './colorizeCode';
 import { uploadArrayToAttribute } from './util/uploadArrayToAttribute';
 import { uploadTexture } from './util/uploadTexture';
 import { calcExtensions, makePixelSpace } from './PixelSpace';
+import { dpr } from './util/dpr';
 
 export type CodeSceneDrawn = {
     verticesArray: Float32Array,
@@ -34,7 +35,7 @@ export function drawCodeScene(canvasEl: HTMLCanvasElement,
 
     const program = createProgram(vertexShaderSource, fragmentShaderSource, gl);
 
-    const pSp = makePixelSpace(canvasEl.width, canvasEl.height);
+    const pSp = makePixelSpace(canvasEl.width / dpr, canvasEl.height / dpr);
 
     const xRotAngle = -tfs['angle x'].val;
     const yRotAngle = -tfs['angle y'].val;
@@ -95,7 +96,7 @@ export function drawCodeScene(canvasEl: HTMLCanvasElement,
         0, -1 / pSp.yMax, 0, 0,
         // zMin ... zMax -> -1 ... +1 (won't be divided by w)
         0, 0, 2 / pSp.zSpan, -1 - 2 * pSp.zMin / pSp.zSpan,
-        // zMin(==-zBase)...zBase...zMax -> 0...+2...(zSpan/zBase)
+        // zMin(==-zBase)...0...zBase...zMax -> 0...+1...+2...(zSpan/zBase)
         0, 0, 1 / pSp.zBase, 1,
     ]);
 

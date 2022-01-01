@@ -2,7 +2,6 @@ import { rect2d, vertexSize2d } from './util/rect';
 import type { GlyphRaster } from './rasterizeFont';
 import type { Source } from './getSource';
 import { pluck } from './util/pluck';
-import { dpr } from './util/dpr';
 import type { CodeColorization } from './colorizeCode';
 
 export function createCodeSceneData(bounds: {xMin: number, yMin: number, xMax: number, yMax: number},
@@ -27,7 +26,7 @@ export function createCodeSceneData(bounds: {xMin: number, yMin: number, xMax: n
         let letter = source.text[i];
         if (letter === '\n') {
             x = bounds.xMin;
-            y += fontSize * dpr;
+            y += fontSize;
             if (y > bounds.yMax) {
                 break;
             }
@@ -51,9 +50,9 @@ export function createCodeSceneData(bounds: {xMin: number, yMin: number, xMax: n
 
         const rectVertices = rect2d(
             x,
-            baseline - r.ascent / glyphRaster.sizeRatio * dpr,
-            x + r.w / glyphRaster.sizeRatio * dpr,
-            baseline + r.descent / glyphRaster.sizeRatio * dpr,
+            baseline - r.ascent / glyphRaster.sizeRatio,
+            x + r.w / glyphRaster.sizeRatio,
+            baseline + r.descent / glyphRaster.sizeRatio,
         )
         vertices.push(...rectVertices);
 
@@ -69,7 +68,7 @@ export function createCodeSceneData(bounds: {xMin: number, yMin: number, xMax: n
                 .flatMap(() => color)
         );
 
-        x += r.w / glyphRaster.sizeRatio * dpr;
+        x += r.w / glyphRaster.sizeRatio;
     }
 
     return {vertices, glyphTexPosition, colors};

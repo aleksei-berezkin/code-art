@@ -35,6 +35,11 @@ export function makePixelSpace(w: number, h: number) {
         zBase,
         zMax,
         zSpan: zMax - zMin,
+        // See figures/04_Optics.png
+        optics: {
+            lensDiameter: .15 * w,  // ~ 50mm for 15.6" screen
+            focalLength: .09 * w,   // ~ 30mm for 15.6" screen
+        },
     };
 }
 
