@@ -29,6 +29,26 @@ export function drawEffectsScene(canvasEl: HTMLCanvasElement, codeSceneDrawn: Co
         codeSceneDrawn.txMat,
     );
 
+    gl.uniform1f(
+        gl.getUniformLocation(program, 'u_zBase'),
+        codeSceneDrawn.pixelSpace.zBase,
+    );
+
+    gl.uniform1f(
+        gl.getUniformLocation(program, 'u_focalLength'),
+        codeSceneDrawn.pixelSpace.optics.focalLength,
+    );
+
+    gl.uniform1f(
+        gl.getUniformLocation(program, 'u_distanceToSensor'),
+        1 / (1 / codeSceneDrawn.pixelSpace.optics.focalLength - 1 / codeSceneDrawn.pixelSpace.zBase),
+    );
+
+    gl.uniform1f(
+        gl.getUniformLocation(program, 'u_lensDiameter'),
+        codeSceneDrawn.pixelSpace.optics.lensDiameter,
+    );
+
     gl.uniform3fv(
         gl.getUniformLocation(program, 'u_bg'),
         codeSceneDrawn.bgColor,

@@ -11,10 +11,11 @@ import { RGB, rgbSize } from './ColorScheme';
 import type { CodeColorization } from './colorizeCode';
 import { uploadArrayToAttribute } from './util/uploadArrayToAttribute';
 import { uploadTexture } from './util/uploadTexture';
-import { calcExtensions, makePixelSpace } from './PixelSpace';
+import { calcExtensions, makePixelSpace, PixelSpace } from './PixelSpace';
 import { dpr } from './util/dpr';
 
 export type CodeSceneDrawn = {
+    pixelSpace: PixelSpace,
     verticesArray: Float32Array,
     txMat: Mat4,
     bgColor: RGB,
@@ -120,5 +121,10 @@ export function drawCodeScene(canvasEl: HTMLCanvasElement,
 
     gl.drawArrays(gl.TRIANGLES, 0, sceneData.vertices.length / vertexSize2d);
 
-    return {verticesArray, txMat, bgColor: codeColorization.bgColor};
+    return {
+        pixelSpace: pSp,
+        verticesArray,
+        txMat,
+        bgColor: codeColorization.bgColor,
+    };
 }
