@@ -5,11 +5,11 @@ import { pluck } from './util/pluck';
 import { dpr } from './util/dpr';
 import type { CodeColorization } from './colorizeCode';
 
-export function createCodeSceneData(xMin: number, yMin: number,
-                                    xMax: number, yMax: number,
+export function createCodeSceneData(bounds: {xMin: number, yMin: number, xMax: number, yMax: number},
                                     scrollFraction: number,
                                     fontSize: number,
-                                    source: Source, codeColorization: CodeColorization,
+                                    source: Source,
+                                    codeColorization: CodeColorization,
                                     glyphRaster: GlyphRaster,
 ): CodeSceneData {
     const vertices = [];
@@ -19,22 +19,22 @@ export function createCodeSceneData(xMin: number, yMin: number,
     const lRasters = [...glyphRaster.glyphs.values()];
     const maxAscent = lRasters.reduce((max, r) => r.ascent > max ? r.ascent : max, 0) / glyphRaster.sizeRatio;
 
-    const posMin = getPosMin(source, Math.ceil((yMax - yMin) / fontSize), scrollFraction);
+    const posMin = getPosMin(source, Math.ceil((bounds.yMax - bounds.yMin) / fontSize), scrollFraction);
 
-    let x = xMin;
-    let y = yMin;
+    let x = bounds.xMin;
+    let y = bounds.yMin;
     for (let i = posMin; i < source.text.length; i++) {
         let letter = source.text[i];
         if (letter === '\n') {
-            x = xMin;
+            x = bounds.xMin;
             y += fontSize * dpr;
-            if (y > yMax) {
+            if (y > bounds.yMax) {
                 break;
             }
             continue;
         }
 
-        if (x > xMax) {
+        if (x > bounds.xMax) {
             continue;
         }
 

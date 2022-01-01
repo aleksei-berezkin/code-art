@@ -103,6 +103,7 @@
     import { colorSchemeNames } from './colorSchemes';
     import { randomItem } from './util/randomItem';
     import { colorizeCode } from './colorizeCode';
+    import {drawEffectsScene} from "./drawEffectsScene";
 
     function toId(k: string) {
         return 'code-scene-control-' + k.replace(/\s/g, '-');
@@ -179,7 +180,7 @@
         handleResize();
         source.then(src => {
             _rasterizeFont(src);
-            _drawCodeScene(src);
+            _drawScene(src);
         });
     });
 
@@ -197,19 +198,20 @@
             if (tx === 'font size') {
                 _rasterizeFont(src);
             }
-            _drawCodeScene(src);
+            _drawScene(src);
         });
     }
 
     function handleColorSchemeChange() {
-        source.then(src => _drawCodeScene(src));
+        source.then(src => _drawScene(src));
     }
 
     function _rasterizeFont(source: Source) {
         glyphRaster = rasterizeFont(source, rasterCanvasEl, transformations['font size'].val);
     }
 
-    function _drawCodeScene(source: Source) {
-        drawCodeScene(codeCanvasEl, rasterCanvasEl, transformations, source, colorizeCode(source, selectedColorSchemeName), glyphRaster);
+    function _drawScene(source: Source) {
+        const codeSceneDrawn = drawCodeScene(codeCanvasEl, rasterCanvasEl, transformations, source, colorizeCode(source, selectedColorSchemeName), glyphRaster);
+        drawEffectsScene(codeCanvasEl, codeSceneDrawn);
     }
 </script>

@@ -3,21 +3,38 @@ import { createProgram } from './util/createProgram';
 import vertexShaderSource from './shader/codeVertex.shader';
 import fragmentShaderSource from './shader/codeFragment.shader';
 import type { Transformations } from './Transformations';
-import { asMat4, getRotateXMat, getRotateYMat, getRotateZMat, getScaleMat, getTranslateMat, mul } from './util/matrices';
+import {
+    asMat4,
+    getRotateXMat,
+    getRotateYMat,
+    getRotateZMat,
+    getTranslateMat,
+    Mat4,
+    mul,
+} from './util/matrices';
 import { createCodeSceneData } from './createCodeSceneData';
 import { vertexSize2d } from './util/rect';
 import type { GlyphRaster } from './rasterizeFont';
 import type { Source } from './getSource';
 import { pluck } from './util/pluck';
 import { degToRag } from './util/degToRad';
-import { rgbSize } from './ColorScheme';
+import { RGB, rgbSize } from './ColorScheme';
 import type { CodeColorization } from './colorizeCode';
 
-export function drawCodeScene(canvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement,
+export type CodeSceneDrawn = {
+    verticesArray: Float32Array,
+    txMat: Mat4,
+    bgColor: RGB,
+}
+
+// TODO render to texture
+export function drawCodeScene(canvasEl: HTMLCanvasElement,
+                              rasterCanvasEl: HTMLCanvasElement,
                               tfs: Transformations,
-                              source: Source, codeColorization: CodeColorization,
+                              source: Source,
+                              codeColorization: CodeColorization,
                               glyphRaster: GlyphRaster,
-) {
+): CodeSceneDrawn {
     const gl = canvasEl.getContext('webgl2');
     if (!gl) {
         throw new Error('webgl2 not supported');
@@ -35,16 +52,26 @@ export function drawCodeScene(canvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLC
 
     const ext = calcExtensions(pSp, xRotAngle, yRotAngle, zRotAngle);
 
+    const sceneBounds = {
+        xMin: pSp.xMin * ext.xMin,
+        yMin: pSp.yMin * ext.yMin,
+        xMax: pSp.xMax * ext.xMax,
+        yMax: pSp.yMax * ext.yMax,
+    };
+
     const sceneData = createCodeSceneData(
-        pSp.xMin * ext.xMin, pSp.yMin * ext.yMin,
-        pSp.xMax * ext.xMax, pSp.yMax * ext.yMax,
-        tfs.scroll.val / 100, tfs['font size'].val,
-        source, codeColorization, glyphRaster
+        sceneBounds,
+        tfs.scroll.val / 100,
+        tfs['font size'].val,
+        source,
+        codeColorization,
+        glyphRaster,
     );
 
     // Code vertices
     gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sceneData.vertices), gl.STATIC_DRAW);
+    const verticesArray = new Float32Array(sceneData.vertices);
+    gl.bufferData(gl.ARRAY_BUFFER, verticesArray, gl.STATIC_DRAW);
     const positionAttribLoc = gl.getAttribLocation(program, 'a_position');
     gl.enableVertexAttribArray(positionAttribLoc);
     gl.vertexAttribPointer(positionAttribLoc, vertexSize2d, gl.FLOAT, false, 0, 0);
@@ -98,14 +125,13 @@ export function drawCodeScene(canvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLC
             getRotateXMat(xRotAngle),
             getRotateYMat(yRotAngle),
             getRotateZMat(zRotAngle),
-            getScaleMat(1, -1, 1),
         );
 
     const toClipSpaceMat = asMat4([
         // xMin(==-xMax) ... xMax -> -1 ... +1
         1 / pSp.xMax, 0, 0, 0,
-        // yMin(==-yMax) ... yMax -> -1 ... +1
-        0, 1 / pSp.yMax, 0, 0,
+        // yMin(==-yMax) ... yMax -> +1 ... -1
+        0, -1 / pSp.yMax, 0, 0,
         // zMin ... zMax -> -1 ... +1 (won't be divided by w)
         0, 0, 2 / pSp.zSpan, -1 - 2 * pSp.zMin / pSp.zSpan,
         // zMin(==-zBase)...zBase...zMax -> 0...+2...(zSpan/zBase)
@@ -135,6 +161,8 @@ export function drawCodeScene(canvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLC
 
     // Go
     gl.drawArrays(gl.TRIANGLES, 0, sceneData.vertices.length / vertexSize2d);
+
+    return {verticesArray, txMat, bgColor: codeColorization.bgColor};
 }
 
 /**
@@ -184,8 +212,8 @@ function calcExtensions(pixelSpace: PixelSpace, xRotAngle: number, yRotAngle: nu
     const xMinByY = Math.sin(Math.PI / 2 + viewAngleH / 2) / Math.sin(Math.PI / 2 - _yRotAngle - viewAngleH / 2);
     const xMaxByY = Math.sin(Math.PI / 2 + viewAngleH / 2) / Math.sin(Math.PI / 2 + _yRotAngle - viewAngleH / 2);
 
-    const yMinByX = Math.sin(Math.PI / 2 + viewAngleV / 2) / Math.sin(Math.PI / 2 + _xRotAngle - viewAngleV / 2);
-    const yMaxByX = Math.sin(Math.PI / 2 + viewAngleV / 2) / Math.sin(Math.PI / 2 - _xRotAngle - viewAngleV / 2);
+    const yMinByX = Math.sin(Math.PI / 2 + viewAngleV / 2) / Math.sin(Math.PI / 2 - _xRotAngle - viewAngleV / 2);
+    const yMaxByX = Math.sin(Math.PI / 2 + viewAngleV / 2) / Math.sin(Math.PI / 2 + _xRotAngle - viewAngleV / 2);
 
     // Z distance from farthest point
     const fudgeByYRot = pixelSpace.xMax * Math.max(xMinByY, xMaxByY) * Math.sin(Math.abs(_yRotAngle)) / pixelSpace.zBase + 1;
@@ -203,8 +231,8 @@ function calcExtensions(pixelSpace: PixelSpace, xRotAngle: number, yRotAngle: nu
     const extraFudges = {
         xMin: yRotAngle > 0 ? extraFudge : 1,
         xMax: yRotAngle < 0 ? extraFudge : 1,
-        yMin: xRotAngle < 0 ? extraFudge : 1,
-        yMax: xRotAngle > 0 ? extraFudge : 1,
+        yMin: xRotAngle > 0 ? extraFudge : 1,
+        yMax: xRotAngle < 0 ? extraFudge : 1,
     };
 
     return {
