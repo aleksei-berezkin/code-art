@@ -13,7 +13,7 @@ export function createCodeSceneData(bounds: {xMin: number, yMin: number, xMax: n
                                     glyphRaster: GlyphRaster,
 ): CodeSceneData {
     const vertices = [];
-    const texPosition = [];
+    const glyphTexPosition = [];
     const colors = [];
 
     const lRasters = [...glyphRaster.glyphs.values()];
@@ -57,7 +57,7 @@ export function createCodeSceneData(bounds: {xMin: number, yMin: number, xMax: n
         )
         vertices.push(...rectVertices);
 
-        texPosition.push(...rect2d(
+        glyphTexPosition.push(...rect2d(
             r.x, r.baseline - r.ascent,
             r.x + r.w, r.baseline + r.descent,
         ));
@@ -72,14 +72,14 @@ export function createCodeSceneData(bounds: {xMin: number, yMin: number, xMax: n
         x += r.w / glyphRaster.sizeRatio * dpr;
     }
 
-    return {vertices, texPosition, colors};
+    return {vertices, glyphTexPosition, colors};
 }
 
 export type CodeSceneData = {
     // only x, y; z is left default = 0
     vertices: number[],
     // only x, y
-    texPosition: number[],
+    glyphTexPosition: number[],
     colors: number[],
 }
 

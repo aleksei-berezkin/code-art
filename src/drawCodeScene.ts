@@ -1,17 +1,8 @@
-import { createShader } from './util/createShader';
 import { createProgram } from './util/createProgram';
 import vertexShaderSource from './shader/codeVertex.shader';
 import fragmentShaderSource from './shader/codeFragment.shader';
 import type { Transformations } from './Transformations';
-import {
-    asMat4,
-    getRotateXMat,
-    getRotateYMat,
-    getRotateZMat,
-    getTranslateMat,
-    Mat4,
-    mul,
-} from './util/matrices';
+import { asMat4, getRotateXMat, getRotateYMat, getRotateZMat, getTranslateMat, Mat4, mul } from './util/matrices';
 import { createCodeSceneData } from './createCodeSceneData';
 import { vertexSize2d } from './util/rect';
 import type { GlyphRaster } from './rasterizeFont';
@@ -42,9 +33,7 @@ export function drawCodeScene(canvasEl: HTMLCanvasElement,
         throw new Error('webgl2 not supported');
     }
 
-    const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
-    const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
-    const program = createProgram(gl, vertexShader, fragmentShader);
+    const program = createProgram(vertexShaderSource, fragmentShaderSource, gl);
 
     const pSp = makePixelSpace(canvasEl.width, canvasEl.height);
 
@@ -73,7 +62,7 @@ export function drawCodeScene(canvasEl: HTMLCanvasElement,
     const verticesArray = new Float32Array(sceneData.vertices);
     uploadArrayToAttribute('a_position', verticesArray, vertexSize2d, program, gl);
 
-    uploadArrayToAttribute('a_texPosition', new Float32Array(sceneData.texPosition), vertexSize2d, program, gl);
+    uploadArrayToAttribute('a_glyphTexPosition', new Float32Array(sceneData.glyphTexPosition), vertexSize2d, program, gl);
 
     uploadArrayToAttribute('a_color', new Float32Array(sceneData.colors), rgbSize, program, gl);
 
@@ -86,7 +75,7 @@ export function drawCodeScene(canvasEl: HTMLCanvasElement,
         gl.TEXTURE0,
     );
 
-    // Transform scene then transform to clip space
+    // Transform in pixel space
     const txMatPixels =
         mul(
             getTranslateMat(
@@ -99,6 +88,7 @@ export function drawCodeScene(canvasEl: HTMLCanvasElement,
             getRotateZMat(zRotAngle),
         );
 
+    // Pixel space to clip space
     const toClipSpaceMat = asMat4([
         // xMin(==-xMax) ... xMax -> -1 ... +1
         1 / pSp.xMax, 0, 0, 0,

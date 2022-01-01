@@ -1,5 +1,4 @@
 import type { CodeSceneDrawn } from './drawCodeScene';
-import { createShader } from './util/createShader';
 import vertexShaderSource from './shader/effectsVertex.shader';
 import fragmentShaderSource from './shader/effectsFragment.shader';
 import { createProgram } from './util/createProgram';
@@ -10,9 +9,7 @@ import { uploadTexture } from './util/uploadTexture';
 export function drawEffectsScene(canvasEl: HTMLCanvasElement, codeSceneDrawn: CodeSceneDrawn) {
     const gl = canvasEl.getContext('webgl2')!;
 
-    const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
-    const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
-    const program = createProgram(gl, vertexShader, fragmentShader);
+    const program = createProgram(vertexShaderSource, fragmentShaderSource, gl);
 
     // Because w is non-linear of (x, y) we can't draw just one rect of (xMin, yMin)-(xMax, yMax).
     uploadArrayToAttribute('a_position', codeSceneDrawn.verticesArray, vertexSize2d, program, gl);

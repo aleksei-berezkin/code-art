@@ -4,7 +4,7 @@ uniform mat4 u_tx;
 uniform vec3 u_bg;
 
 in vec4 a_position;
-in vec2 a_texPosition;
+in vec2 a_glyphTexPosition;
 in vec3 a_color;
 
 out vec2 v_texPosition;
@@ -18,6 +18,6 @@ void main() {
     // z is not divided by w
     gl_Position = vec4(pos.xy / w, pos.z, 1);
 
-    v_texPosition = a_texPosition;
+    v_texPosition = a_glyphTexPosition;
     v_color = a_color;
 }
