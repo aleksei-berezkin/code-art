@@ -8,12 +8,14 @@ export type PixelSpace = ReturnType<typeof makePixelSpace>;
  *
  * Pixel space (x, y) goes from top-left (-w/2, -h/2) to bottom-right (w/2, h/2).
  * Z goes from -zBase to +large_val*zBase where z=-zBase is a camera position,
- * and z=0 is a depth at which an object with height=h is fully visible.
+ * and z=0 is a distance at which an object with height=h is fully visible.
  *
- * Vertical view angle is 115 deg (like that of human) so the following equation is valid:
+ * Vertical view angle is 115 deg (like that of a human eye) so the following
+ * equation is valid:
+ * 
  * tan(155deg / 2) = (h/2) / zBase
  *
- * An object at z=+zBase (2*zBase distance from an eye) is twice smaller than that
+ * An object at z=+zBase (2*zBase distance from the camera) is twice smaller than that
  * at z=0, so w = (zBase + z) / zBase = 1 + z / zBase
  */
 export function makePixelSpace(w: number, h: number) {
@@ -21,7 +23,7 @@ export function makePixelSpace(w: number, h: number) {
     const zBase = h / 2 / Math.tan(viewAngleV / 2);
     const viewAngleH = Math.atan(w / 2 / zBase) * 2;
     const zMin = -zBase;
-    const zMax = zBase * 1000;
+    const zMax = 1000 * zBase;
     return {
         w,
         h,
