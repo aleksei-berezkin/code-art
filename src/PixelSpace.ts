@@ -39,11 +39,13 @@ export function makePixelSpace(w: number, h: number) {
         zSpan: zMax - zMin,
         // See figures/04_Optics.png
         optics: {
-            lensDiameter: .15 * w,  // ~ 50mm for 15.6" screen
-            focalLength: .09 * w,   // ~ 30mm for 15.6" screen
+            lensDiameter: .08 * w,
+            focalLength: .04 * w,
         },
     };
 }
+
+export type Extensions = ReturnType<typeof calcExtensions>;
 
 /**
  * Because code plane is rotated, bounds must be extended to fill the whole canvas.
@@ -89,5 +91,16 @@ export function calcExtensions(pixelSpace: PixelSpace, xRotAngle: number, yRotAn
         xMax: pluck(0, xMaxByY * fudgeByXRot * extraFudges.xMax * clipByZRot, 20),
         yMin: pluck(0, yMinByX * fudgeByYRot * extraFudges.yMin * clipByZRot, 20),
         yMax: pluck(0, yMaxByX * fudgeByYRot * extraFudges.yMax * clipByZRot, 20),
+    };
+}
+
+export type SceneBounds = ReturnType<typeof getSceneBounds>;
+
+export function getSceneBounds(pSp: PixelSpace, ext: Extensions) {
+    return {
+        xMin: pSp.xMin * ext.xMin,
+        yMin: pSp.yMin * ext.yMin,
+        xMax: pSp.xMax * ext.xMax,
+        yMax: pSp.yMax * ext.yMax,
     };
 }

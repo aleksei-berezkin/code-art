@@ -1,18 +1,23 @@
 import type { CodeSceneDrawn } from './drawCodeScene';
 import vertexShaderSource from './shader/effectsVertex.shader';
-import fragmentShaderSource from './shader/effectsFragment.shader';
+import fragmentShaderSourceWithMacro from './shader/effectsFragment.shader';
 import { createProgram } from './util/createProgram';
-import { vertexSize2d} from './util/rect';
+import { vertexSize2d } from './util/rect';
 import { uploadArrayToAttribute } from './util/uploadArrayToAttribute';
 import { uploadTexture } from './util/uploadTexture';
+import { blurKernel, blurKernelSize, blurKernelWeight } from './blurKernel';
+import { createEffectsGrid } from './createEffectsGrid';
 
-export function drawEffectsScene(canvasEl: HTMLCanvasElement, codeSceneDrawn: CodeSceneDrawn) {
+const fragmentShaderSource = fragmentShaderSourceWithMacro
+    .replaceAll('_BLUR_K_SZ_', String(blurKernelSize));
+
+export function drawEffectsScene(canvasEl: HTMLCanvasElement, codeSceneDrawn: CodeSceneDrawn, fontSize: number) {
     const gl = canvasEl.getContext('webgl2')!;
 
     const program = createProgram(vertexShaderSource, fragmentShaderSource, gl);
 
-    // Because w is non-linear of (x, y) we can't draw just one rect of (xMin, yMin)-(xMax, yMax).
-    uploadArrayToAttribute('a_position', codeSceneDrawn.verticesArray, vertexSize2d, program, gl);
+    const gridVertices = createEffectsGrid(codeSceneDrawn.pixelSpace, codeSceneDrawn.extensions, fontSize);
+    uploadArrayToAttribute('a_position', new Float32Array(gridVertices), vertexSize2d, program, gl);
 
     uploadTexture(canvasEl, gl.TEXTURE0, gl);
 
@@ -20,13 +25,24 @@ export function drawEffectsScene(canvasEl: HTMLCanvasElement, codeSceneDrawn: Co
 
     gl.uniform1i(
         gl.getUniformLocation(program, 'u_image'),
-        gl.TEXTURE0,
+        0,
     );
 
     gl.uniformMatrix4fv(
         gl.getUniformLocation(program, 'u_tx'),
         false,
         codeSceneDrawn.txMat,
+    );
+
+    gl.uniform1f(
+        gl.getUniformLocation(program, 'u_xMax'),
+        codeSceneDrawn.pixelSpace.xMax,
+    );
+
+    // noinspection JSSuspiciousNameCombination
+    gl.uniform1f(
+        gl.getUniformLocation(program, 'u_yMax'),
+        codeSceneDrawn.pixelSpace.yMax,
     );
 
     gl.uniform1f(
@@ -54,7 +70,17 @@ export function drawEffectsScene(canvasEl: HTMLCanvasElement, codeSceneDrawn: Co
         codeSceneDrawn.bgColor,
     );
 
+    gl.uniform1fv(
+        gl.getUniformLocation(program, 'u_blurKernel'),
+        blurKernel,
+    );
+
+    gl.uniform1f(
+        gl.getUniformLocation(program, 'u_blurKernelWeight'),
+        blurKernelWeight,
+    );
+
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
-    gl.drawArrays(gl.TRIANGLES, 0, codeSceneDrawn.verticesArray.length / vertexSize2d);
+    gl.drawArrays(gl.TRIANGLES, 0, gridVertices.length / vertexSize2d);
 }

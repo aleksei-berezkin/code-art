@@ -103,7 +103,7 @@
     import { colorSchemeNames } from './colorSchemes';
     import { randomItem } from './util/randomItem';
     import { colorizeCode } from './colorizeCode';
-    import {drawEffectsScene} from "./drawEffectsScene";
+    import { drawEffectsScene } from './drawEffectsScene';
 
     function toId(k: string) {
         return 'code-scene-control-' + k.replace(/\s/g, '-');
@@ -212,6 +212,6 @@
 
     function _drawScene(source: Source) {
         const codeSceneDrawn = drawCodeScene(codeCanvasEl, rasterCanvasEl, transformations, source, colorizeCode(source, selectedColorSchemeName), glyphRaster);
-        drawEffectsScene(codeCanvasEl, codeSceneDrawn);
+        drawEffectsScene(codeCanvasEl, codeSceneDrawn, transformations['font size'].val);
     }
 </script>

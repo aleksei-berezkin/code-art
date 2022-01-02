@@ -11,12 +11,12 @@ import { RGB, rgbSize } from './ColorScheme';
 import type { CodeColorization } from './colorizeCode';
 import { uploadArrayToAttribute } from './util/uploadArrayToAttribute';
 import { uploadTexture } from './util/uploadTexture';
-import { calcExtensions, makePixelSpace, PixelSpace } from './PixelSpace';
+import { calcExtensions, Extensions, getSceneBounds, makePixelSpace, PixelSpace } from './PixelSpace';
 import { dpr } from './util/dpr';
 
 export type CodeSceneDrawn = {
     pixelSpace: PixelSpace,
-    verticesArray: Float32Array,
+    extensions: Extensions,
     txMat: Mat4,
     bgColor: RGB,
 }
@@ -42,17 +42,10 @@ export function drawCodeScene(canvasEl: HTMLCanvasElement,
     const yRotAngle = -tfs['angle y'].val;
     const zRotAngle = tfs['angle z'].val;
 
-    const ext = calcExtensions(pSp, xRotAngle, yRotAngle, zRotAngle);
-
-    const sceneBounds = {
-        xMin: pSp.xMin * ext.xMin,
-        yMin: pSp.yMin * ext.yMin,
-        xMax: pSp.xMax * ext.xMax,
-        yMax: pSp.yMax * ext.yMax,
-    };
+    const extensions = calcExtensions(pSp, xRotAngle, yRotAngle, zRotAngle);
 
     const sceneData = createCodeSceneData(
-        sceneBounds,
+        getSceneBounds(pSp, extensions),
         tfs.scroll.val / 100,
         tfs['font size'].val,
         source,
@@ -73,7 +66,7 @@ export function drawCodeScene(canvasEl: HTMLCanvasElement,
 
     gl.uniform1i(
         gl.getUniformLocation(program, 'u_letters'),
-        gl.TEXTURE0,
+        0,
     );
 
     // Transform in pixel space
@@ -123,7 +116,7 @@ export function drawCodeScene(canvasEl: HTMLCanvasElement,
 
     return {
         pixelSpace: pSp,
-        verticesArray,
+        extensions,
         txMat,
         bgColor: codeColorization.bgColor,
     };

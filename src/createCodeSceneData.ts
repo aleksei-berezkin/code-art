@@ -3,8 +3,9 @@ import type { GlyphRaster } from './rasterizeFont';
 import type { Source } from './getSource';
 import { pluck } from './util/pluck';
 import type { CodeColorization } from './colorizeCode';
+import type { SceneBounds } from './PixelSpace';
 
-export function createCodeSceneData(bounds: {xMin: number, yMin: number, xMax: number, yMax: number},
+export function createCodeSceneData(bounds: SceneBounds,
                                     scrollFraction: number,
                                     fontSize: number,
                                     source: Source,

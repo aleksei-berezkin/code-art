@@ -4,6 +4,7 @@
     "exclude": ["node_modules/*", "__sapper__/*", "static/*"],
     "compilerOptions": {
         "esModuleInterop": true,
+        "lib": ["dom", "esnext"],
         "strict": true
     }
 }

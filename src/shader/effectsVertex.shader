@@ -1,7 +1,11 @@
 #version 300 es
 
 uniform mat4 u_tx;
+
+uniform float u_xMax;
+uniform float u_yMax;
 uniform float u_zBase;
+
 uniform float u_focalLength;
 uniform float u_distanceToSensor;
 uniform float u_lensDiameter;
@@ -9,7 +13,7 @@ uniform float u_lensDiameter;
 in vec4 a_position;
 
 out vec2 v_texCoords;
-out float v_blurRadius;
+out vec2 v_blurTexCoordsRadii;
 out float v_w;
 
 void main() {
@@ -21,14 +25,22 @@ void main() {
 
     // x: -1..+1 -> 0..1
     // y: -1..+1 -> 1..0
-    float texX = (gl_Position.x + 1.0) / 2.0;
-    float texY = 1.0 - (gl_Position.y + 1.0) / 2.0;
-    v_texCoords = vec2(texX, texY);
+    v_texCoords = vec2(
+        (gl_Position.x + 1.0) / 2.0,
+        1.0 - (gl_Position.y + 1.0) / 2.0
+    );
 
-    float distanceToSubject = v_w * u_zBase;
+    float distanceToSubject = w * u_zBase;
     float distanceToImage = 1.0 / (1.0 / u_focalLength - 1.0 / distanceToSubject);
     // May be negative - this guarantes pass through 0.0
-    v_blurRadius = u_lensDiameter / 2.0 / distanceToImage * (u_distanceToSensor - distanceToImage);
+    float blurRadius = u_lensDiameter / 2.0 / distanceToImage * (u_distanceToSensor - distanceToImage);
+
+    // x: -xMax..+xMax -> -.5..+.5
+    // y: -yMax..+yMax -> +.5..-.5
+    v_blurTexCoordsRadii = vec2(
+        blurRadius / u_xMax / 2.0,
+        blurRadius / u_yMax / -2.0
+    );
 
     v_w = w;
 }
