@@ -53,12 +53,11 @@ export function drawEffectsScene(canvasEl: HTMLCanvasElement, codeSceneDrawn: Co
 
     gl.uniform1f(gl.getUniformLocation(program, 'u_blurKernelWeight'), gaussianBlurKernelWeight);
 
-    gl.uniform1f(gl.getUniformLocation(program, 'u_glowRadius'), 1.5);
+    gl.uniform1f(gl.getUniformLocation(program, 'u_glowRadius'), 4);
 
-    // TODO combine luminance and colorMul
-    gl.uniform1f(gl.getUniformLocation(program, 'u_glowLuminance'), 1.1);
+    gl.uniform3fv(gl.getUniformLocation(program, 'u_glowColorMul'), [.3, .1, .4]);
 
-    gl.uniform3fv(gl.getUniformLocation(program, 'u_glowColorMul'), [1.5, 1, 1.7]);
+    gl.uniform1f(gl.getUniformLocation(program, 'u_colorAmplification'), 2);
 
     gl.uniform1i(gl.getUniformLocation(program, 'u_mode'), 0);
 
