@@ -1,6 +1,4 @@
-export type RGB = [number, number, number];
-
-export const rgbSize = 3;
+import type { RGB } from './util/RGB';
 
 export type ColorScheme = {
     background: RGB,

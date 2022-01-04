@@ -2,12 +2,12 @@
 import * as acornLoose from 'acorn-loose';
 import type { Source } from './souceCode';
 import type { ColorScheme } from './ColorScheme';
-import type { RGB } from './ColorScheme';
 import type { Options, Token } from 'acorn';
 import * as acorn from 'acorn';
 import * as acornWalk from 'acorn-walk';
 import type { ColorSchemeName } from './colorSchemes';
 import { colorSchemes } from './colorSchemes';
+import type {RGB} from "./util/RGB";
 
 export type CodeColorization = {
     bgColor: RGB,

@@ -7,12 +7,13 @@ import { createCodeSceneData } from './createCodeSceneData';
 import { vertexSize2d } from './util/rect';
 import type { GlyphRaster } from './rasterizeFont';
 import type { Source } from './souceCode';
-import { RGB, rgbSize } from './ColorScheme';
-import type { CodeColorization } from './colorizeCode';
 import { uploadArrayToAttribute } from './util/uploadArrayToAttribute';
 import { uploadTexture } from './util/uploadTexture';
 import { calcExtensions, Extensions, getSceneBounds, makePixelSpace, PixelSpace } from './PixelSpace';
 import { dpr } from './util/dpr';
+import { colorizeCode } from "./colorizeCode";
+import type { ColorSchemeName } from "./colorSchemes";
+import {RGB, rgbSize} from "./util/RGB";
 
 export type CodeSceneDrawn = {
     pixelSpace: PixelSpace,
@@ -26,7 +27,6 @@ export function drawCodeScene(canvasEl: HTMLCanvasElement,
                               rasterCanvasEl: HTMLCanvasElement,
                               params: ImgParams,
                               source: Source,
-                              codeColorization: CodeColorization,
                               glyphRaster: GlyphRaster,
 ): CodeSceneDrawn {
     const gl = canvasEl.getContext('webgl2');
@@ -34,9 +34,9 @@ export function drawCodeScene(canvasEl: HTMLCanvasElement,
         throw new Error('webgl2 not supported');
     }
 
-    const program = createProgram(vertexShaderSource, fragmentShaderSource, gl);
+    const codeColorization = colorizeCode(source, params['color scheme'].val as ColorSchemeName);
 
-    const pSp = makePixelSpace(canvasEl.width / dpr, canvasEl.height / dpr);
+    const pSp = makePixelSpace(canvasEl.width / dpr, canvasEl.height / dpr, 10 ** (params.blur.val - 2 /* -2 because percent */));
 
     const xRotAngle = -params['angle x'].val;
     const yRotAngle = -params['angle y'].val;
@@ -52,6 +52,8 @@ export function drawCodeScene(canvasEl: HTMLCanvasElement,
         codeColorization,
         glyphRaster,
     );
+
+    const program = createProgram(vertexShaderSource, fragmentShaderSource, gl);
 
     const verticesArray = new Float32Array(sceneData.vertices);
     uploadArrayToAttribute('a_position', verticesArray, vertexSize2d, program, gl);

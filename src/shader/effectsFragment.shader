@@ -13,7 +13,8 @@ uniform sampler2D u_image;
 uniform float[_BLUR_K_SZ_ * _BLUR_K_SZ_] u_blurKernel;
 uniform float u_blurKernelWeight;
 
-uniform vec3 u_glowColorMul;
+uniform vec3 u_glowColorAddition;
+uniform float u_glowColorAmplification;
 uniform float u_fade;
 
 uniform vec3 u_bg;
@@ -47,9 +48,9 @@ void main() {
         vec3 selfRgb = texture(u_image, v_texCoords).rgb;
 
         outColor = vec4(
-            screen(screen(blurred.r, u_glowColorMul.r), u_bg.r + (selfRgb.r - u_bg.r) * u_colorAmplification),
-            screen(screen(blurred.g, u_glowColorMul.g), u_bg.g + (selfRgb.g - u_bg.g) * u_colorAmplification),
-            screen(screen(blurred.b, u_glowColorMul.b), u_bg.b + (selfRgb.b - u_bg.b) * u_colorAmplification),
+            screen(screen(blurred.r * u_glowColorAmplification, u_glowColorAddition.r), u_bg.r + (selfRgb.r - u_bg.r) * u_colorAmplification),
+            screen(screen(blurred.g * u_glowColorAmplification, u_glowColorAddition.g), u_bg.g + (selfRgb.g - u_bg.g) * u_colorAmplification),
+            screen(screen(blurred.b * u_glowColorAmplification, u_glowColorAddition.b), u_bg.b + (selfRgb.b - u_bg.b) * u_colorAmplification),
             1
         );
         

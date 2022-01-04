@@ -7,16 +7,18 @@ import { uploadArrayToAttribute } from './util/uploadArrayToAttribute';
 import { uploadTexture } from './util/uploadTexture';
 import {blurKernel, blurKernelSize, blurKernelWeight, gaussianBlurKernel, gaussianBlurKernelWeight} from './blurKernel';
 import { createEffectsGrid } from './createEffectsGrid';
+import type { ImgParams } from './ImgParams';
+import {hexToRgb} from "./util/RGB";
 
 const fragmentShaderSource = fragmentShaderSourceWithMacro
     .replaceAll('_BLUR_K_SZ_', String(blurKernelSize));
 
-export function drawEffectsScene(canvasEl: HTMLCanvasElement, codeSceneDrawn: CodeSceneDrawn, fontSize: number) {
+export function drawEffectsScene(canvasEl: HTMLCanvasElement, codeSceneDrawn: CodeSceneDrawn, imgParams: ImgParams) {
     const gl = canvasEl.getContext('webgl2')!;
 
     const program = createProgram(vertexShaderSource, fragmentShaderSource, gl);
 
-    const gridVertices = createEffectsGrid(codeSceneDrawn.pixelSpace, codeSceneDrawn.extensions, fontSize);
+    const gridVertices = createEffectsGrid(codeSceneDrawn.pixelSpace, codeSceneDrawn.extensions, imgParams['font size'].val);
     uploadArrayToAttribute('a_position', new Float32Array(gridVertices), vertexSize2d, program, gl);
 
     uploadTexture(canvasEl, gl.TEXTURE0, gl);
@@ -53,11 +55,13 @@ export function drawEffectsScene(canvasEl: HTMLCanvasElement, codeSceneDrawn: Co
 
     gl.uniform1f(gl.getUniformLocation(program, 'u_blurKernelWeight'), gaussianBlurKernelWeight);
 
-    gl.uniform1f(gl.getUniformLocation(program, 'u_glowRadius'), 4);
+    gl.uniform1f(gl.getUniformLocation(program, 'u_glowRadius'), imgParams['font size'].val * imgParams['glow radius'].val / 100);
 
-    gl.uniform3fv(gl.getUniformLocation(program, 'u_glowColorMul'), [.3, .1, .4]);
+    gl.uniform1f(gl.getUniformLocation(program, 'u_glowColorAmplification'), imgParams['glow color amplification'].val);
 
-    gl.uniform1f(gl.getUniformLocation(program, 'u_colorAmplification'), 2);
+    gl.uniform3fv(gl.getUniformLocation(program, 'u_glowColorAddition'), hexToRgb(imgParams['glow color addition'].val));
+
+    gl.uniform1f(gl.getUniformLocation(program, 'u_colorAmplification'), imgParams['color amplification'].val);
 
     gl.uniform1i(gl.getUniformLocation(program, 'u_mode'), 0);
 

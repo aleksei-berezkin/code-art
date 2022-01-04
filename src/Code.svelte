@@ -7,6 +7,7 @@
         width: 2048px;
     }
 
+    
     section {
         align-items: center;
         display: flex;
@@ -47,7 +48,7 @@
         text-align: right;
     }
 
-    .color-scheme-wr {
+    .choices-wr {
         align-items: center;
         display: flex;
         flex-direction: row;
@@ -55,9 +56,16 @@
         margin-bottom: .5em;
     }
 
-    .color-scheme-select {
-        margin-right: 4em;
+    .choices-select {
+        font: inherit;
+        margin: 0 4em 0.5em 0;
+        padding: 0.4em;
         width: 240px;
+    }
+
+    .input-color-wr {
+        width: calc(240px + 4em);
+        text-align: left;
     }
 
     .code-canvas {
@@ -82,10 +90,10 @@
             {/if}
 
             {#if p[1].type === 'choices'}
-                <div class='color-scheme-wr'>
-                    <label class='color-scheme-label' for={toId(p[0])}>{p[0]}</label>
+                <div class='choices-wr'>
+                    <label class='choices-label' for={toId(p[0])}>{p[0]}</label>
                     <!--suppress XmlDuplicatedId -->
-                    <select class='color-scheme-select' id={toId(p[0])} data-k={p[0]} on:change={handleChoiceChange}>
+                    <select class='choices-select' id={toId(p[0])} data-k={p[0]} on:change={handleChoiceChange}>
                         {#each p[1].choices as choice}
                             {#if p[1].val === choice}
                                 <option value={choice} selected>{choice}</option>
@@ -97,6 +105,15 @@
                 </div>
             {/if}
 
+            {#if p[1].type === 'color'}
+                <div class='choices-wr'>
+                    <label for={toId(p[0])}>{p[0]}</label>
+                    <div class='input-color-wr'>
+                        <!--suppress XmlDuplicatedId -->
+                        <input id={toId(p[0])} data-k={p[0]} type='color' class='input-color' value='{p[1].val}' on:change={handleColorChange}/>
+                    </div>
+                </div>
+            {/if}
         {/each}
     </div>
     <canvas class='code-canvas' bind:this={ codeCanvasEl }></canvas>
@@ -106,30 +123,30 @@
 
 <script lang='ts'>
     import { onMount } from 'svelte';
-    import {ImgParams, ParamChoiceKey, ParamKey, ParamSliderKey} from './ImgParams';
+    import {ImgParams, ParamChoiceKey, ParamColorKey, ParamKey, ParamSliderKey} from './ImgParams';
     import { drawCodeScene } from './drawCodeScene';
     import { rasterizeFont, GlyphRaster } from './rasterizeFont';
-    import {getSource, Source, SourceCodeName, sourceCodeNames} from './souceCode';
+    import { getSource, Source, SourceCodeName, sourceCodeNames } from './souceCode';
     import { dpr } from './util/dpr';
     import { degToRag } from './util/degToRad';
-    import { ColorSchemeName, colorSchemeNames } from './colorSchemes';
+    import { colorSchemeNames } from './colorSchemes';
     import { randomItem } from './util/randomItem';
-    import { colorizeCode } from './colorizeCode';
     import { drawEffectsScene } from './drawEffectsScene';
+    import {rgbToHex} from "./util/RGB";
 
     function toId(k: string) {
         return 'code-scene-control-' + k.replace(/\s/g, '-');
     }
 
     function toLabelNum(k: ParamKey, val: number) {
-        let s = '';
+        let s;
         if (k === 'angle x' || k === 'angle y' || k === 'angle z') {
             s = `${val / Math.PI * 180}\u00B0`;
-        }
-        if (k === 'translate x' || k === 'translate y' || k === 'translate z' || k === 'scroll') {
+        } else if (k === 'translate x' || k === 'translate y' || k === 'translate z' || k === 'scroll' || k === 'glow radius') {
             s = `${val}%`;
-        }
-        if (k === 'font size') {
+        } else if (k === 'blur') {
+            s = `${10**val}%`;
+        } else {
             s = String(val);
         }
         return s.replace(/-/, '\u2212');
@@ -198,9 +215,21 @@
             val: randomItem(sourceCodeNames),
             choices: sourceCodeNames,
         },
-        'glow color': {
+        'glow color amplification': {
+            type: 'slider',
+            min: 0,
+            val: .8 + Math.random() * .3,
+            max: 3,
+        },
+        'glow color addition': {
             type: 'color',
-            val: '#201008',
+            val: rgbToHex(Array.from({length: 3}).map(() => Math.random() * .2)),
+        },
+        'glow radius': {
+            type: 'slider',
+            min: 0,
+            val: 5 * Math.random() * 10,
+            max: 100,
         },
         'fade in distortion': {
             type: 'color',
@@ -209,6 +238,19 @@
         'fade out distortion': {
             type: 'color',
             val: '#000000',
+        },
+        'blur': {
+            type: 'slider',
+            // % log10
+            min: 1,
+            val: 1.7 + Math.random() * .6,
+            max: 3,
+        },
+        'color amplification': {
+            type: 'slider',
+            min: 0,
+            val: 1 + Math.random() * .2,
+            max: 3,
         },
     };
 
@@ -253,6 +295,15 @@
         });
     }
 
+    function handleColorChange(e: Event) {
+        const inputEl = (e.target as HTMLInputElement);
+        const k = inputEl.dataset.k as ParamColorKey;
+        imgParams[k].val = inputEl.value;
+        _getSource().then(src => {
+            _drawScene(src);
+        });
+    }
+
     function _getSource() {
         return getSource(imgParams['source'].val as SourceCodeName);
     }
@@ -262,7 +313,7 @@
     }
 
     function _drawScene(source: Source) {
-        const codeSceneDrawn = drawCodeScene(codeCanvasEl, rasterCanvasEl, imgParams, source, colorizeCode(source, imgParams['color scheme'].val as ColorSchemeName), glyphRaster);
-        drawEffectsScene(codeCanvasEl, codeSceneDrawn, imgParams['font size'].val);
+        const codeSceneDrawn = drawCodeScene(codeCanvasEl, rasterCanvasEl, imgParams, source, glyphRaster);
+        drawEffectsScene(codeCanvasEl, codeSceneDrawn, imgParams);
     }
 </script>

@@ -18,7 +18,7 @@ export type PixelSpace = ReturnType<typeof makePixelSpace>;
  * An object at z=+zBase (2*zBase distance from the camera) is twice smaller than that
  * at z=0, so w = (zBase + z) / zBase = 1 + z / zBase
  */
-export function makePixelSpace(w: number, h: number) {
+export function makePixelSpace(w: number, h: number, blurFactor: number) {
     const viewAngleV = degToRag(115);
     const zBase = h / 2 / Math.tan(viewAngleV / 2);
     const viewAngleH = Math.atan(w / 2 / zBase) * 2;
@@ -39,7 +39,7 @@ export function makePixelSpace(w: number, h: number) {
         zSpan: zMax - zMin,
         // See figures/04_Optics.png
         optics: {
-            lensDiameter: .08 * w,
+            lensDiameter: .08 * w * blurFactor,
             focalLength: .04 * w,
         },
     };

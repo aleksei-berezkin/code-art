@@ -27,6 +27,10 @@ export type ParamSliderKey =
     | 'translate z'
     | 'scroll'
     | 'font size'
+    | 'blur'
+    | 'glow radius'
+    | 'color amplification'
+    | 'glow color amplification'
     ;
 
 export type ParamChoiceKey =
@@ -35,7 +39,7 @@ export type ParamChoiceKey =
     ;
 
 export type ParamColorKey =
-    'glow color'
+    'glow color addition'
     | 'fade in distortion'
     | 'fade out distortion'
     ;

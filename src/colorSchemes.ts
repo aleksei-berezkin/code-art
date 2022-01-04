@@ -1,4 +1,4 @@
-import type { RGB } from './ColorScheme';
+import {hexToRgb} from "./util/RGB";
 
 export const colorSchemes = {
     'VS Code Dark+': {
@@ -83,11 +83,3 @@ export const colorSchemes = {
 export type ColorSchemeName = keyof typeof colorSchemes;
 
 export const colorSchemeNames = Object.keys(colorSchemes) as ColorSchemeName[];
-
-function hexToRgb(hex: string): RGB {
-    const grp = /#([0-9a-fA-F]{6})/.exec(hex)![1];
-    const r = parseInt(grp.slice(0, 2), 16) / 256;
-    const g = parseInt(grp.slice(2, 4), 16) / 256;
-    const b = parseInt(grp.slice(4, 6), 16) / 256;
-    return [r, g, b];
-}
