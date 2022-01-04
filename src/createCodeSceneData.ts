@@ -1,6 +1,6 @@
 import { rect2d, vertexSize2d } from './util/rect';
 import type { GlyphRaster } from './rasterizeFont';
-import type { Source } from './getSource';
+import type { Source } from './souceCode';
 import { pluck } from './util/pluck';
 import type { CodeColorization } from './colorizeCode';
 import type { SceneBounds } from './PixelSpace';

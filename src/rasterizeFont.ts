@@ -1,5 +1,5 @@
 import { dpr } from './util/dpr';
-import type {Source} from "./getSource";
+import type {Source} from "./souceCode";
 
 export type GlyphRaster = {
     glyphs: Map<string, GlyphMetrics>,

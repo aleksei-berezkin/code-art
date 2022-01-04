@@ -109,10 +109,10 @@
     import {ImgParams, ParamChoiceKey, ParamKey, ParamSliderKey} from './ImgParams';
     import { drawCodeScene } from './drawCodeScene';
     import { rasterizeFont, GlyphRaster } from './rasterizeFont';
-    import { getSource, Source, sourceCodeNames } from './getSource';
+    import {getSource, Source, SourceCodeName, sourceCodeNames} from './souceCode';
     import { dpr } from './util/dpr';
     import { degToRag } from './util/degToRad';
-    import {ColorSchemeName, colorSchemeNames} from './colorSchemes';
+    import { ColorSchemeName, colorSchemeNames } from './colorSchemes';
     import { randomItem } from './util/randomItem';
     import { colorizeCode } from './colorizeCode';
     import { drawEffectsScene } from './drawEffectsScene';
@@ -137,8 +137,6 @@
    
     let codeCanvasEl: HTMLCanvasElement;
     let rasterCanvasEl: HTMLCanvasElement;
-
-    const source = getSource();
 
     const imgParams: ImgParams = {
         'angle x': {
@@ -218,7 +216,7 @@
 
     onMount(() => {
         handleResize();
-        source.then(src => {
+        _getSource().then(src => {
             _rasterizeFont(src);
             _drawScene(src);
         });
@@ -234,7 +232,7 @@
         const inputEl = (e.target as HTMLInputElement);
         const k = inputEl.dataset.k as ParamSliderKey;
         imgParams[k].val = Number(inputEl.value);
-        source.then(src => {
+        _getSource().then(src => {
             if (k === 'font size') {
                 _rasterizeFont(src);
             }
@@ -247,7 +245,16 @@
         const k = selectEl.dataset.k as ParamChoiceKey;
         selectEl.selectedIndex
         imgParams[k].val = imgParams[k].choices[selectEl.selectedIndex];
-        source.then(src => _drawScene(src));
+        _getSource().then(src => {
+            if (k === 'source') {
+                _rasterizeFont(src);
+            }
+            _drawScene(src);
+        });
+    }
+
+    function _getSource() {
+        return getSource(imgParams['source'].val as SourceCodeName);
     }
 
     function _rasterizeFont(source: Source) {

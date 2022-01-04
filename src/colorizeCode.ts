@@ -1,6 +1,6 @@
 // @ts-ignore
 import * as acornLoose from 'acorn-loose';
-import type { Source } from './getSource';
+import type { Source } from './souceCode';
 import type { ColorScheme } from './ColorScheme';
 import type { RGB } from './ColorScheme';
 import type { Options, Token } from 'acorn';

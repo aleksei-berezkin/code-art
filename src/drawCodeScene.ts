@@ -6,7 +6,7 @@ import { asMat4, getRotateXMat, getRotateYMat, getRotateZMat, getTranslateMat, M
 import { createCodeSceneData } from './createCodeSceneData';
 import { vertexSize2d } from './util/rect';
 import type { GlyphRaster } from './rasterizeFont';
-import type { Source } from './getSource';
+import type { Source } from './souceCode';
 import { RGB, rgbSize } from './ColorScheme';
 import type { CodeColorization } from './colorizeCode';
 import { uploadArrayToAttribute } from './util/uploadArrayToAttribute';
