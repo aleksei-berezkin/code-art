@@ -1,7 +1,7 @@
 import { createProgram } from './util/createProgram';
 import vertexShaderSource from './shader/codeVertex.shader';
 import fragmentShaderSource from './shader/codeFragment.shader';
-import type { Transformations } from './Transformations';
+import type { ImgParams } from './ImgParams';
 import { asMat4, getRotateXMat, getRotateYMat, getRotateZMat, getTranslateMat, Mat4, mul } from './util/matrices';
 import { createCodeSceneData } from './createCodeSceneData';
 import { vertexSize2d } from './util/rect';
@@ -24,7 +24,7 @@ export type CodeSceneDrawn = {
 // TODO render to texture
 export function drawCodeScene(canvasEl: HTMLCanvasElement,
                               rasterCanvasEl: HTMLCanvasElement,
-                              tfs: Transformations,
+                              params: ImgParams,
                               source: Source,
                               codeColorization: CodeColorization,
                               glyphRaster: GlyphRaster,
@@ -38,16 +38,16 @@ export function drawCodeScene(canvasEl: HTMLCanvasElement,
 
     const pSp = makePixelSpace(canvasEl.width / dpr, canvasEl.height / dpr);
 
-    const xRotAngle = -tfs['angle x'].val;
-    const yRotAngle = -tfs['angle y'].val;
-    const zRotAngle = tfs['angle z'].val;
+    const xRotAngle = -params['angle x'].val;
+    const yRotAngle = -params['angle y'].val;
+    const zRotAngle = params['angle z'].val;
 
     const extensions = calcExtensions(pSp, xRotAngle, yRotAngle, zRotAngle);
 
     const sceneData = createCodeSceneData(
         getSceneBounds(pSp, extensions),
-        tfs.scroll.val / 100,
-        tfs['font size'].val,
+        params.scroll.val / 100,
+        params['font size'].val,
         source,
         codeColorization,
         glyphRaster,
@@ -73,9 +73,9 @@ export function drawCodeScene(canvasEl: HTMLCanvasElement,
     const txMatPixels =
         mul(
             getTranslateMat(
-                tfs['translate x'].val / 100 * pSp.w,
-                tfs['translate y'].val / 100 * pSp.h,
-                tfs['translate z'].val / 100 * pSp.zBase,
+                params['translate x'].val / 100 * pSp.w,
+                params['translate y'].val / 100 * pSp.h,
+                params['translate z'].val / 100 * pSp.zBase,
             ),
             getRotateXMat(xRotAngle),
             getRotateYMat(yRotAngle),

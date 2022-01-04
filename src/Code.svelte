@@ -70,22 +70,34 @@
 <canvas class='rasterize-font-canvas' bind:this={ rasterCanvasEl } width='2048'></canvas>
 <section>
     <div class='sliders'>
-        {#each Object.entries(transformations) as tx}
-            <div class='slider-wr'>
-                <label class='slider-label' for={toId(tx[0])}>{tx[0]}</label>
-                <div class='slider-min'>{toLabelNum(tx[0], tx[1].min)}</div>
-                <input class='slider-slider' id={toId(tx[0])} data-tx={tx[0]} type='range' min='{tx[1].min}' max='{tx[1].max}' step='any' value='{tx[1].val}' on:input={handleTxChange}/>
-                <div class='slider-max'>{toLabelNum(tx[0], tx[1].max)}</div>
-            </div>
+        {#each Object.entries(imgParams) as p}
+            {#if p[1].type === 'slider'}
+                <div class='slider-wr'>
+                    <label class='slider-label' for={toId(p[0])}>{p[0]}</label>
+                    <div class='slider-min'>{toLabelNum(p[0], p[1].min)}</div>
+                    <!--suppress XmlDuplicatedId -->
+                    <input class='slider-slider' id={toId(p[0])} data-k={p[0]} type='range' min='{p[1].min}' max='{p[1].max}' step='any' value='{p[1].val}' on:input={handleSliderChange}/>
+                    <div class='slider-max'>{toLabelNum(p[0], p[1].max)}</div>
+                </div>
+            {/if}
+
+            {#if p[1].type === 'choices'}
+                <div class='color-scheme-wr'>
+                    <label class='color-scheme-label' for={toId(p[0])}>{p[0]}</label>
+                    <!--suppress XmlDuplicatedId -->
+                    <select class='color-scheme-select' id={toId(p[0])} data-k={p[0]} on:change={handleChoiceChange}>
+                        {#each p[1].choices as choice}
+                            {#if p[1].val === choice}
+                                <option value={choice} selected>{choice}</option>
+                            {:else}
+                                <option value={choice}>{choice}</option>
+                            {/if}
+                        {/each}
+                    </select>
+                </div>
+            {/if}
+
         {/each}
-        <div class='color-scheme-wr'>
-            <label class='color-scheme-label' for={toId('scheme')}>color scheme</label>
-            <select class='color-scheme-select' id={toId('scheme')} bind:value={selectedColorSchemeName} on:change={handleColorSchemeChange}>
-                {#each colorSchemeNames as scheme}
-                    <option value={scheme}>{scheme}</option>
-                {/each}
-            </select>
-        </div>
     </div>
     <canvas class='code-canvas' bind:this={ codeCanvasEl }></canvas>
 </section>
@@ -94,13 +106,13 @@
 
 <script lang='ts'>
     import { onMount } from 'svelte';
-    import { Transformations, TxType } from './Transformations';
+    import {ImgParams, ParamChoiceKey, ParamKey, ParamSliderKey} from './ImgParams';
     import { drawCodeScene } from './drawCodeScene';
-    import { rasterizeFont, GlyphRaster} from './rasterizeFont';
-    import { getSource, Source } from './getSource';
+    import { rasterizeFont, GlyphRaster } from './rasterizeFont';
+    import { getSource, Source, sourceCodeNames } from './getSource';
     import { dpr } from './util/dpr';
     import { degToRag } from './util/degToRad';
-    import { colorSchemeNames } from './colorSchemes';
+    import {ColorSchemeName, colorSchemeNames} from './colorSchemes';
     import { randomItem } from './util/randomItem';
     import { colorizeCode } from './colorizeCode';
     import { drawEffectsScene } from './drawEffectsScene';
@@ -109,15 +121,15 @@
         return 'code-scene-control-' + k.replace(/\s/g, '-');
     }
 
-    function toLabelNum(tx: TxType, val: number) {
+    function toLabelNum(k: ParamKey, val: number) {
         let s = '';
-        if (tx === 'angle x' || tx === 'angle y' || tx === 'angle z') {
+        if (k === 'angle x' || k === 'angle y' || k === 'angle z') {
             s = `${val / Math.PI * 180}\u00B0`;
         }
-        if (tx === 'translate x' || tx === 'translate y' || tx === 'translate z' || tx === 'scroll') {
+        if (k === 'translate x' || k === 'translate y' || k === 'translate z' || k === 'scroll') {
             s = `${val}%`;
         }
-        if (tx === 'font size') {
+        if (k === 'font size') {
             s = String(val);
         }
         return s.replace(/-/, '\u2212');
@@ -128,51 +140,79 @@
 
     const source = getSource();
 
-    const transformations: Transformations = {
+    const imgParams: ImgParams = {
         'angle x': {
+            type: 'slider',
             min: degToRag(-20),
             val: degToRag(-15) + Math.random() * degToRag(30),
             max: degToRag(20),
         },
         'angle y': {
+            type: 'slider',
             min: degToRag(-20),
             val: degToRag(-15) + Math.random() * degToRag(30),
             max: degToRag(20),
         },
         'angle z': {
+            type: 'slider',
             min: -Math.PI / 2,
             val: (-.05 + Math.random() * .1) * Math.PI / 2,
             max: Math.PI / 2,
         },
         'translate x': {
+            type: 'slider',
             // percent
             min: -100,
             val: 0,
             max: 100,
         },
         'translate y': {
+            type: 'slider',
             min: -100,
             val: 0,
             max: 100,
         },
         'translate z': {
+            type: 'slider',
             min: -100,
             val: 0,
             max: 100,
         },
         'scroll': {
+            type: 'slider',
             min: 0,
             val: Math.random() * 100,
             max: 100,
         },
         'font size': {
+            type: 'slider',
             min: 5,
             val: 36,
             max: 120,
-        }
+        },
+        'color scheme': {
+            type: 'choices',
+            val: randomItem(colorSchemeNames),
+            choices: colorSchemeNames,
+        },
+        'source': {
+            type: 'choices',
+            val: randomItem(sourceCodeNames),
+            choices: sourceCodeNames,
+        },
+        'glow color': {
+            type: 'color',
+            val: '#201008',
+        },
+        'fade in distortion': {
+            type: 'color',
+            val: '#000000',
+        },
+        'fade out distortion': {
+            type: 'color',
+            val: '#000000',
+        },
     };
-
-    let selectedColorSchemeName = randomItem(colorSchemeNames);
 
     let glyphRaster: GlyphRaster;
 
@@ -190,28 +230,32 @@
         codeCanvasEl.height = canvasRect.height * dpr;
     }
 
-    function handleTxChange(e: Event) {
+    function handleSliderChange(e: Event) {
         const inputEl = (e.target as HTMLInputElement);
-        const tx = inputEl.dataset.tx as TxType;
-        transformations[tx].val = Number(inputEl.value);
+        const k = inputEl.dataset.k as ParamSliderKey;
+        imgParams[k].val = Number(inputEl.value);
         source.then(src => {
-            if (tx === 'font size') {
+            if (k === 'font size') {
                 _rasterizeFont(src);
             }
             _drawScene(src);
         });
     }
 
-    function handleColorSchemeChange() {
+    function handleChoiceChange(e: Event) {
+        const selectEl = (e.target as HTMLSelectElement);
+        const k = selectEl.dataset.k as ParamChoiceKey;
+        selectEl.selectedIndex
+        imgParams[k].val = imgParams[k].choices[selectEl.selectedIndex];
         source.then(src => _drawScene(src));
     }
 
     function _rasterizeFont(source: Source) {
-        glyphRaster = rasterizeFont(source, rasterCanvasEl, transformations['font size'].val);
+        glyphRaster = rasterizeFont(source, rasterCanvasEl, imgParams['font size'].val);
     }
 
     function _drawScene(source: Source) {
-        const codeSceneDrawn = drawCodeScene(codeCanvasEl, rasterCanvasEl, transformations, source, colorizeCode(source, selectedColorSchemeName), glyphRaster);
-        drawEffectsScene(codeCanvasEl, codeSceneDrawn, transformations['font size'].val);
+        const codeSceneDrawn = drawCodeScene(codeCanvasEl, rasterCanvasEl, imgParams, source, colorizeCode(source, imgParams['color scheme'].val as ColorSchemeName), glyphRaster);
+        drawEffectsScene(codeCanvasEl, codeSceneDrawn, imgParams['font size'].val);
     }
 </script>

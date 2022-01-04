@@ -7,6 +7,8 @@ export type Source = {
     linesOffsets: number[], // value = pos in text
 }
 
+export const sourceCodeNames = ['React DOM min'];
+
 export async function getSource(): Promise<Source> {
     if (source) {
         return source;
