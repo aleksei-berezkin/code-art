@@ -142,7 +142,7 @@
         let s;
         if (k === 'angle x' || k === 'angle y' || k === 'angle z') {
             s = `${val / Math.PI * 180}\u00B0`;
-        } else if (k === 'translate x' || k === 'translate y' || k === 'translate z' || k === 'scroll' || k === 'glow radius') {
+        } else if (k === 'translate x' || k === 'translate y' || k === 'translate z' || k === 'scroll' || k === 'glow radius' || k === 'glow color shift') {
             s = `${val}%`;
         } else if (k === 'blur') {
             s = `${10**val}%`;
@@ -215,20 +215,26 @@
             val: randomItem(sourceCodeNames),
             choices: sourceCodeNames,
         },
-        'glow color amplification': {
+        'glow amplification': {
             type: 'slider',
             min: 0,
-            val: .8 + Math.random() * .3,
-            max: 3,
+            val: 1 + Math.random() * 1.5,
+            max: 4,
         },
-        'glow color addition': {
+        'glow color shift': {
+            type: 'slider',
+            min: 0,
+            val: Math.random() * 100,
+            max: 100,
+        },
+        'glow shifted color': {
             type: 'color',
-            val: rgbToHex(Array.from({length: 3}).map(() => Math.random() * .2)),
+            val: rgbToHex(Array.from({length: 3}).map(() => Math.random())),
         },
         'glow radius': {
             type: 'slider',
             min: 0,
-            val: 5 * Math.random() * 10,
+            val: 20 + Math.random() * 40,
             max: 100,
         },
         'fade in distortion': {

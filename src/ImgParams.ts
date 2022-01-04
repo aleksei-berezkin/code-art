@@ -30,7 +30,8 @@ export type ParamSliderKey =
     | 'blur'
     | 'glow radius'
     | 'color amplification'
-    | 'glow color amplification'
+    | 'glow amplification'
+    | 'glow color shift'
     ;
 
 export type ParamChoiceKey =
@@ -39,7 +40,7 @@ export type ParamChoiceKey =
     ;
 
 export type ParamColorKey =
-    'glow color addition'
+    'glow shifted color'
     | 'fade in distortion'
     | 'fade out distortion'
     ;

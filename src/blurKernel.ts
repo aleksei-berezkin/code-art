@@ -1,4 +1,4 @@
-export const blurKernelSize = 11;
+export const blurKernelSize = 15;
 
 const center = Math.floor(blurKernelSize / 2);
 const radius = center;

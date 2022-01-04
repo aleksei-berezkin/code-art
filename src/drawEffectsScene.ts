@@ -55,11 +55,13 @@ export function drawEffectsScene(canvasEl: HTMLCanvasElement, codeSceneDrawn: Co
 
     gl.uniform1f(gl.getUniformLocation(program, 'u_blurKernelWeight'), gaussianBlurKernelWeight);
 
-    gl.uniform1f(gl.getUniformLocation(program, 'u_glowRadius'), imgParams['font size'].val * imgParams['glow radius'].val / 100);
+    gl.uniform1f(gl.getUniformLocation(program, 'u_glowRadius'), imgParams['font size'].val * imgParams['glow radius'].val / 200);
 
-    gl.uniform1f(gl.getUniformLocation(program, 'u_glowColorAmplification'), imgParams['glow color amplification'].val);
+    gl.uniform1f(gl.getUniformLocation(program, 'u_glowAmplification'), imgParams['glow amplification'].val);
 
-    gl.uniform3fv(gl.getUniformLocation(program, 'u_glowColorAddition'), hexToRgb(imgParams['glow color addition'].val));
+    gl.uniform1f(gl.getUniformLocation(program, 'u_glowColorShift'), imgParams['glow color shift'].val / 100);
+
+    gl.uniform3fv(gl.getUniformLocation(program, 'u_glowShiftedColor'), hexToRgb(imgParams['glow shifted color'].val));
 
     gl.uniform1f(gl.getUniformLocation(program, 'u_colorAmplification'), imgParams['color amplification'].val);
 
