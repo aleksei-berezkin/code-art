@@ -48,10 +48,9 @@ void main() {
     vec3 blurred = vec3(0);
     for (int row = 0; row < _BLUR_K_SZ_; row++) {
         for (int col = 0; col < _BLUR_K_SZ_; col++) {
-            float deltaX = -v_blurTexCoordsRadii.x + 2.0 * v_blurTexCoordsRadii.x * float(row) / float(_BLUR_K_SZ_ - 1);
-            float deltaY = -v_blurTexCoordsRadii.y + 2.0 * v_blurTexCoordsRadii.y * float(col) / float(_BLUR_K_SZ_ - 1);
-            vec2 tc = v_texCoords + vec2(deltaX, deltaY);
-            blurred += u_blurKernel[row * _BLUR_K_SZ_ + col] * abs(texture(u_image, tc).rgb - u_bg);
+            vec2 delta = -v_blurTexCoordsRadii + 2.0 * v_blurTexCoordsRadii * vec2(row, col) / float(_BLUR_K_SZ_ - 1);
+            blurred += u_blurKernel[row * _BLUR_K_SZ_ + col]
+                * (texture(u_image, v_texCoords + delta).rgb - u_bg);
         }
     }
 
