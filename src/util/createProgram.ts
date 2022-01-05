@@ -1,4 +1,9 @@
 export function createProgram(vertexShaderSource: string, fragmentShaderSource: string, gl: WebGL2RenderingContext) {
+    const cacheKey = vertexShaderSource + fragmentShaderSource;
+    if (cache.has(cacheKey)) {
+        return cache.get(cacheKey)!;
+    }
+
     const program = gl.createProgram();
     if (!program) {
         throw new Error('Cannot create program');
@@ -9,6 +14,7 @@ export function createProgram(vertexShaderSource: string, fragmentShaderSource: 
     gl.linkProgram(program);
     const success = gl.getProgramParameter(program, gl.LINK_STATUS);
     if (success) {
+        cache.set(cacheKey, program);
         return program;
     }
 
@@ -18,6 +24,7 @@ export function createProgram(vertexShaderSource: string, fragmentShaderSource: 
     throw new Error(String(message));
 }
 
+const cache: Map<string, WebGLProgram> = new Map();
 
 function createShader(source: string, type: GLenum, gl: WebGL2RenderingContext) {
     const shader = gl.createShader(type);
