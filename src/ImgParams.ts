@@ -32,6 +32,7 @@ export type ParamSliderKey =
     | 'color amplification'
     | 'glow amplification'
     | 'glow color shift'
+    | 'fade'
     ;
 
 export type ParamChoiceKey =

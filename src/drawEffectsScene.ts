@@ -65,6 +65,8 @@ export function drawEffectsScene(canvasEl: HTMLCanvasElement, codeSceneDrawn: Co
 
     gl.uniform1f(gl.getUniformLocation(program, 'u_colorAmplification'), imgParams['color amplification'].val);
 
+    gl.uniform1f(gl.getUniformLocation(program, 'u_fade'), 10**imgParams['fade'].val);
+
     gl.uniform1i(gl.getUniformLocation(program, 'u_mode'), 0);
 
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);

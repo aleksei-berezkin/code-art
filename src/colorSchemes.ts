@@ -2,7 +2,7 @@ import {hexToRgb} from "./util/RGB";
 
 export const colorSchemes = {
     'VS Code Dark+': {
-        background: hexToRgb('#1e1e1e'),
+        background: hexToRgb('#181818'),
         comment: hexToRgb('#6a9954'),
         number: hexToRgb('#6897bb'),
         string: hexToRgb('#ce9178'),
@@ -13,7 +13,7 @@ export const colorSchemes = {
         default: hexToRgb('#e4e4e4'),
     },
     'IntelliJ Darkula': {
-        background: hexToRgb('#2b2b2b'),
+        background: hexToRgb('#181818'),
         comment: hexToRgb('#808080'),
         number: hexToRgb('#b5cea8'),
         string: hexToRgb('#6a8757'),
@@ -24,7 +24,7 @@ export const colorSchemes = {
         default: hexToRgb('#a9b7c6'),
     },
     'Chrome Dark': {
-        background: hexToRgb('#202124'),
+        background: hexToRgb('#101114'),
         comment: hexToRgb('#747474'),
         number: hexToRgb('#a1f7ea'),   // Changed
         string: hexToRgb('#f28b54'),
@@ -35,7 +35,7 @@ export const colorSchemes = {
         default: hexToRgb('#e8eaed'),
     },
     'Sahara': {
-        background: hexToRgb('#202020'),
+        background: hexToRgb('#181818'),
         comment: hexToRgb('#797056'),
         number: hexToRgb('#92d277'),
         string: hexToRgb('#b2b2b2'),
@@ -46,7 +46,7 @@ export const colorSchemes = {
         default: hexToRgb('#c5cee1'),
     },
     'Ocean': {
-        background: hexToRgb('#102028'),
+        background: hexToRgb('#080c14'),
         comment: hexToRgb('#78889d'),
         number: hexToRgb('#77d2a5'),
         string: hexToRgb('#96ab93'),
@@ -57,7 +57,7 @@ export const colorSchemes = {
         default: hexToRgb('#bbb3ad'),
     },
     'Rainbow': {
-        background: hexToRgb('#181818'),
+        background: hexToRgb('#141414'),
         comment: hexToRgb('#bdbdbd'),
         number: hexToRgb('#ff8c16'),
         string: hexToRgb('#f1d230'),
@@ -68,7 +68,7 @@ export const colorSchemes = {
         default: hexToRgb('#a9a9a9'),
     },
     'Forest': {
-        background: hexToRgb('#082412'),
+        background: hexToRgb('#06140a'),
         comment: hexToRgb('#6f776f'),
         number: hexToRgb('#ecbc85'),
         string: hexToRgb('#5bafb9'),

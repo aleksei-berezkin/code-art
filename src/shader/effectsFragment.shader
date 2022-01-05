@@ -56,16 +56,22 @@ void main() {
     if (u_mode == MODE_GLOW) {
         vec3 selfRgb = texture(u_image, v_texCoords).rgb;
         outColor = vec4(
-            screen(
-                ((1.0 - u_glowColorShift) * blurred + u_glowColorShift * avg(blurred) * u_glowShiftedColor) * u_glowAmplification,
-                u_bg + (selfRgb - u_bg) * u_colorAmplification
-            ),
+            ((1.0 - u_glowColorShift) * blurred + u_glowColorShift * avg(blurred) * u_glowShiftedColor) * u_glowAmplification + u_bg
+            + selfRgb * u_colorAmplification,
             1
         );
     } else if (u_mode == MODE_BLUR) {
-        // TODO square func; distort color
-        float fade = 1.0 + (v_w - 1.0) * 2.0;
-        outColor = vec4(blurred / fade + u_bg * (1.0 - 1.0 / fade), 1);
+        blurred += u_bg;
+        float distance = v_w - 1.0;
+        if (distance > 0.0) {
+            float fade = 1.0 + pow(distance, 2.0) * u_fade;
+            outColor = vec4(blurred / fade, 1);
+        } else if (distance == 0.0) {
+            outColor = vec4(blurred, 1);
+        } else {
+            float brighter = 1.0 + pow(distance, 2.0) / u_fade;
+            outColor = vec4(blurred * brighter, 1);
+        }
     }
 
 }

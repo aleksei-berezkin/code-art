@@ -145,7 +145,9 @@
         } else if (k === 'translate x' || k === 'translate y' || k === 'translate z' || k === 'scroll' || k === 'glow radius' || k === 'glow color shift') {
             s = `${val}%`;
         } else if (k === 'blur') {
-            s = `${10**val}%`;
+            s = `${10 ** val}%`;
+        } else if (k === 'fade') {
+            s = String(10 ** val);
         } else {
             s = String(val);
         }
@@ -229,7 +231,7 @@
         },
         'glow shifted color': {
             type: 'color',
-            val: rgbToHex(Array.from({length: 3}).map(() => Math.random())),
+            val: rgbToHex(Array.from({length: 3}).map(() => .25 + .75 * Math.random())),
         },
         'glow radius': {
             type: 'slider',
@@ -257,6 +259,13 @@
             min: 0,
             val: 1 + Math.random() * .2,
             max: 3,
+        },
+        'fade': {
+            type: 'slider',
+            // log10
+            min: -2,
+            val: -1 + Math.random(),
+            max: 1,
         },
     };
 
