@@ -67,6 +67,12 @@ export function drawEffectsScene(canvasEl: HTMLCanvasElement, codeSceneDrawn: Co
 
     gl.uniform1f(gl.getUniformLocation(program, 'u_fade'), 10**imgParams['fade'].val);
 
+    gl.uniform3fv(gl.getUniformLocation(program, 'u_fadeInDistortion'), hexToRgb(imgParams['fade in distortion'].val));
+
+    gl.uniform3fv(gl.getUniformLocation(program, 'u_fadeOutDistortion'), hexToRgb(imgParams['fade out distortion'].val));
+
+    gl.uniform1f(gl.getUniformLocation(program, 'u_fadeDistortion'), imgParams['fade distortion'].val);
+
     gl.uniform1i(gl.getUniformLocation(program, 'u_mode'), 0);
 
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);

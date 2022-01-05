@@ -33,8 +33,8 @@ function extendExtensions(ext: Extensions): Extensions {
 
 const extPow = 1.2;
 function extend(ext: number) {
-    if (ext < 1) {
-        return 1 / ((1 / ext) ** extPow);
+    if (ext < 2) {
+        return ext * 2;
     }
     return ext ** extPow;
 }

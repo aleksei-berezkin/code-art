@@ -18,6 +18,10 @@ uniform float u_glowColorShift;
 uniform float u_glowAmplification;
 uniform float u_fade;
 
+uniform vec3 u_fadeInDistortion;
+uniform vec3 u_fadeOutDistortion;
+uniform float u_fadeDistortion;
+
 uniform vec3 u_bg;
 
 uniform float u_colorAmplification;
@@ -63,14 +67,29 @@ void main() {
     } else if (u_mode == MODE_BLUR) {
         blurred += u_bg;
         float distance = v_w - 1.0;
-        if (distance > 0.0) {
-            float fade = 1.0 + pow(distance, 2.0) * u_fade;
-            outColor = vec4(blurred / fade, 1);
-        } else if (distance == 0.0) {
+        if (distance == 0.0) {
             outColor = vec4(blurred, 1);
         } else {
-            float brighter = 1.0 + pow(distance, 2.0) / u_fade;
-            outColor = vec4(blurred * brighter, 1);
+            vec3 selfColor;
+            float distort;
+            vec3 distortColor;
+            if (distance > 0.0) {
+                float fade = 1.0 + pow(distance, 2.0) * u_fade;
+                selfColor = blurred / fade;
+                distort = distance * u_fadeDistortion;
+                distortColor = u_fadeOutDistortion;
+            } else {
+                float brighter = 1.0 + pow(distance, 2.0) / u_fade;
+                selfColor = blurred * brighter;
+                distort = -distance * u_fadeDistortion;
+                distortColor = u_fadeInDistortion;
+            }
+
+            if (distort == 0.0) {
+                outColor = vec4(selfColor, 1);
+            } else {
+                outColor = vec4((selfColor / distort + avg(selfColor) * distortColor * distort) / (avg(selfColor) * distort + 1.0/distort), 1);
+            }
         }
     }
 

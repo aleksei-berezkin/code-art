@@ -180,6 +180,7 @@
         'angle z': {
             type: 'slider',
             min: -Math.PI / 2,
+            // TODO 0 or some minimal
             val: Math.PI / 2 * (isMinified
                 ? -.05 + Math.random() * .1
                 : -.025 + Math.random() * .05
@@ -241,6 +242,7 @@
         },
         'glow shifted color': {
             type: 'color',
+            // TODO good colors in col scheme
             val: rgbToHex(Array.from({length: 3}).map(() => .25 + .75 * Math.random())),
         },
         'glow radius': {
@@ -251,11 +253,11 @@
         },
         'fade in distortion': {
             type: 'color',
-            val: '#000000',
+            val: rgbToHex(Array.from({length: 3}).map(() => .25 + .75 * Math.random())),
         },
         'fade out distortion': {
             type: 'color',
-            val: '#000000',
+            val: rgbToHex(Array.from({length: 3}).map(() => .25 + .75 * Math.random())),
         },
         'blur': {
             type: 'slider',
@@ -277,6 +279,12 @@
             val: -1 + Math.random(),
             max: 1,
         },
+        'fade distortion': {
+            type: 'slider',
+            min: 0,
+            val: 1.5 + Math.random() * 2.5,
+            max: 4,
+        }
     };
 
     let glyphRaster: GlyphRaster;
