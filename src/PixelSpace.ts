@@ -1,4 +1,4 @@
-import { degToRag } from './util/degToRad';
+import { degToRad } from './util/degToRad';
 import { pluck } from './util/pluck';
 
 export type PixelSpace = ReturnType<typeof makePixelSpace>;
@@ -19,7 +19,7 @@ export type PixelSpace = ReturnType<typeof makePixelSpace>;
  * at z=0, so w = (zBase + z) / zBase = 1 + z / zBase
  */
 export function makePixelSpace(w: number, h: number, blurFactor: number) {
-    const viewAngleV = degToRag(115);
+    const viewAngleV = degToRad(115);
     const zBase = h / 2 / Math.tan(viewAngleV / 2);
     const viewAngleH = Math.atan(w / 2 / zBase) * 2;
     const zMin = -zBase;

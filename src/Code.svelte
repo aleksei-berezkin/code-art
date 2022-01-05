@@ -126,11 +126,11 @@
     import {ImgParams, ParamChoiceKey, ParamColorKey, ParamKey, ParamSliderKey} from './ImgParams';
     import { drawCodeScene } from './drawCodeScene';
     import { rasterizeFont, GlyphRaster } from './rasterizeFont';
-    import { getSource, Source, SourceCodeName, sourceCodeNames } from './souceCode';
+    import {getSource, Source, SourceCodeName, sourceCodeNames, sourceDetails} from './souceCode';
     import { dpr } from './util/dpr';
-    import { degToRag } from './util/degToRad';
+    import { degToRad } from './util/degToRad';
     import { colorSchemeNames } from './colorSchemes';
-    import { randomItem } from './util/randomItem';
+    import { pickRandom } from './util/pickRandom';
     import { drawEffectsScene } from './drawEffectsScene';
     import {rgbToHex} from "./util/RGB";
 
@@ -157,23 +157,33 @@
     let codeCanvasEl: HTMLCanvasElement;
     let rasterCanvasEl: HTMLCanvasElement;
 
+    const sourceName = pickRandom(sourceCodeNames);
+    const isMinified = sourceDetails[sourceName].lang === 'js min';
+
     const imgParams: ImgParams = {
         'angle x': {
             type: 'slider',
-            min: degToRag(-20),
-            val: degToRag(-15) + Math.random() * degToRag(30),
-            max: degToRag(20),
+            min: degToRad(-20),
+            val: isMinified
+                ? degToRad(-15) + Math.random() * degToRad(30)
+                : degToRad(-5) + Math.random() * degToRad(10),
+            max: degToRad(20),
         },
         'angle y': {
             type: 'slider',
-            min: degToRag(-20),
-            val: degToRag(-15) + Math.random() * degToRag(30),
-            max: degToRag(20),
+            min: degToRad(-20),
+            val: isMinified
+                ? degToRad(-15) + Math.random() * degToRad(30)
+                : degToRad(20) * Math.random(),
+            max: degToRad(20),
         },
         'angle z': {
             type: 'slider',
             min: -Math.PI / 2,
-            val: (-.05 + Math.random() * .1) * Math.PI / 2,
+            val: Math.PI / 2 * (isMinified
+                ? -.05 + Math.random() * .1
+                : -.025 + Math.random() * .05
+            ),
             max: Math.PI / 2,
         },
         'translate x': {
@@ -209,18 +219,18 @@
         },
         'color scheme': {
             type: 'choices',
-            val: randomItem(colorSchemeNames),
+            val: pickRandom(colorSchemeNames),
             choices: colorSchemeNames,
         },
         'source': {
             type: 'choices',
-            val: randomItem(sourceCodeNames),
+            val: sourceName,
             choices: sourceCodeNames,
         },
         'glow amplification': {
             type: 'slider',
             min: 0,
-            val: 1 + Math.random() * 1.5,
+            val: 1 + Math.random() * 1.2,
             max: 4,
         },
         'glow color shift': {
@@ -251,13 +261,13 @@
             type: 'slider',
             // % log10
             min: 1,
-            val: 1.7 + Math.random() * .6,
+            val: 1.3 + Math.random(),
             max: 3,
         },
         'color amplification': {
             type: 'slider',
             min: 0,
-            val: 1 + Math.random() * .2,
+            val: .9 + Math.random() * .2,
             max: 3,
         },
         'fade': {
