@@ -1,5 +1,5 @@
 import { dpr } from './util/dpr';
-import type {Source} from "./souceCode";
+import type { Source } from './souceCode';
 
 export type GlyphRaster = {
     glyphs: Map<string, GlyphMetrics>,
@@ -19,7 +19,15 @@ const fontSizeMultiplier = 2;
 const spaceV = 1.05;
 const spaceH = 1.05;
 
+const dsSourceId = 'sourceId';
+const dsFontSize = 'fontSize';
+let cachedRaster: GlyphRaster | undefined = undefined;
+
 export function rasterizeFont(source: Source, canvasEl: HTMLCanvasElement, fontSize: number): GlyphRaster {
+    if (cachedRaster && canvasEl.dataset[dsSourceId] === source.id && canvasEl.dataset[dsFontSize] === String(fontSize)) {
+        return cachedRaster;
+    }
+
     const ctx = canvasEl.getContext('2d');
     if (!ctx) {
         throw new Error('No 2d context');
@@ -62,10 +70,14 @@ export function rasterizeFont(source: Source, canvasEl: HTMLCanvasElement, fontS
         }
     }
 
-    return {
+    canvasEl.dataset[dsSourceId] = source.id;
+    canvasEl.dataset[dsFontSize] = String(fontSize);
+    cachedRaster =  {
         glyphs,
         sizeRatio: _fontSize / fontSize,
     };
+
+    return cachedRaster;
 }
 
 function getAlphabet(source: string) {

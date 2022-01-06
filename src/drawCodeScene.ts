@@ -11,9 +11,9 @@ import { uploadArrayToAttribute } from './util/uploadArrayToAttribute';
 import { uploadTexture } from './util/uploadTexture';
 import { calcExtensions, Extensions, getSceneBounds, makePixelSpace, PixelSpace } from './PixelSpace';
 import { dpr } from './util/dpr';
-import { colorizeCode } from "./colorizeCode";
-import type { ColorSchemeName } from "./colorSchemes";
-import {RGB, rgbSize} from "./util/RGB";
+import { colorizeCode } from './colorizeCode';
+import type { ColorSchemeName } from './colorSchemes';
+import { RGB, rgbSize } from './util/RGB';
 
 export type CodeSceneDrawn = {
     pixelSpace: PixelSpace,

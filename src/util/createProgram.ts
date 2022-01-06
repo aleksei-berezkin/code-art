@@ -1,7 +1,16 @@
+const cache: Map<string, WebGLProgram> = new Map();
+
 export function createProgram(vertexShaderSource: string, fragmentShaderSource: string, gl: WebGL2RenderingContext) {
     const cacheKey = vertexShaderSource + fragmentShaderSource;
     if (cache.has(cacheKey)) {
-        return cache.get(cacheKey)!;
+        const cachedProg = cache.get(cacheKey)!;
+        try {
+            // Old program won't work for new gl context which is possible to happen in hot-reload
+            if (gl.getProgramParameter(cachedProg, gl.LINK_STATUS)) {
+                return cachedProg;
+            }
+        } catch (_ignored) {
+        }
     }
 
     const program = gl.createProgram();
@@ -23,8 +32,6 @@ export function createProgram(vertexShaderSource: string, fragmentShaderSource: 
 
     throw new Error(String(message));
 }
-
-const cache: Map<string, WebGLProgram> = new Map();
 
 function createShader(source: string, type: GLenum, gl: WebGL2RenderingContext) {
     const shader = gl.createShader(type);

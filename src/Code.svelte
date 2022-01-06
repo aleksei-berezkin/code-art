@@ -119,14 +119,13 @@
     <canvas class='code-canvas' bind:this={ codeCanvasEl }></canvas>
 </section>
     
-<svelte:window on:resize={ handleResize }/>
+<svelte:window on:resize={ _setWH }/>
 
 <script lang='ts'>
-    import { onMount } from 'svelte';
-    import { ParamChoiceKey, ParamColorKey, ParamKey, ParamSliderKey} from './ImgParams';
+    import { ImgParams, ParamChoiceKey, ParamColorKey, ParamKey, ParamSliderKey } from './ImgParams';
     import { drawCodeScene } from './drawCodeScene';
-    import { rasterizeFont, GlyphRaster } from './rasterizeFont';
-    import { getSource, Source, SourceCodeName } from './souceCode';
+    import { rasterizeFont } from './rasterizeFont';
+    import { getSource, SourceCodeName } from './souceCode';
     import { dpr } from './util/dpr';
     import { drawEffectsScene } from './drawEffectsScene';
     import { createImgParams } from './createImgParams';
@@ -153,35 +152,14 @@
    
     let codeCanvasEl: HTMLCanvasElement;
     let rasterCanvasEl: HTMLCanvasElement;
+    let imgParams = createImgParams();
 
-    const imgParams = createImgParams();
-
-    let glyphRaster: GlyphRaster;
-
-    onMount(() => {
-        handleResize();
-        _getSource().then(src => {
-            _rasterizeFont(src);
-            _drawScene(src);
-        });
-    });
-
-    function handleResize() {
-        const canvasRect = codeCanvasEl.getBoundingClientRect();
-        codeCanvasEl.width = canvasRect.width * dpr;
-        codeCanvasEl.height = canvasRect.height * dpr;
-    }
+    $: drawScene(imgParams);
 
     function handleSliderChange(e: Event) {
         const inputEl = (e.target as HTMLInputElement);
         const k = inputEl.dataset.k as ParamSliderKey;
         imgParams[k].val = Number(inputEl.value);
-        _getSource().then(src => {
-            if (k === 'font size') {
-                _rasterizeFont(src);
-            }
-            _drawScene(src);
-        });
     }
 
     function handleChoiceChange(e: Event) {
@@ -189,33 +167,25 @@
         const k = selectEl.dataset.k as ParamChoiceKey;
         selectEl.selectedIndex
         imgParams[k].val = imgParams[k].choices[selectEl.selectedIndex];
-        _getSource().then(src => {
-            if (k === 'source') {
-                _rasterizeFont(src);
-            }
-            _drawScene(src);
-        });
     }
 
     function handleColorChange(e: Event) {
         const inputEl = (e.target as HTMLInputElement);
         const k = inputEl.dataset.k as ParamColorKey;
         imgParams[k].val = inputEl.value;
-        _getSource().then(src => {
-            _drawScene(src);
-        });
     }
 
-    function _getSource() {
-        return getSource(imgParams['source'].val as SourceCodeName);
-    }
-
-    function _rasterizeFont(source: Source) {
-        glyphRaster = rasterizeFont(source, rasterCanvasEl, imgParams['font size'].val);
-    }
-
-    function _drawScene(source: Source) {
+    async function drawScene(imgParams: ImgParams /* reactivity */) {
+        const source = await getSource(imgParams['source'].val as SourceCodeName);
+        _setWH();
+        const glyphRaster = rasterizeFont(source, rasterCanvasEl, imgParams['font size'].val);
         const codeSceneDrawn = drawCodeScene(codeCanvasEl, rasterCanvasEl, imgParams, source, glyphRaster);
         drawEffectsScene(codeCanvasEl, codeSceneDrawn, imgParams);
+    }
+
+    function _setWH() {
+        const canvasRect = codeCanvasEl.getBoundingClientRect();
+        codeCanvasEl.width = canvasRect.width * dpr;
+        codeCanvasEl.height = canvasRect.height * dpr;
     }
 </script>
