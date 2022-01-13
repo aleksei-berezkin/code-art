@@ -3,37 +3,45 @@ import { sourceCodeNames, sourceDetails } from './souceCode';
 import type { ImgParams } from './ImgParams';
 import { degToRad } from './util/degToRad';
 import { colorSchemeNames } from './colorSchemes';
-import {  RGB, rgbToHex } from './util/RGB';
+import { RGB, rgbToHex } from './util/RGB';
 
 export function createImgParams(): ImgParams {
     const sourceName = pickRandom(sourceCodeNames);
     const isMinified = sourceDetails[sourceName].lang === 'js min';
 
+    const p = genRotationPatterns(isMinified);
+
+    const angleX = p.has('xSmall') ? randomAngle(4, 7) * randomSign()
+        : p.has('xMed') ? randomAngle(7, 12) * randomSign()
+        : p.has('xLarge') ? randomAngle(12, 15) * randomSign()
+        : 0;
+
+    const angleY = p.has('ySmall') ? randomAngle(4, 10) * (isMinified ? randomSign() : 1)
+        : p.has('yMed') ? randomAngle(10, 16) * (isMinified ? randomSign() : 1)
+        : p.has('yLarge') ? randomAngle(16, 20) * (isMinified ? randomSign() : 1)
+        : 0;
+
+    const angleZ = (isMinified || Math.abs(angleX) < degToRad(5) && Math.abs(angleY) < degToRad(7))
+        ? randomAngle(1.5, 3.5) * randomSign()
+        : 0;
+
     return {
         'angle x': {
             type: 'slider',
             min: degToRad(-20),
-            val: isMinified
-                ? degToRad(-15) + Math.random() * degToRad(30)
-                : degToRad(-5) + Math.random() * degToRad(10),
+            val: angleX,
             max: degToRad(20),
         },
         'angle y': {
             type: 'slider',
             min: degToRad(-20),
-            val: isMinified
-                ? degToRad(-15) + Math.random() * degToRad(30)
-                : degToRad(20) * Math.random(),
+            val: angleY,
             max: degToRad(20),
         },
         'angle z': {
             type: 'slider',
             min: -Math.PI / 2,
-            // TODO 0 or some minimal
-            val: Math.PI / 2 * (isMinified
-                    ? -.05 + Math.random() * .1
-                    : -.025 + Math.random() * .05
-            ),
+            val: angleZ,
             max: Math.PI / 2,
         },
         'translate x': {
@@ -135,4 +143,36 @@ export function createImgParams(): ImgParams {
             max: 4,
         }
     };
+}
+
+type RotPattern = 'xSmall' | 'xMed' | 'xLarge' | 'ySmall' | 'yMed' | 'yLarge';
+
+function genRotationPatterns(isMinified: boolean): Set<RotPattern | undefined> {
+    const xOptions: (RotPattern | undefined)[] = isMinified
+        ? [undefined, 'xSmall', 'xMed', 'xLarge']
+        : [undefined, 'xSmall', 'xMed'];
+    const yOptions: (RotPattern | undefined)[] = isMinified
+        ? [undefined, 'ySmall', 'yMed', 'yLarge']
+        : [undefined, 'ySmall', 'yMed'];
+
+    const x = pickRandom<RotPattern | undefined>(xOptions);
+    const y = pickRandom<RotPattern | undefined>(yOptions);
+
+    if (!isMinified && x === 'xMed' && y === 'yMed'
+        || x === 'xSmall' && y === undefined
+        || x === undefined && y === 'ySmall'
+        || x === undefined && y === undefined
+    ) {
+        return genRotationPatterns(isMinified);
+    }
+
+    return new Set([x, y]);
+}
+
+function randomAngle(degMin: number, degMax: number) {
+    return degToRad(degMin) + Math.random() * degToRad(degMax - degMin);
+}
+
+function randomSign() {
+    return Math.random() < .5 ? -1 : 1;
 }
