@@ -25,7 +25,7 @@ const dsFontSize = 'fontSize';
 let cachedRaster: GlyphRaster | undefined = undefined;
 
 export function rasterizeFont(source: Source, canvasEl: HTMLCanvasElement, fontSize: number): GlyphRaster {
-    if (cachedRaster && canvasEl.dataset[dsSourceId] === source.id && canvasEl.dataset[dsFontSize] === String(fontSize)) {
+    if (cachedRaster && canvasEl.dataset[dsSourceId] === source.name && canvasEl.dataset[dsFontSize] === String(fontSize)) {
         return cachedRaster;
     }
 
@@ -76,7 +76,7 @@ export function rasterizeFont(source: Source, canvasEl: HTMLCanvasElement, fontS
         .reduce((max, r) => r.ascent > max ? r.ascent : max, 0) / sizeRatio;
 
 
-    canvasEl.dataset[dsSourceId] = source.id;
+    canvasEl.dataset[dsSourceId] = source.name;
     canvasEl.dataset[dsFontSize] = String(fontSize);
     cachedRaster =  {
         glyphs,

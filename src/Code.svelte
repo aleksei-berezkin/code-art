@@ -23,7 +23,7 @@
 <canvas class='rasterize-font-canvas' bind:this={rasterCanvasEl} width='2048'></canvas>
 <section>
     {#if imgParams}
-        <ImgParamsMenu imgParams={imgParams} paramsUpdated={p => imgParams = p}/>
+        <ImgParamsMenu imgParams={imgParams} paramsUpdated={onParamsUpdate}/>
     {/if}
     <canvas class='code-canvas' bind:this={codeCanvasEl}></canvas>
 </section>
@@ -31,45 +31,64 @@
 <script lang='ts'>
     import { ImgParams } from './ImgParams';
     import { drawCodeScene } from './drawCodeScene';
-    import { rasterizeFont } from './rasterizeFont';
-    import { Source } from './souceCode';
+    import { GlyphRaster, rasterizeFont } from './rasterizeFont';
+    import { getSource, Source, SourceCodeName, sourceCodeNames } from './souceCode';
     import { dpr } from './util/dpr';
     import { drawEffectsScene } from './drawEffectsScene';
-    import { createSpaceAndImgParams } from './createSpaceAndImgParams';
+    import { genAllParams } from './genAllParams';
     import ImgParamsMenu from './ImgParamsMenu.svelte';
-    import type {Extensions, PixelSpace} from "./PixelSpace";
+    import type { Extensions, PixelSpace } from "./PixelSpace";
     import { onMount } from 'svelte';
+    import { pickRandom } from './util/pickRandom';
+    import { calcExtensions, makePixelSpace } from './PixelSpace';
+    import { percentLogToVal } from './util/percentLogToVal';
+    import type { Mat4 } from './util/matrices';
+    import { getTxMax } from './getTxMax';
 
     let codeCanvasEl: HTMLCanvasElement;
     let rasterCanvasEl: HTMLCanvasElement;
 
-    let pixelSpace: PixelSpace | undefined = undefined;
-    let extensions: Extensions | undefined = undefined;
-    let source: Source | undefined = undefined;
     let imgParams: ImgParams | undefined = undefined;
     
     onMount(function () {
         setWH();
-        createSpaceAndImgParams(codeCanvasEl.width / dpr, codeCanvasEl.height / dpr)
-            .then(spaceAndParams => {
-                pixelSpace = spaceAndParams.pixelSpace;
-                extensions = spaceAndParams.extensions;
-                source = spaceAndParams.source;
-                imgParams = spaceAndParams.imgParams;
-            });
+        const sourceName = pickRandom(sourceCodeNames);
+        const fontSize = 36;
+        getSource(sourceName).then(source => {
+            const glyphRaster = rasterizeFont(source, rasterCanvasEl, fontSize);
+            const allParams = genAllParams(getW(), getH(), fontSize, source, glyphRaster);
+            imgParams = allParams.imgParams;
+            drawScene(allParams.pixelSpace, allParams.extensions, source, allParams.imgParams, allParams.txMat, glyphRaster);
+        });
     });
 
-    $: {
-        if (pixelSpace && extensions && source && imgParams) {
-            drawScene(pixelSpace, extensions, source, imgParams);
-        }
+    function onParamsUpdate() {
+        const pixelSpace = makePixelSpace(getW(), getH(), percentLogToVal(imgParams!.blur.val));
+        const xAngle = imgParams!['angle x'].val;
+        const yAngle = imgParams!['angle y'].val;
+        const zAngle = imgParams!['angle z'].val;
+        const extensions = calcExtensions(pixelSpace, xAngle, yAngle, zAngle);
+        getSource(imgParams!['source'].val as SourceCodeName).then(source => {
+            const glyphRaster = rasterizeFont(source, rasterCanvasEl, imgParams!['font size'].val);
+            const txMat = getTxMax(pixelSpace,
+                xAngle, yAngle, zAngle,
+                imgParams!['translate x'].val, imgParams!['translate y'].val, imgParams!['translate z'].val
+            );
+            drawScene(pixelSpace, extensions, source, imgParams!, txMat, glyphRaster);
+        })
     }
 
-    // Params passed for reactivity
-    async function drawScene(pixelSpace: PixelSpace, extensions: Extensions, source: Source, imgParams: ImgParams) {
-        const glyphRaster = rasterizeFont(source, rasterCanvasEl, imgParams['font size'].val);
-        const codeSceneDrawn = drawCodeScene(codeCanvasEl, rasterCanvasEl, pixelSpace, extensions, imgParams, source, glyphRaster);
+    function drawScene(pixelSpace: PixelSpace, extensions: Extensions, source: Source, imgParams: ImgParams, txMat: Mat4, glyphRaster: GlyphRaster) {
+        const codeSceneDrawn = drawCodeScene(codeCanvasEl, rasterCanvasEl, pixelSpace, extensions, imgParams, txMat, source, glyphRaster);
         drawEffectsScene(codeCanvasEl, codeSceneDrawn, imgParams);
+    }
+
+    function getW() {
+        return codeCanvasEl.width / dpr;
+    }
+
+    function getH() {
+        return codeCanvasEl.height / dpr;
     }
 
     function setWH() {

@@ -2,7 +2,7 @@ import { createProgram } from './util/createProgram';
 import vertexShaderSource from './shader/codeVertex.shader';
 import fragmentShaderSource from './shader/codeFragment.shader';
 import type { ImgParams } from './ImgParams';
-import { asMat4, getRotateXMat, getRotateYMat, getRotateZMat, getTranslateMat, Mat4, mul } from './util/matrices';
+import type { Mat4} from './util/matrices';
 import { createCodeSceneData } from './createCodeSceneData';
 import { vertexSize2d } from './util/rect';
 import type { GlyphRaster } from './rasterizeFont';
@@ -26,7 +26,9 @@ export function drawCodeScene(canvasEl: HTMLCanvasElement,
                               rasterCanvasEl: HTMLCanvasElement,
                               pixelSpace: PixelSpace,
                               extensions: Extensions,
+                              // TODO params not orthogonal here
                               params: ImgParams,
+                              txMat: Mat4,
                               source: Source,
                               glyphRaster: GlyphRaster,
 ): CodeSceneDrawn {
@@ -63,33 +65,6 @@ export function drawCodeScene(canvasEl: HTMLCanvasElement,
         gl.getUniformLocation(program, 'u_letters'),
         0,
     );
-
-    // Transform in pixel space
-    const txMatPixels =
-        mul(
-            getTranslateMat(
-                params['translate x'].val / 100 * pixelSpace.w,
-                params['translate y'].val / 100 * pixelSpace.h,
-                params['translate z'].val / 100 * pixelSpace.zBase,
-            ),
-            getRotateXMat(params['angle x'].val),
-            getRotateYMat(params['angle y'].val),
-            getRotateZMat(params['angle z'].val),
-        );
-
-    // Pixel space to clip space
-    const toClipSpaceMat = asMat4([
-        // xMin(==-xMax) ... xMax -> -1 ... +1
-        1 / pixelSpace.xMax, 0, 0, 0,
-        // yMin(==-yMax) ... yMax -> +1 ... -1
-        0, -1 / pixelSpace.yMax, 0, 0,
-        // zMin ... zMax -> -1 ... +1 (won't be divided by w)
-        0, 0, 2 / pixelSpace.zSpan, -1 - 2 * pixelSpace.zMin / pixelSpace.zSpan,
-        // zMin(==-zBase)...0...zBase...zMax -> 0...+1...+2...(zSpan/zBase)
-        0, 0, 1 / pixelSpace.zBase, 1,
-    ]);
-
-    const txMat = mul(toClipSpaceMat, txMatPixels);
 
     gl.uniformMatrix4fv(
         gl.getUniformLocation(program, 'u_tx'),

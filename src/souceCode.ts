@@ -24,7 +24,7 @@ export type SourceCodeName = keyof typeof sourceDetails;
 export const sourceCodeNames = Object.keys(sourceDetails) as SourceCodeName[];
 
 export type Source = {
-    id: SourceCodeName,
+    name: SourceCodeName,
     lang: 'js' | 'js min',
     text: string,
     linesOffsets: number[], // value = pos in text
@@ -39,7 +39,7 @@ export async function getSource(name: SourceCodeName): Promise<Source> {
     const text = await r.text();
 
     const source = {
-        id: name,
+        name,
         lang: sourceDetails[name].lang,
         text,
         linesOffsets: getLinesOffsets(text),

@@ -15,7 +15,7 @@ export type CodeColorization = {
 }
 
 export function colorizeCode(source: Source, colorSchemeName: ColorSchemeName): CodeColorization {
-    const cacheKey = JSON.stringify([source.id, colorSchemeName])
+    const cacheKey = JSON.stringify([source.name, colorSchemeName])
 
     if (idToColorizationCache.has(cacheKey)) {
         return idToColorizationCache.get(cacheKey)!;

@@ -1,5 +1,5 @@
 import { pickRandom } from './util/pickRandom';
-import {getSource, getSourceStartLine, getSourceStartPos, Source, sourceCodeNames, sourceDetails} from './souceCode';
+import { getSourceStartLine, Source, sourceCodeNames } from './souceCode';
 import type { ImgParams } from './ImgParams';
 import { degToRad } from './util/degToRad';
 import { colorSchemeNames } from './colorSchemes';
@@ -13,19 +13,25 @@ import {
     PixelSpace,
     SceneBounds
 } from './PixelSpace';
+import type { GlyphRaster } from './rasterizeFont';
+import { percentLogToVal } from './util/percentLogToVal';
+import { getTxMax } from './getTxMax';
+import type { Mat4 } from './util/matrices';
 
-export async function createSpaceAndImgParams(w: number, h: number): Promise<{pixelSpace: PixelSpace, extensions: Extensions, source: Source, imgParams: ImgParams}> {
-    const blurFactorLogPercent = 1.3 + Math.random();
+export function genAllParams(w: number, h: number, fontSize: number, source: Source, glyphRaster: GlyphRaster): {
+    pixelSpace: PixelSpace,
+    extensions: Extensions,
+    txMat: Mat4,
+    imgParams: ImgParams,
+} {
+    const blurFactorPercentLog = 1.3 + Math.random();
 
-    const sourceName = pickRandom(sourceCodeNames);
+    const angles = createAngles(source.lang === 'js min')
 
-    const angles = createAngles(sourceDetails[sourceName].lang === 'js min')
-
-    const pixelSpace = makePixelSpace(w, h, 10 ** (blurFactorLogPercent - 2 /* -2 because percent */));
+    const pixelSpace = makePixelSpace(w, h, percentLogToVal(blurFactorPercentLog));
     const extensions = calcExtensions(pixelSpace, angles.x, angles.y, angles.z);
 
-    const fontSize = 36;
-    const source = await getSource(sourceName);
+    const txMat = getTxMax(pixelSpace, angles.x, angles.y, angles.z, 0, 0, 0);
     const scrollFraction = genScrollFraction(source, getSceneBounds(pixelSpace, extensions), angles.x, fontSize);
 
     const imgParams: ImgParams = {
@@ -85,7 +91,7 @@ export async function createSpaceAndImgParams(w: number, h: number): Promise<{pi
         },
         'source': {
             type: 'choices',
-            val: sourceName,
+            val: source.name,
             choices: sourceCodeNames,
         },
         'glow amplification': {
@@ -123,7 +129,7 @@ export async function createSpaceAndImgParams(w: number, h: number): Promise<{pi
             type: 'slider',
             // % log10
             min: 1,
-            val: blurFactorLogPercent,
+            val: blurFactorPercentLog,
             max: 3,
         },
         'color amplification': {
@@ -147,7 +153,7 @@ export async function createSpaceAndImgParams(w: number, h: number): Promise<{pi
         }
     };
 
-    return {pixelSpace, extensions, source, imgParams};
+    return {pixelSpace, txMat, extensions, imgParams};
 }
 
 function createAngles(isMinified: boolean) {
@@ -220,6 +226,7 @@ function genScrollFraction(source: Source, sceneBounds: SceneBounds, xAngle: num
     return best.scrollFraction;
 }
 
+// TODO score scroll using real text positions and tx mat
 function scoreScroll(source: Source, sceneBounds: SceneBounds, xAngle: number, scrollFraction: number, fontSize: number) {
     const linesNum = getSceneLinesNum(sceneBounds, fontSize);
     const startLine = getSourceStartLine(source, linesNum, scrollFraction);
