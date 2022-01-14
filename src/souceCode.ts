@@ -1,3 +1,5 @@
+import { pluck } from './util/pluck';
+
 export const sourceDetails = {
     'React DOM min': {
         lang: 'js min' as const,
@@ -57,4 +59,21 @@ function getLinesOffsets(text: string): number[] {
         }
     }
     return offsets;
+}
+
+export function getSourceStartLine(source: Source, requiredLinesNum: number, scrollFraction: number) {
+    if (source.linesOffsets.length <= requiredLinesNum) {
+        return 0;
+    }
+    return pluck(
+        0,
+        Math.round((source.linesOffsets.length - requiredLinesNum) * scrollFraction),
+        source.linesOffsets.length - 1,
+    );
+    
+}
+
+export function getSourceStartPos(source: Source, requiredLinesNum: number, scrollFraction: number) {
+    const startLine = getSourceStartLine(source, requiredLinesNum, scrollFraction);
+    return source.linesOffsets[startLine];
 }

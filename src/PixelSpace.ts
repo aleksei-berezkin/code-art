@@ -104,3 +104,7 @@ export function getSceneBounds(pSp: PixelSpace, ext: Extensions) {
         yMax: pSp.yMax * ext.yMax,
     };
 }
+
+export function getSceneLinesNum(bounds: SceneBounds, fontSize: number) {
+    return Math.ceil((bounds.yMax - bounds.yMin) / fontSize )
+}

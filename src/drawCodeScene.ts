@@ -9,8 +9,7 @@ import type { GlyphRaster } from './rasterizeFont';
 import type { Source } from './souceCode';
 import { uploadArrayToAttribute } from './util/uploadArrayToAttribute';
 import { uploadTexture } from './util/uploadTexture';
-import { calcExtensions, Extensions, getSceneBounds, makePixelSpace, PixelSpace } from './PixelSpace';
-import { dpr } from './util/dpr';
+import { Extensions, getSceneBounds, PixelSpace } from './PixelSpace';
 import { colorizeCode } from './colorizeCode';
 import type { ColorSchemeName } from './colorSchemes';
 import { RGB, rgbSize } from './util/RGB';
@@ -25,6 +24,8 @@ export type CodeSceneDrawn = {
 // TODO render to texture
 export function drawCodeScene(canvasEl: HTMLCanvasElement,
                               rasterCanvasEl: HTMLCanvasElement,
+                              pixelSpace: PixelSpace,
+                              extensions: Extensions,
                               params: ImgParams,
                               source: Source,
                               glyphRaster: GlyphRaster,
@@ -36,16 +37,8 @@ export function drawCodeScene(canvasEl: HTMLCanvasElement,
 
     const codeColorization = colorizeCode(source, params['color scheme'].val as ColorSchemeName);
 
-    const pSp = makePixelSpace(canvasEl.width / dpr, canvasEl.height / dpr, 10 ** (params.blur.val - 2 /* -2 because percent */));
-
-    const xRotAngle = -params['angle x'].val;
-    const yRotAngle = -params['angle y'].val;
-    const zRotAngle = params['angle z'].val;
-
-    const extensions = calcExtensions(pSp, xRotAngle, yRotAngle, zRotAngle);
-
     const sceneData = createCodeSceneData(
-        getSceneBounds(pSp, extensions),
+        getSceneBounds(pixelSpace, extensions),
         params.scroll.val / 100,
         params['font size'].val,
         source,
@@ -75,25 +68,25 @@ export function drawCodeScene(canvasEl: HTMLCanvasElement,
     const txMatPixels =
         mul(
             getTranslateMat(
-                params['translate x'].val / 100 * pSp.w,
-                params['translate y'].val / 100 * pSp.h,
-                params['translate z'].val / 100 * pSp.zBase,
+                params['translate x'].val / 100 * pixelSpace.w,
+                params['translate y'].val / 100 * pixelSpace.h,
+                params['translate z'].val / 100 * pixelSpace.zBase,
             ),
-            getRotateXMat(xRotAngle),
-            getRotateYMat(yRotAngle),
-            getRotateZMat(zRotAngle),
+            getRotateXMat(params['angle x'].val),
+            getRotateYMat(params['angle y'].val),
+            getRotateZMat(params['angle z'].val),
         );
 
     // Pixel space to clip space
     const toClipSpaceMat = asMat4([
         // xMin(==-xMax) ... xMax -> -1 ... +1
-        1 / pSp.xMax, 0, 0, 0,
+        1 / pixelSpace.xMax, 0, 0, 0,
         // yMin(==-yMax) ... yMax -> +1 ... -1
-        0, -1 / pSp.yMax, 0, 0,
+        0, -1 / pixelSpace.yMax, 0, 0,
         // zMin ... zMax -> -1 ... +1 (won't be divided by w)
-        0, 0, 2 / pSp.zSpan, -1 - 2 * pSp.zMin / pSp.zSpan,
+        0, 0, 2 / pixelSpace.zSpan, -1 - 2 * pixelSpace.zMin / pixelSpace.zSpan,
         // zMin(==-zBase)...0...zBase...zMax -> 0...+1...+2...(zSpan/zBase)
-        0, 0, 1 / pSp.zBase, 1,
+        0, 0, 1 / pixelSpace.zBase, 1,
     ]);
 
     const txMat = mul(toClipSpaceMat, txMatPixels);
@@ -117,7 +110,7 @@ export function drawCodeScene(canvasEl: HTMLCanvasElement,
     gl.drawArrays(gl.TRIANGLES, 0, sceneData.vertices.length / vertexSize2d);
 
     return {
-        pixelSpace: pSp,
+        pixelSpace,
         extensions,
         txMat,
         bgColor: codeColorization.bgColor,

@@ -1,9 +1,8 @@
 import { rect2d, vertexSize2d } from './util/rect';
 import type { GlyphRaster } from './rasterizeFont';
-import type { Source } from './souceCode';
-import { pluck } from './util/pluck';
+import { Source, getSourceStartPos } from './souceCode';
 import type { CodeColorization } from './colorizeCode';
-import type { SceneBounds } from './PixelSpace';
+import { getSceneLinesNum, SceneBounds } from './PixelSpace';
 
 export function createCodeSceneData(bounds: SceneBounds,
                                     scrollFraction: number,
@@ -19,7 +18,7 @@ export function createCodeSceneData(bounds: SceneBounds,
     const lRasters = [...glyphRaster.glyphs.values()];
     const maxAscent = lRasters.reduce((max, r) => r.ascent > max ? r.ascent : max, 0) / glyphRaster.sizeRatio;
 
-    const posMin = getPosMin(source, Math.ceil((bounds.yMax - bounds.yMin) / fontSize), scrollFraction);
+    const posMin = getSourceStartPos(source, getSceneLinesNum(bounds, fontSize), scrollFraction);
 
     let x = bounds.xMin;
     let y = bounds.yMin;
@@ -83,14 +82,3 @@ export type CodeSceneData = {
     colors: number[],
 }
 
-function getPosMin(source: Source, linesNum: number, scrollFraction: number) {
-    if (source.linesOffsets.length <= linesNum) {
-        return 0;
-    }
-    const fromLine = pluck(
-        0,
-        Math.round((source.linesOffsets.length - linesNum) * scrollFraction),
-        source.linesOffsets.length - 1,
-    );
-    return source.linesOffsets[fromLine];
-}

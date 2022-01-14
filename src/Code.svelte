@@ -22,7 +22,9 @@
 
 <canvas class='rasterize-font-canvas' bind:this={rasterCanvasEl} width='2048'></canvas>
 <section>
-    <ImgParamsMenu imgParams={imgParams} paramsUpdated={p => imgParams = p}/>
+    {#if imgParams}
+        <ImgParamsMenu imgParams={imgParams} paramsUpdated={p => imgParams = p}/>
+    {/if}
     <canvas class='code-canvas' bind:this={codeCanvasEl}></canvas>
 </section>
     
@@ -30,27 +32,47 @@
     import { ImgParams } from './ImgParams';
     import { drawCodeScene } from './drawCodeScene';
     import { rasterizeFont } from './rasterizeFont';
-    import { getSource, SourceCodeName } from './souceCode';
+    import { Source } from './souceCode';
     import { dpr } from './util/dpr';
     import { drawEffectsScene } from './drawEffectsScene';
-    import { createImgParams } from './createImgParams';
+    import { createSpaceAndImgParams } from './createSpaceAndImgParams';
     import ImgParamsMenu from './ImgParamsMenu.svelte';
+    import type {Extensions, PixelSpace} from "./PixelSpace";
+    import { onMount } from 'svelte';
 
     let codeCanvasEl: HTMLCanvasElement;
     let rasterCanvasEl: HTMLCanvasElement;
-    let imgParams = createImgParams();
 
-    $: drawScene(imgParams);
+    let pixelSpace: PixelSpace | undefined = undefined;
+    let extensions: Extensions | undefined = undefined;
+    let source: Source | undefined = undefined;
+    let imgParams: ImgParams | undefined = undefined;
+    
+    onMount(function () {
+        setWH();
+        createSpaceAndImgParams(codeCanvasEl.width / dpr, codeCanvasEl.height / dpr)
+            .then(spaceAndParams => {
+                pixelSpace = spaceAndParams.pixelSpace;
+                extensions = spaceAndParams.extensions;
+                source = spaceAndParams.source;
+                imgParams = spaceAndParams.imgParams;
+            });
+    });
 
-    async function drawScene(imgParams: ImgParams /* reactivity */) {
-        const source = await getSource(imgParams['source'].val as SourceCodeName);
-        _setWH();
+    $: {
+        if (pixelSpace && extensions && source && imgParams) {
+            drawScene(pixelSpace, extensions, source, imgParams);
+        }
+    }
+
+    // Params passed for reactivity
+    async function drawScene(pixelSpace: PixelSpace, extensions: Extensions, source: Source, imgParams: ImgParams) {
         const glyphRaster = rasterizeFont(source, rasterCanvasEl, imgParams['font size'].val);
-        const codeSceneDrawn = drawCodeScene(codeCanvasEl, rasterCanvasEl, imgParams, source, glyphRaster);
+        const codeSceneDrawn = drawCodeScene(codeCanvasEl, rasterCanvasEl, pixelSpace, extensions, imgParams, source, glyphRaster);
         drawEffectsScene(codeCanvasEl, codeSceneDrawn, imgParams);
     }
 
-    function _setWH() {
+    function setWH() {
         const canvasRect = codeCanvasEl.getBoundingClientRect();
         codeCanvasEl.width = canvasRect.width * dpr;
         codeCanvasEl.height = canvasRect.height * dpr;
