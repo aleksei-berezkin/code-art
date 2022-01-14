@@ -3,6 +3,7 @@ import type { Source } from './souceCode';
 
 export type GlyphRaster = {
     glyphs: Map<string, GlyphMetrics>,
+    maxAscent: number,
     // Actual size on tex to passed font size
     sizeRatio: number,
 }
@@ -70,11 +71,17 @@ export function rasterizeFont(source: Source, canvasEl: HTMLCanvasElement, fontS
         }
     }
 
+    const sizeRatio = _fontSize / fontSize;
+    const maxAscent = [...glyphs.values()]
+        .reduce((max, r) => r.ascent > max ? r.ascent : max, 0) / sizeRatio;
+
+
     canvasEl.dataset[dsSourceId] = source.id;
     canvasEl.dataset[dsFontSize] = String(fontSize);
     cachedRaster =  {
         glyphs,
-        sizeRatio: _fontSize / fontSize,
+        maxAscent,
+        sizeRatio,
     };
 
     return cachedRaster;

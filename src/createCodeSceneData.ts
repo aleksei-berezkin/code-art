@@ -1,8 +1,9 @@
 import { rect2d, vertexSize2d } from './util/rect';
 import type { GlyphRaster } from './rasterizeFont';
-import { Source, getSourceStartPos } from './souceCode';
+import type { Source } from './souceCode';
 import type { CodeColorization } from './colorizeCode';
-import { getSceneLinesNum, SceneBounds } from './PixelSpace';
+import type { SceneBounds } from './PixelSpace';
+import { iterateCode } from './iterateCode';
 
 export function createCodeSceneData(bounds: SceneBounds,
                                     scrollFraction: number,
@@ -14,61 +15,29 @@ export function createCodeSceneData(bounds: SceneBounds,
     const vertices = [];
     const glyphTexPosition = [];
     const colors = [];
-
-    const lRasters = [...glyphRaster.glyphs.values()];
-    const maxAscent = lRasters.reduce((max, r) => r.ascent > max ? r.ascent : max, 0) / glyphRaster.sizeRatio;
-
-    const posMin = getSourceStartPos(source, getSceneLinesNum(bounds, fontSize), scrollFraction);
-
-    let x = bounds.xMin;
-    let y = bounds.yMin;
-    for (let i = posMin; i < source.text.length; i++) {
-        let letter = source.text[i];
-        if (letter === '\n') {
-            x = bounds.xMin;
-            y += fontSize;
-            if (y > bounds.yMax) {
-                break;
-            }
-            continue;
-        }
-
-        if (x > bounds.xMax) {
-            continue;
-        }
-
-        if (letter.charCodeAt(0) < 32) {
-            if (letter === '\t') {
-                letter = ' ';
-            } else {
-                continue;
-            }
-        }
-
-        const baseline = y + maxAscent;
-        const r = glyphRaster.glyphs.get(letter)!;
-
+    for (const codeLetter of iterateCode(bounds, scrollFraction, fontSize, source, glyphRaster)) {
+        const {pos, letter, x, baseline} = codeLetter;
+        debugger;
+        const m = glyphRaster.glyphs.get(letter)!;
         const rectVertices = rect2d(
             x,
-            baseline - r.ascent / glyphRaster.sizeRatio,
-            x + r.w / glyphRaster.sizeRatio,
-            baseline + r.descent / glyphRaster.sizeRatio,
+            baseline - m.ascent / glyphRaster.sizeRatio,
+            x + m.w / glyphRaster.sizeRatio,
+            baseline + m.descent / glyphRaster.sizeRatio,
         )
         vertices.push(...rectVertices);
 
         glyphTexPosition.push(...rect2d(
-            r.x, r.baseline - r.ascent,
-            r.x + r.w, r.baseline + r.descent,
+            m.x, m.baseline - m.ascent,
+            m.x + m.w, m.baseline + m.descent,
         ));
 
-        const color = codeColorization.colors[i] || [1, 1, 1];
+        const color = codeColorization.colors[pos] || [1, 1, 1];
         const verticesNum = rectVertices.length / vertexSize2d;
         colors.push(
             ...Array.from({length: verticesNum})
                 .flatMap(() => color)
         );
-
-        x += r.w / glyphRaster.sizeRatio;
     }
 
     return {vertices, glyphTexPosition, colors};
@@ -81,4 +50,3 @@ export type CodeSceneData = {
     glyphTexPosition: number[],
     colors: number[],
 }
-
