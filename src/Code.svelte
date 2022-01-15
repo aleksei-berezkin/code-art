@@ -57,19 +57,42 @@
         stroke: none;
         width: 32px;
     }
+
+    .menu-wr {
+        border-radius: 8px;
+        overflow: hidden;
+        position: absolute;
+        top: 80px;
+        left: 16px;
+    }
+
+    .menu-body {
+        opacity: 0;
+        transform: scale(0);
+        transform-origin: top left;
+        transition: transform 150ms, opacity 150ms;
+    }
+
+    .menu-body.shown {
+        opacity: 1;
+        transform: scale(1);
+    }
 </style>
 
 <canvas class='rasterize-font-canvas' bind:this={rasterCanvasEl} width='2048'></canvas>
 <section>
-    {#if imgParams}
-        <ImgParamsMenu imgParams={imgParams} paramsUpdated={onParamsUpdate}/>
-    {/if}
-
     <div class='code-wr'>
         <canvas class='code-canvas' bind:this={codeCanvasEl}></canvas>
-        <button class='btn-img-params'>
+        <button class='btn-img-params' on:click={() => menuShown = !menuShown}>
             <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' class='btn-dd' fill='#000000'><path d='M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6-1.41-1.41z'/></svg>
         </button>
+        {#if imgParams}
+            <div class='menu-wr'>
+                <div class={ `menu-body ${menuShown ? 'shown' : ''}` } >
+                    <ImgParamsMenu imgParams={imgParams} paramsUpdated={onParamsUpdate}/>
+                </div>
+            </div>
+        {/if}
     </div>
 </section>
     
@@ -93,6 +116,7 @@
     let codeCanvasEl: HTMLCanvasElement;
     let rasterCanvasEl: HTMLCanvasElement;
 
+    let menuShown = false;
     let imgParams: ImgParams | undefined = undefined;
     
     onMount(function () {

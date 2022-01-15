@@ -1,5 +1,11 @@
 <style>
-    .sliders {
+    .menu-root {
+        background-color: #ffffffb0;
+        border-radius: 8px;
+        box-sizing: border-box;
+        box-shadow: 0 2px 4px -1px rgb(0 0 0 / 20%), 0 4px 5px 0 rgb(0 0 0 / 14%), 0 1px 10px 0 rgb(0 0 0 / 12%);
+        margin: 12px;
+        padding: 16px;
     }
 
     .slider-wr {
@@ -54,7 +60,7 @@
     }
 </style>
 
-<div class='sliders'>
+<menu class='menu-root'>
     {#each Object.entries(imgParams) as p}
         {#if p[1].type === 'slider'}
             <div class='slider-wr'>
@@ -92,7 +98,7 @@
             </div>
         {/if}
     {/each}
-</div>
+</menu>
 
 <script lang='ts'>
     import { ImgParams, ParamChoiceKey, ParamColorKey, ParamKey, ParamSliderKey } from './ImgParams';
