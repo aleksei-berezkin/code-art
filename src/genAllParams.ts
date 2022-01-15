@@ -1,5 +1,5 @@
 import { pickRandom } from './util/pickRandom';
-import { getSourceStartLine, Source, sourceCodeNames } from './souceCode';
+import { Source, sourceCodeNames } from './souceCode';
 import type { ImgParams } from './ImgParams';
 import { degToRad } from './util/degToRad';
 import { colorSchemeNames } from './colorSchemes';
@@ -8,7 +8,6 @@ import {
     calcExtensions,
     Extensions,
     getSceneBounds,
-    getSceneLinesNum,
     makePixelSpace,
     PixelSpace,
     SceneBounds
@@ -17,6 +16,8 @@ import type { GlyphRaster } from './rasterizeFont';
 import { percentLogToVal } from './util/percentLogToVal';
 import { getTxMax } from './getTxMax';
 import type { Mat4 } from './util/matrices';
+import { iterateCode } from './iterateCode';
+import { mulVec } from './util/matrices';
 
 export function genAllParams(w: number, h: number, fontSize: number, source: Source, glyphRaster: GlyphRaster): {
     pixelSpace: PixelSpace,
@@ -32,7 +33,7 @@ export function genAllParams(w: number, h: number, fontSize: number, source: Sou
     const extensions = calcExtensions(pixelSpace, angles.x, angles.y, angles.z);
 
     const txMat = getTxMax(pixelSpace, angles.x, angles.y, angles.z, 0, 0, 0);
-    const scrollFraction = genScrollFraction(source, getSceneBounds(pixelSpace, extensions), angles.x, fontSize);
+    const scrollFraction = genScrollFraction(source, getSceneBounds(pixelSpace, extensions), txMat, fontSize, glyphRaster);
 
     const imgParams: ImgParams = {
         'angle x': {
@@ -208,63 +209,32 @@ function randomSign() {
     return Math.random() < .5 ? -1 : 1;
 }
 
-function genScrollFraction(source: Source, sceneBounds: SceneBounds, xAngle: number, fontSize: number) {
+function genScrollFraction(source: Source, sceneBounds: SceneBounds, txMat: Mat4, fontSize: number, glyphRaster: GlyphRaster) {
     if (source.lang === 'js min') {
         return Math.random();
     }
 
-    const best = Array.from({length: 5})
+    return Array.from({length: 5})
         .map(() => {
             const scrollFraction = Math.random();
             return {
                 scrollFraction,
-                score: scoreScroll(source, sceneBounds, xAngle, scrollFraction, fontSize),
+                score: scoreScroll(source, sceneBounds, txMat, scrollFraction, fontSize, glyphRaster),
             }
         })
-        .reduce((a, b) => a.score > b.score ? a : b);
-    console.log('scoreeeee', best.score);
-    return best.scrollFraction;
+        .reduce((a, b) => a.score > b.score ? a : b)
+        .scrollFraction;
 }
 
-// TODO score scroll using real text positions and tx mat
-function scoreScroll(source: Source, sceneBounds: SceneBounds, xAngle: number, scrollFraction: number, fontSize: number) {
-    const linesNum = getSceneLinesNum(sceneBounds, fontSize);
-    const startLine = getSourceStartLine(source, linesNum, scrollFraction);
-    const linesScores = Array.from({length: linesNum})
-        .map((_, l) => scoreLine(source, startLine + l));
-
-    if (xAngle === 0) {
-        return linesScores.reduce((s, t) => s + t);
-    }
-
-    if (xAngle < 0) {
-        // Upper lines are farther, so start from lower non-discounted
-        linesScores.reverse();
-    }
-
-    return linesScores
-        .map((score, i) => score * Math.exp(-i / 20))
-        .reduce((s, t) => s + t);
-}
-
-function scoreLine(source: Source, lineNum: number) {
-    if (lineNum >= source.linesOffsets.length) {
-        return 0;
-    }
-
-    const startPos = source.linesOffsets[lineNum];
-    const lineLength = lineNum === source.linesOffsets.length
-        ? source.text.length - startPos
-        : source.linesOffsets[lineNum + 1] - startPos;
-
-    let leadingSpaces = 0;
-    for (let i = startPos; i < startPos + lineLength; i++) {
-        if (source.text.charCodeAt(i) <= 32) {
-            leadingSpaces++;
-        } else {
-            break;
+function scoreScroll(source: Source, sceneBounds: SceneBounds, txMat: Mat4, scrollFraction: number, fontSize: number, glyphRaster: GlyphRaster) {
+    let score = 0;
+    for (const c of iterateCode(sceneBounds, scrollFraction, fontSize, source, glyphRaster)) {
+        let [x, y, , w] = mulVec(txMat, [c.x, c.baseline, 0, 1]);
+        x /= w;
+        y /= w;
+        if (-1 <= x && x <= 1 && -1 <= y && y <= 1) {
+            score += 1 / w**2;
         }
     }
-
-    return lineLength / (leadingSpaces + 1);
+    return score;
 }

@@ -16,7 +16,7 @@ export function mul(...A: Mat4[]): Mat4 {
     return A.reduce(mul2);
 }
 
-function mul2(A: Mat4, B: Mat4) {
+function mul2(A: Mat4, B: Mat4): Mat4 {
     const C = [];
     for (let r = 0; r < size; r++) {
         for (let c = 0; c < size; c++) {
@@ -28,6 +28,25 @@ function mul2(A: Mat4, B: Mat4) {
         }
     }
     return asMat4(C);
+}
+
+/**
+ * Unlike math, vector here is 'horizontal'
+ */
+export type Vec4 = [
+    number, number, number, number
+];
+
+export function mulVec(A: Mat4, v: Vec4): Vec4 {
+    const w = [];
+    for (let r = 0; r < size; r++) {
+        let s = 0;
+        for (let c = 0; c < size; c++) {
+            s += A[ix(r, c)] * v[c];
+        }
+        w.push(s);
+    }
+    return w as Vec4;
 }
 
 function ix(r: number, c: number) {

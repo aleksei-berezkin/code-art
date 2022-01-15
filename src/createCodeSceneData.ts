@@ -17,7 +17,6 @@ export function createCodeSceneData(bounds: SceneBounds,
     const colors = [];
     for (const codeLetter of iterateCode(bounds, scrollFraction, fontSize, source, glyphRaster)) {
         const {pos, letter, x, baseline} = codeLetter;
-        debugger;
         const m = glyphRaster.glyphs.get(letter)!;
         const rectVertices = rect2d(
             x,

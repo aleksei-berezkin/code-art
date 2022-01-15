@@ -35,23 +35,23 @@ export function* iterateCode(bounds: SceneBounds,
             continue;
         }
 
-        if (letter.charCodeAt(0) < 32) {
-            if (letter === '\t') {
-                letter = ' ';
-            } else {
-                continue;
-            }
+        if (letter === '\t') {
+            letter = ' ';
+        } else if (letter.charCodeAt(0) < 32) {
+            continue;
         }
 
         const baseline = y + glyphRaster.maxAscent;
         const metrics = glyphRaster.glyphs.get(letter)!;
 
-        yield {
-            pos,
-            letter,
-            x,
-            baseline,
-        };
+        if (letter !== ' ') {
+            yield {
+                pos,
+                letter,
+                x,
+                baseline,
+            };
+        }
 
         x += metrics.w / glyphRaster.sizeRatio;
     }
