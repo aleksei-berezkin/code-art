@@ -13,10 +13,49 @@
         flex-direction: column;
     }
 
+    .code-wr {
+        max-width: 1280px;
+        position: relative;
+        width: 90%;
+    }
+
     .code-canvas {
         aspect-ratio: 3/2;
-        max-width: 1280px;
-        width: 90%;
+        width: 100%;
+    }
+
+    .btn-img-params {
+        align-items: center;
+        background: #ffffffd0;
+        border: none;
+        border-radius: 50%;
+        box-shadow: 0 1px 2px 0 rgb(60 64 67 / 30%), 0 2px 6px 2px rgb(60 64 67 / 15%);
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        left: 16px;
+        height: 48px;
+        margin: 0;
+        padding: 0;
+        position: absolute;
+        transition: background-color 200ms;
+        top: 16px;
+        width: 48px;
+    }
+
+    .btn-img-params:hover {
+        background: #ffffffe0;
+    }
+
+    .btn-img-params:active {
+        background: #fffffff0;
+    }
+
+    .btn-dd {
+        fill: #000000e0;
+        height: 32px;
+        stroke: none;
+        width: 32px;
     }
 </style>
 
@@ -25,7 +64,13 @@
     {#if imgParams}
         <ImgParamsMenu imgParams={imgParams} paramsUpdated={onParamsUpdate}/>
     {/if}
-    <canvas class='code-canvas' bind:this={codeCanvasEl}></canvas>
+
+    <div class='code-wr'>
+        <canvas class='code-canvas' bind:this={codeCanvasEl}></canvas>
+        <button class='btn-img-params'>
+            <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' class='btn-dd' fill='#000000'><path d='M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6-1.41-1.41z'/></svg>
+        </button>
+    </div>
 </section>
     
 <script lang='ts'>
