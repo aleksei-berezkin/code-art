@@ -7,10 +7,16 @@
         width: 2048px;
     }
 
-    section {
+    .section-main {
         align-items: center;
         display: flex;
         flex-direction: column;
+        --bord-r-std: 8px;
+        --btn-size: 48px;
+        --btn-pic-size: 32px;
+        --pad-std: 16px;
+        --tr-fast: 150ms;
+        --tr-std: 250ms;
     }
 
     .code-wr {
@@ -24,74 +30,73 @@
         width: 100%;
     }
 
-    .btn-img-params {
+    .round-btn {
         align-items: center;
-        background: #ffffffd0;
+        background: #ffffffc0;
         border: none;
         border-radius: 50%;
         box-shadow: 0 1px 2px 0 rgb(60 64 67 / 30%), 0 2px 6px 2px rgb(60 64 67 / 15%);
         cursor: pointer;
         display: flex;
         justify-content: center;
-        left: 16px;
-        height: 48px;
+        height: var(--btn-size);
         margin: 0;
         padding: 0;
         position: absolute;
-        transition: background-color 200ms;
-        top: 16px;
-        width: 48px;
+        transition: background-color var(--tr-std);
+        top: var(--pad-std);
+        width: var(--btn-size);
+        -webkit-tap-highlight-color: transparent;
     }
 
-    .btn-img-params:hover {
+    .round-btn.left {
+        left: var(--pad-std);
+    }
+
+    .round-btn.second-to-right {
+        right: calc(var(--pad-std) * 2 + var(--btn-size));
+    }
+
+    .round-btn.right {
+        right: var(--pad-std);
+    }
+
+    .round-btn:hover {
         background: #ffffffe0;
     }
 
-    .btn-img-params:active {
-        background: #fffffff0;
+    .round-btn:active {
+        background: #fffffff8;
     }
 
-    .btn-dd {
-        fill: #000000e0;
-        height: 32px;
+    .btn-pic {
+        fill: #000000d0;
+        height: var(--btn-pic-size);
         stroke: none;
-        width: 32px;
+        transition: transform var(--tr-std);
+        width: var(--btn-pic-size);
     }
 
-    .menu-wr {
-        border-radius: 8px;
-        overflow: hidden;
-        position: absolute;
-        top: 80px;
-        left: 16px;
-    }
-
-    .menu-body {
-        opacity: 0;
-        transform: scale(0);
-        transform-origin: top left;
-        transition: transform 150ms, opacity 150ms;
-    }
-
-    .menu-body.shown {
-        opacity: 1;
-        transform: scale(1);
+    .btn-pic.rotate180 {
+        transform: rotate(-180deg);
     }
 </style>
 
 <canvas class='rasterize-font-canvas' bind:this={rasterCanvasEl} width='2048'></canvas>
-<section>
+<section class='section-main'>
     <div class='code-wr'>
         <canvas class='code-canvas' bind:this={codeCanvasEl}></canvas>
-        <button class='btn-img-params' on:click={() => menuShown = !menuShown}>
-            <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' class='btn-dd' fill='#000000'><path d='M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6-1.41-1.41z'/></svg>
+        <button class='round-btn left' on:click={() => menuOpen = !menuOpen}>
+            <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' class={`btn-pic ${menuOpen ? 'rotate180' : ''}`}><path d='M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6-1.41-1.41z'/></svg>
+        </button>
+        <button class='round-btn second-to-right' on:click={handleGenerateClick}>
+            <svg xmlns='http://www.w3.org/2000/svg' viewBox="0 0 24 24" class='btn-pic'><path d='M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z'/></svg>
+        </button>
+        <button class='round-btn right' on:click={() => {}}>
+            <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' class='btn-pic'><path d='M18,15v3H6v-3H4v3c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2v-3H18z M17,11l-1.41-1.41L13,12.17V4h-2v8.17L8.41,9.59L7,11l5,5 L17,11z'/></svg>
         </button>
         {#if imgParams}
-            <div class='menu-wr'>
-                <div class={ `menu-body ${menuShown ? 'shown' : ''}` } >
-                    <ImgParamsMenu imgParams={imgParams} paramsUpdated={onParamsUpdate}/>
-                </div>
-            </div>
+            <ImgParamsMenu imgParams={imgParams} menuOpen={menuOpen} paramsUpdated={onParamsUpdate} clickedOutside={onClickedOutsideMenu}/>
         {/if}
     </div>
 </section>
@@ -116,20 +121,32 @@
     let codeCanvasEl: HTMLCanvasElement;
     let rasterCanvasEl: HTMLCanvasElement;
 
-    let menuShown = false;
     let imgParams: ImgParams | undefined = undefined;
+    let menuOpen = false;
     
     onMount(function () {
+        generateScene(36);
+    });
+
+    function handleGenerateClick() {
+        if (imgParams) {
+            // The only preserved param
+            const fontSize = imgParams['font size'].val;
+            generateScene(fontSize);
+        }
+    }
+
+    function generateScene(fontSize: number) {
         setWH();
         const sourceName = pickRandom(sourceCodeNames);
-        const fontSize = 36;
         getSource(sourceName).then(source => {
             const glyphRaster = rasterizeFont(source, rasterCanvasEl, fontSize);
             const allParams = genAllParams(getW(), getH(), fontSize, source, glyphRaster);
             imgParams = allParams.imgParams;
             drawScene(allParams.pixelSpace, allParams.extensions, source, allParams.imgParams, allParams.txMat, glyphRaster);
         });
-    });
+    }
+        
 
     function onParamsUpdate() {
         const pixelSpace = makePixelSpace(getW(), getH(), percentLogToVal(imgParams!.blur.val));
@@ -145,6 +162,10 @@
             );
             drawScene(pixelSpace, extensions, source, imgParams!, txMat, glyphRaster);
         })
+    }
+
+    function onClickedOutsideMenu() {
+        menuOpen = false;
     }
 
     function drawScene(pixelSpace: PixelSpace, extensions: Extensions, source: Source, imgParams: ImgParams, txMat: Mat4, glyphRaster: GlyphRaster) {

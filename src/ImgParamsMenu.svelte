@@ -1,11 +1,23 @@
 <style>
     .menu-root {
         background-color: #ffffffb0;
-        border-radius: 8px;
+        border-radius: var(--bord-r-std);
         box-sizing: border-box;
         box-shadow: 0 2px 4px -1px rgb(0 0 0 / 20%), 0 4px 5px 0 rgb(0 0 0 / 14%), 0 1px 10px 0 rgb(0 0 0 / 12%);
-        margin: 12px;
-        padding: 16px;
+        left: var(--pad-std);
+        margin: 0;
+        opacity: 0;
+        padding: var(--pad-std);
+        position: absolute;
+        transform: scale(0);
+        transform-origin: top left;
+        transition: transform var(--tr-fast), var(--tr-fast);
+        top: calc(var(--pad-std) * 2 + var(--btn-size));
+    }
+
+    .menu-root.open {
+        transform: scale(1);
+        opacity: 1;
     }
 
     .slider-wr {
@@ -60,7 +72,7 @@
     }
 </style>
 
-<menu class='menu-root'>
+<menu class={`menu-root ${menuOpen ? 'open' : ''}`} bind:this={menuRootEl}>
     {#each Object.entries(imgParams) as p}
         {#if p[1].type === 'slider'}
             <div class='slider-wr'>
@@ -102,9 +114,12 @@
 
 <script lang='ts'>
     import { ImgParams, ParamChoiceKey, ParamColorKey, ParamKey, ParamSliderKey } from './ImgParams';
+    import { afterUpdate, onDestroy } from 'svelte';
 
-    export let imgParams;
+    export let imgParams: ImgParams;
+    export let menuOpen: boolean;
     export let paramsUpdated: (imgParams: ImgParams) => void;
+    export let clickedOutside: () => void;
 
     function toId(k: string) {
         return 'code-scene-control-' + k.replace(/\s/g, '-');
@@ -124,6 +139,41 @@
             s = String(val);
         }
         return s.replace(/-/, '\u2212');
+    }
+
+    let menuRootEl: HTMLElement;
+    let outsideClickListener: ((e: MouseEvent) => void) | undefined = undefined;
+
+    afterUpdate(async () => {
+        if (!menuOpen) {
+            removeOutsideClickListener();
+            return;
+        }
+
+        // Event is still processed, so postpone
+        setTimeout(() => {
+            if (outsideClickListener) {
+                window.removeEventListener('click', outsideClickListener);
+            }
+    
+            outsideClickListener = function (e: MouseEvent) {
+                if ((e.target as Node | null)?.nodeType && menuRootEl.contains(e.target as Node)) {
+                    return;
+                }
+    
+                clickedOutside();
+            }
+    
+            window.addEventListener('click', outsideClickListener);
+        });
+    });
+
+    onDestroy(removeOutsideClickListener);
+
+    function removeOutsideClickListener() {
+        if (outsideClickListener) {
+            window.removeEventListener('click', outsideClickListener);
+        }
     }
 
     function handleSliderChange(e: Event) {
