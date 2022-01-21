@@ -1,8 +1,11 @@
-type SliderVal = {
+type Unit = 'rad' | '%' | 'log10' | 'log10%';
+
+export type SliderVal = {
     type: 'slider',
     min: number,
     val: number,
     max: number,
+    unit?: Unit,
 }
 
 type ChoicesVal = {
@@ -18,38 +21,38 @@ type ColorVal = {
 
 export type ImgParams = {
     angle: {
-        'angle x': SliderVal,
-        'angle y': SliderVal,
-        'angle z': SliderVal,
+        x: SliderVal,
+        y: SliderVal,
+        z: SliderVal,
     },
     position: {
         scroll: SliderVal,
-        'translate x': SliderVal,
-        'translate y': SliderVal,
-        'translate z': SliderVal,
+        x: SliderVal,
+        y: SliderVal,
+        z: SliderVal,
     },
     font: {
-        'font size': SliderVal,
+        size: SliderVal,
     },
     source: {
         source: ChoicesVal,
     },
     color: {
-        'color scheme': ChoicesVal,
-        'color amplification': SliderVal,
+        scheme: ChoicesVal,
+        brightness: SliderVal,
     },
     glow: {
-        'glow radius': SliderVal,
-        'glow amplification': SliderVal,
-        'glow shifted color': ColorVal,
-        'glow color shift': SliderVal,
+        radius: SliderVal,
+        brightness: SliderVal,
+        recolor: SliderVal,
+        to: ColorVal,
     },
     fade: {
         blur: SliderVal,
         fade: SliderVal,
-        'fade distortion': SliderVal,
-        'fade in distortion': ColorVal,
-        'fade out distortion': ColorVal,
+        recolor: SliderVal,
+        near: ColorVal,
+        far: ColorVal,
     },
 }
 

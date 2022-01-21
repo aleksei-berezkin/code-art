@@ -121,7 +121,7 @@
     function handleGenerateClick() {
         if (imgParams) {
             // The only preserved param
-            const fontSize = imgParams.font['font size'].val;
+            const fontSize = imgParams.font.size.val;
             generateScene(fontSize);
         }
     }
@@ -144,19 +144,19 @@
         }
 
         const pixelSpace = makePixelSpace(getW(), getH(), percentLogToVal(imgParams.fade.blur.val));
-        const xAngle = imgParams.angle['angle x'].val;
-        const yAngle = imgParams.angle['angle y'].val;
-        const zAngle = imgParams.angle['angle z'].val;
+        const xAngle = imgParams.angle.x.val;
+        const yAngle = imgParams.angle.y.val;
+        const zAngle = imgParams.angle.z.val;
         const extensions = calcExtensions(pixelSpace, xAngle, yAngle, zAngle);
         getSource(imgParams.source['source'].val as SourceCodeName).then(source => {
             if (!imgParams) {
                 return;
             }
 
-            const glyphRaster = rasterizeFont(source, rasterCanvasEl, imgParams.font['font size'].val);
+            const glyphRaster = rasterizeFont(source, rasterCanvasEl, imgParams.font.size.val);
             const txMat = getTxMax(pixelSpace,
                 xAngle, yAngle, zAngle,
-                imgParams.position['translate x'].val, imgParams.position['translate y'].val, imgParams.position['translate z'].val
+                imgParams.position.x.val, imgParams.position.y.val, imgParams.position.z.val
             );
             drawScene(pixelSpace, extensions, source, imgParams, txMat, glyphRaster);
         })

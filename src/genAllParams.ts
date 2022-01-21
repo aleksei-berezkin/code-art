@@ -37,23 +37,26 @@ export function genAllParams(w: number, h: number, fontSize: number, source: Sou
 
     const imgParams: ImgParams = {
         angle: {
-            'angle x': {
+            x: {
                 type: 'slider',
                 min: degToRad(-20),
                 val: angles.x,
                 max: degToRad(20),
+                unit: 'rad',
             },
-            'angle y': {
+            y: {
                 type: 'slider',
                 min: degToRad(-20),
                 val: angles.y,
                 max: degToRad(20),
+                unit: 'rad',
             },
-            'angle z': {
+            z: {
                 type: 'slider',
                 min: -Math.PI / 2,
                 val: angles.z,
                 max: Math.PI / 2,
+                unit: 'rad',
             },
         },
         position: {
@@ -62,29 +65,32 @@ export function genAllParams(w: number, h: number, fontSize: number, source: Sou
                 min: 0,
                 val: scrollFraction * 100,
                 max: 100,
+                unit: '%',
             },
-            'translate x': {
-                type: 'slider',
-                // percent
-                min: -100,
-                val: 0,
-                max: 100,
-            },
-            'translate y': {
+            x: {
                 type: 'slider',
                 min: -100,
                 val: 0,
                 max: 100,
+                unit: '%',
             },
-            'translate z': {
+            y: {
                 type: 'slider',
                 min: -100,
                 val: 0,
                 max: 100,
+                unit: '%',
+            },
+            z: {
+                type: 'slider',
+                min: -100,
+                val: 0,
+                max: 100,
+                unit: '%',
             },
         },
         font: {
-            'font size': {
+            size: {
                 type: 'slider',
                 min: 5,
                 val: fontSize,
@@ -99,12 +105,12 @@ export function genAllParams(w: number, h: number, fontSize: number, source: Sou
             },
         },
         color: {
-            'color scheme': {
+            scheme: {
                 type: 'choices',
                 val: pickRandom(colorSchemeNames),
                 choices: colorSchemeNames,
             },
-            'color amplification': {
+            brightness: {
                 type: 'slider',
                 min: 0,
                 val: .9 + Math.random() * .2,
@@ -112,25 +118,27 @@ export function genAllParams(w: number, h: number, fontSize: number, source: Sou
             },
         },
         glow: {
-            'glow radius': {
+            radius: {
                 type: 'slider',
                 min: 0,
                 val: 20 + Math.random() * 40,
                 max: 100,
+                unit: '%',
             },
-            'glow amplification': {
+            brightness: {
                 type: 'slider',
                 min: 0,
                 val: 1 + Math.random() * 1.2,
                 max: 4,
             },
-            'glow color shift': {
+            recolor: {
                 type: 'slider',
                 min: 0,
                 val: Math.random() * 100,
                 max: 100,
+                unit: '%',
             },
-            'glow shifted color': {
+            to: {
                 type: 'color',
                 // TODO good colors in col scheme
                 val: rgbToHex(Array.from({length: 3}).map(() => .25 + .75 * Math.random()) as RGB),
@@ -139,29 +147,29 @@ export function genAllParams(w: number, h: number, fontSize: number, source: Sou
         fade: {
             'blur': {
                 type: 'slider',
-                // % log10
                 min: 1,
                 val: blurFactorPercentLog,
                 max: 3,
+                unit: 'log10%',
             },
             'fade': {
                 type: 'slider',
-                // log10
                 min: -2,
                 val: -1 + Math.random(),
                 max: 1,
+                unit: 'log10',
             },
-            'fade distortion': {
+            recolor: {
                 type: 'slider',
                 min: 0,
                 val: 1.5 + Math.random() * 2.5,
                 max: 4,
             },
-            'fade in distortion': {
+            near: {
                 type: 'color',
                 val: rgbToHex(Array.from({length: 3}).map(() => .25 + .75 * Math.random()) as RGB),
             },
-            'fade out distortion': {
+            far: {
                 type: 'color',
                 val: rgbToHex(Array.from({length: 3}).map(() => .25 + .75 * Math.random()) as RGB),
             },

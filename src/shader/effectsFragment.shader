@@ -15,16 +15,16 @@ uniform float u_blurKernelWeight;
 
 uniform vec3 u_glowShiftedColor;
 uniform float u_glowColorShift;
-uniform float u_glowAmplification;
+uniform float u_glowBrightness;
 uniform float u_fade;
 
-uniform vec3 u_fadeInDistortion;
-uniform vec3 u_fadeOutDistortion;
-uniform float u_fadeDistortion;
+uniform vec3 u_fadeNearColor;
+uniform vec3 u_fadeFarColor;
+uniform float u_fadeRecolor;
 
 uniform vec3 u_bg;
 
-uniform float u_colorAmplification;
+uniform float u_colorBrightness;
 
 in vec2 v_texCoords;
 in vec2 v_blurTexCoordsRadii;
@@ -59,8 +59,8 @@ void main() {
     if (u_mode == MODE_GLOW) {
         vec3 selfRgb = texture(u_image, v_texCoords).rgb;
         outColor = vec4(
-            ((1.0 - u_glowColorShift) * blurred + u_glowColorShift * avg(blurred) * u_glowShiftedColor) * u_glowAmplification + u_bg
-            + selfRgb * u_colorAmplification,
+            ((1.0 - u_glowColorShift) * blurred + u_glowColorShift * avg(blurred) * u_glowShiftedColor) * u_glowBrightness + u_bg
+            + selfRgb * u_colorBrightness,
             1
         );
     } else if (u_mode == MODE_BLUR) {
@@ -75,13 +75,13 @@ void main() {
             if (distance > 0.0) {
                 float fade = 1.0 + pow(distance, 2.0) * u_fade;
                 selfColor = blurred / fade;
-                distort = distance * u_fadeDistortion;
-                distortColor = u_fadeOutDistortion;
+                distort = distance * u_fadeRecolor;
+                distortColor = u_fadeFarColor;
             } else {
                 float brighter = 1.0 + pow(distance, 2.0) / u_fade;
                 selfColor = blurred * brighter;
-                distort = -distance * u_fadeDistortion;
-                distortColor = u_fadeInDistortion;
+                distort = -distance * u_fadeRecolor;
+                distortColor = u_fadeNearColor;
             }
 
             if (distort == 0.0) {

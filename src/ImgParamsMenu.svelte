@@ -84,10 +84,10 @@
                     {#if p.type === 'slider'}
                         <div class='slider-wr'>
                             <label class='slider-label' for={toId(k)}>{k}</label>
-                            <div class='slider-min'>{toLabelNum(k, p.min)}</div>
+                            <div class='slider-min'>{toLabelNum(p, 'min')}</div>
                             <!--suppress XmlDuplicatedId -->
                             <input class='slider-slider' id={toId(k)} data-g={g} data-k={k} type='range' min='{p.min}' max='{p.max}' step='any' value='{p.val}' on:input={handleSliderChange}/>
-                            <div class='slider-max'>{toLabelNum(k, p.max)}</div>
+                            <div class='slider-max'>{toLabelNum(p, 'max')}</div>
                         </div>
                     {/if}
             
@@ -123,7 +123,7 @@
 </menu>
 
 <script lang='ts'>
-    import { ImgParams, ParamGroup } from './ImgParams';
+    import { ImgParams, ParamGroup, SliderVal } from './ImgParams';
     import { afterUpdate, onDestroy } from 'svelte';
     import Icon from './Icon.svelte';
     import { getFromSelfOrParentDataset } from './util/getFromSelfOrParentDataset';
@@ -137,16 +137,17 @@
         return 'code-scene-control-' + k.replace(/\s/g, '-');
     }
 
-    function toLabelNum(k: string, val: number) {
+    function toLabelNum(p: SliderVal, which: 'min' | 'max') {
+        const val = p[which];
         let s;
-        if (k === 'angle x' || k === 'angle y' || k === 'angle z') {
+        if (p.unit === 'rad') {
             s = `${val / Math.PI * 180}\u00B0`;
-        } else if (k === 'translate x' || k === 'translate y' || k === 'translate z' || k === 'scroll' || k === 'glow radius' || k === 'glow color shift') {
+        } else if (p.unit === '%') {
             s = `${val}%`;
-        } else if (k === 'blur') {
-            s = `${10 ** val}%`;
-        } else if (k === 'fade') {
+        } else if (p.unit === 'log10') {
             s = String(10 ** val);
+        } else if (p.unit === 'log10%') {
+            s = `${10 ** val}%`;
         } else {
             s = String(val);
         }
