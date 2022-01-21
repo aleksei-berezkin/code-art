@@ -36,122 +36,136 @@ export function genAllParams(w: number, h: number, fontSize: number, source: Sou
     const scrollFraction = genScrollFraction(source, getSceneBounds(pixelSpace, extensions), txMat, fontSize, glyphRaster);
 
     const imgParams: ImgParams = {
-        'angle x': {
-            type: 'slider',
-            min: degToRad(-20),
-            val: angles.x,
-            max: degToRad(20),
+        angle: {
+            'angle x': {
+                type: 'slider',
+                min: degToRad(-20),
+                val: angles.x,
+                max: degToRad(20),
+            },
+            'angle y': {
+                type: 'slider',
+                min: degToRad(-20),
+                val: angles.y,
+                max: degToRad(20),
+            },
+            'angle z': {
+                type: 'slider',
+                min: -Math.PI / 2,
+                val: angles.z,
+                max: Math.PI / 2,
+            },
         },
-        'angle y': {
-            type: 'slider',
-            min: degToRad(-20),
-            val: angles.y,
-            max: degToRad(20),
+        position: {
+            'scroll': {
+                type: 'slider',
+                min: 0,
+                val: scrollFraction * 100,
+                max: 100,
+            },
+            'translate x': {
+                type: 'slider',
+                // percent
+                min: -100,
+                val: 0,
+                max: 100,
+            },
+            'translate y': {
+                type: 'slider',
+                min: -100,
+                val: 0,
+                max: 100,
+            },
+            'translate z': {
+                type: 'slider',
+                min: -100,
+                val: 0,
+                max: 100,
+            },
         },
-        'angle z': {
-            type: 'slider',
-            min: -Math.PI / 2,
-            val: angles.z,
-            max: Math.PI / 2,
+        font: {
+            'font size': {
+                type: 'slider',
+                min: 5,
+                val: fontSize,
+                max: 120,
+            },
         },
-        'translate x': {
-            type: 'slider',
-            // percent
-            min: -100,
-            val: 0,
-            max: 100,
+        source: {
+            'source': {
+                type: 'choices',
+                val: source.name,
+                choices: sourceCodeNames,
+            },
         },
-        'translate y': {
-            type: 'slider',
-            min: -100,
-            val: 0,
-            max: 100,
+        color: {
+            'color scheme': {
+                type: 'choices',
+                val: pickRandom(colorSchemeNames),
+                choices: colorSchemeNames,
+            },
+            'color amplification': {
+                type: 'slider',
+                min: 0,
+                val: .9 + Math.random() * .2,
+                max: 3,
+            },
         },
-        'translate z': {
-            type: 'slider',
-            min: -100,
-            val: 0,
-            max: 100,
+        glow: {
+            'glow radius': {
+                type: 'slider',
+                min: 0,
+                val: 20 + Math.random() * 40,
+                max: 100,
+            },
+            'glow amplification': {
+                type: 'slider',
+                min: 0,
+                val: 1 + Math.random() * 1.2,
+                max: 4,
+            },
+            'glow color shift': {
+                type: 'slider',
+                min: 0,
+                val: Math.random() * 100,
+                max: 100,
+            },
+            'glow shifted color': {
+                type: 'color',
+                // TODO good colors in col scheme
+                val: rgbToHex(Array.from({length: 3}).map(() => .25 + .75 * Math.random()) as RGB),
+            },
         },
-        'scroll': {
-            type: 'slider',
-            min: 0,
-            val: scrollFraction * 100,
-            max: 100,
+        fade: {
+            'blur': {
+                type: 'slider',
+                // % log10
+                min: 1,
+                val: blurFactorPercentLog,
+                max: 3,
+            },
+            'fade': {
+                type: 'slider',
+                // log10
+                min: -2,
+                val: -1 + Math.random(),
+                max: 1,
+            },
+            'fade distortion': {
+                type: 'slider',
+                min: 0,
+                val: 1.5 + Math.random() * 2.5,
+                max: 4,
+            },
+            'fade in distortion': {
+                type: 'color',
+                val: rgbToHex(Array.from({length: 3}).map(() => .25 + .75 * Math.random()) as RGB),
+            },
+            'fade out distortion': {
+                type: 'color',
+                val: rgbToHex(Array.from({length: 3}).map(() => .25 + .75 * Math.random()) as RGB),
+            },
         },
-        'font size': {
-            type: 'slider',
-            min: 5,
-            val: fontSize,
-            max: 120,
-        },
-        'color scheme': {
-            type: 'choices',
-            val: pickRandom(colorSchemeNames),
-            choices: colorSchemeNames,
-        },
-        'source': {
-            type: 'choices',
-            val: source.name,
-            choices: sourceCodeNames,
-        },
-        'glow amplification': {
-            type: 'slider',
-            min: 0,
-            val: 1 + Math.random() * 1.2,
-            max: 4,
-        },
-        'glow color shift': {
-            type: 'slider',
-            min: 0,
-            val: Math.random() * 100,
-            max: 100,
-        },
-        'glow shifted color': {
-            type: 'color',
-            // TODO good colors in col scheme
-            val: rgbToHex(Array.from({length: 3}).map(() => .25 + .75 * Math.random()) as RGB),
-        },
-        'glow radius': {
-            type: 'slider',
-            min: 0,
-            val: 20 + Math.random() * 40,
-            max: 100,
-        },
-        'fade in distortion': {
-            type: 'color',
-            val: rgbToHex(Array.from({length: 3}).map(() => .25 + .75 * Math.random()) as RGB),
-        },
-        'fade out distortion': {
-            type: 'color',
-            val: rgbToHex(Array.from({length: 3}).map(() => .25 + .75 * Math.random()) as RGB),
-        },
-        'blur': {
-            type: 'slider',
-            // % log10
-            min: 1,
-            val: blurFactorPercentLog,
-            max: 3,
-        },
-        'color amplification': {
-            type: 'slider',
-            min: 0,
-            val: .9 + Math.random() * .2,
-            max: 3,
-        },
-        'fade': {
-            type: 'slider',
-            // log10
-            min: -2,
-            val: -1 + Math.random(),
-            max: 1,
-        },
-        'fade distortion': {
-            type: 'slider',
-            min: 0,
-            val: 1.5 + Math.random() * 2.5,
-            max: 4,
-        }
     };
 
     return {pixelSpace, txMat, extensions, imgParams};

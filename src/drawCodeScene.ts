@@ -37,12 +37,12 @@ export function drawCodeScene(canvasEl: HTMLCanvasElement,
         throw new Error('webgl2 not supported');
     }
 
-    const codeColorization = colorizeCode(source, params['color scheme'].val as ColorSchemeName);
+    const codeColorization = colorizeCode(source, params.color['color scheme'].val as ColorSchemeName);
 
     const sceneData = createCodeSceneData(
         getSceneBounds(pixelSpace, extensions),
-        params.scroll.val / 100,
-        params['font size'].val,
+        params.position.scroll.val / 100,
+        params.font['font size'].val,
         source,
         codeColorization,
         glyphRaster,

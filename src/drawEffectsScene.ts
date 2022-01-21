@@ -18,7 +18,7 @@ export function drawEffectsScene(canvasEl: HTMLCanvasElement, codeSceneDrawn: Co
 
     const program = createProgram(vertexShaderSource, fragmentShaderSource, gl);
 
-    const gridVertices = createEffectsGrid(codeSceneDrawn.pixelSpace, codeSceneDrawn.extensions, imgParams['font size'].val);
+    const gridVertices = createEffectsGrid(codeSceneDrawn.pixelSpace, codeSceneDrawn.extensions, imgParams.font['font size'].val);
     uploadArrayToAttribute('a_position', new Float32Array(gridVertices), vertexSize2d, program, gl);
 
     uploadTexture(canvasEl, gl.TEXTURE0, gl);
@@ -55,23 +55,23 @@ export function drawEffectsScene(canvasEl: HTMLCanvasElement, codeSceneDrawn: Co
 
     gl.uniform1f(gl.getUniformLocation(program, 'u_blurKernelWeight'), gaussianBlurKernelWeight);
 
-    gl.uniform1f(gl.getUniformLocation(program, 'u_glowRadius'), imgParams['font size'].val * imgParams['glow radius'].val / 200);
+    gl.uniform1f(gl.getUniformLocation(program, 'u_glowRadius'), imgParams.font['font size'].val * imgParams.glow['glow radius'].val / 200);
 
-    gl.uniform1f(gl.getUniformLocation(program, 'u_glowAmplification'), imgParams['glow amplification'].val);
+    gl.uniform1f(gl.getUniformLocation(program, 'u_glowAmplification'), imgParams.glow['glow amplification'].val);
 
-    gl.uniform1f(gl.getUniformLocation(program, 'u_glowColorShift'), imgParams['glow color shift'].val / 100);
+    gl.uniform1f(gl.getUniformLocation(program, 'u_glowColorShift'), imgParams.glow['glow color shift'].val / 100);
 
-    gl.uniform3fv(gl.getUniformLocation(program, 'u_glowShiftedColor'), hexToRgb(imgParams['glow shifted color'].val));
+    gl.uniform3fv(gl.getUniformLocation(program, 'u_glowShiftedColor'), hexToRgb(imgParams.glow['glow shifted color'].val));
 
-    gl.uniform1f(gl.getUniformLocation(program, 'u_colorAmplification'), imgParams['color amplification'].val);
+    gl.uniform1f(gl.getUniformLocation(program, 'u_colorAmplification'), imgParams.color['color amplification'].val);
 
-    gl.uniform1f(gl.getUniformLocation(program, 'u_fade'), 10**imgParams['fade'].val);
+    gl.uniform1f(gl.getUniformLocation(program, 'u_fade'), 10**imgParams.fade['fade'].val);
 
-    gl.uniform3fv(gl.getUniformLocation(program, 'u_fadeInDistortion'), hexToRgb(imgParams['fade in distortion'].val));
+    gl.uniform3fv(gl.getUniformLocation(program, 'u_fadeInDistortion'), hexToRgb(imgParams.fade['fade in distortion'].val));
 
-    gl.uniform3fv(gl.getUniformLocation(program, 'u_fadeOutDistortion'), hexToRgb(imgParams['fade out distortion'].val));
+    gl.uniform3fv(gl.getUniformLocation(program, 'u_fadeOutDistortion'), hexToRgb(imgParams.fade['fade out distortion'].val));
 
-    gl.uniform1f(gl.getUniformLocation(program, 'u_fadeDistortion'), imgParams['fade distortion'].val);
+    gl.uniform1f(gl.getUniformLocation(program, 'u_fadeDistortion'), imgParams.fade['fade distortion'].val);
 
     gl.uniform1i(gl.getUniformLocation(program, 'u_mode'), 0);
 

@@ -11,7 +11,7 @@
         position: absolute;
         transform: scale(0);
         transform-origin: top left;
-        transition: transform var(--tr-fast), var(--tr-fast);
+        transition: transform var(--tr-fast), opacity var(--tr-fast);
         top: calc(var(--pad-std) * 2 + var(--btn-size));
     }
 
@@ -73,47 +73,49 @@
 </style>
 
 <menu class={`menu-root ${menuOpen ? 'open' : ''}`} bind:this={menuRootEl}>
-    {#each Object.entries(imgParams) as p}
-        {#if p[1].type === 'slider'}
-            <div class='slider-wr'>
-                <label class='slider-label' for={toId(p[0])}>{p[0]}</label>
-                <div class='slider-min'>{toLabelNum(p[0], p[1].min)}</div>
-                <!--suppress XmlDuplicatedId -->
-                <input class='slider-slider' id={toId(p[0])} data-k={p[0]} type='range' min='{p[1].min}' max='{p[1].max}' step='any' value='{p[1].val}' on:input={handleSliderChange}/>
-                <div class='slider-max'>{toLabelNum(p[0], p[1].max)}</div>
-            </div>
-        {/if}
-
-        {#if p[1].type === 'choices'}
-            <div class='choices-wr'>
-                <label class='choices-label' for={toId(p[0])}>{p[0]}</label>
-                <!--suppress XmlDuplicatedId -->
-                <select class='choices-select' id={toId(p[0])} data-k={p[0]} on:change={handleChoiceChange}>
-                    {#each p[1].choices as choice}
-                        {#if p[1].val === choice}
-                            <option value={choice} selected>{choice}</option>
-                        {:else}
-                            <option value={choice}>{choice}</option>
-                        {/if}
-                    {/each}
-                </select>
-            </div>
-        {/if}
-
-        {#if p[1].type === 'color'}
-            <div class='choices-wr'>
-                <label for={toId(p[0])}>{p[0]}</label>
-                <div class='input-color-wr'>
+    {#each Object.entries(imgParams) as [g, ps]}
+        {#each Object.entries(ps) as [k, p]}
+            {#if p.type === 'slider'}
+                <div class='slider-wr'>
+                    <label class='slider-label' for={toId(k)}>{k}</label>
+                    <div class='slider-min'>{toLabelNum(k, p.min)}</div>
                     <!--suppress XmlDuplicatedId -->
-                    <input id={toId(p[0])} data-k={p[0]} type='color' class='input-color' value='{p[1].val}' on:change={handleColorChange}/>
+                    <input class='slider-slider' id={toId(k)} data-g={g} data-k={k} type='range' min='{p.min}' max='{p.max}' step='any' value='{p.val}' on:input={handleSliderChange}/>
+                    <div class='slider-max'>{toLabelNum(k, p.max)}</div>
                 </div>
-            </div>
-        {/if}
+            {/if}
+    
+            {#if p.type === 'choices'}
+                <div class='choices-wr'>
+                    <label class='choices-label' for={toId(k)}>{k}</label>
+                    <!--suppress XmlDuplicatedId -->
+                    <select class='choices-select' id={toId(k)} data-g={g} data-k={k} on:change={handleChoiceChange}>
+                        {#each p.choices as choice}
+                            {#if p.val === choice}
+                                <option value={choice} selected>{choice}</option>
+                            {:else}
+                                <option value={choice}>{choice}</option>
+                            {/if}
+                        {/each}
+                    </select>
+                </div>
+            {/if}
+    
+            {#if p.type === 'color'}
+                <div class='choices-wr'>
+                    <label for={toId(k)}>{k}</label>
+                    <div class='input-color-wr'>
+                        <!--suppress XmlDuplicatedId -->
+                        <input id={toId(k)} data-g={g} data-k={k} type='color' class='input-color' value='{p.val}' on:change={handleColorChange}/>
+                    </div>
+                </div>
+            {/if}
+        {/each}
     {/each}
 </menu>
 
 <script lang='ts'>
-    import { ImgParams, ParamChoiceKey, ParamColorKey, ParamKey, ParamSliderKey } from './ImgParams';
+    import { ImgParams } from './ImgParams';
     import { afterUpdate, onDestroy } from 'svelte';
 
     export let imgParams: ImgParams;
@@ -125,7 +127,7 @@
         return 'code-scene-control-' + k.replace(/\s/g, '-');
     }
 
-    function toLabelNum(k: ParamKey, val: number) {
+    function toLabelNum(k: string, val: number) {
         let s;
         if (k === 'angle x' || k === 'angle y' || k === 'angle z') {
             s = `${val / Math.PI * 180}\u00B0`;
@@ -178,23 +180,25 @@
 
     function handleSliderChange(e: Event) {
         const inputEl = (e.target as HTMLInputElement);
-        const k = inputEl.dataset.k as ParamSliderKey;
-        imgParams[k].val = Number(inputEl.value);
+        const g = inputEl.dataset.g;
+        const k = inputEl.dataset.k;
+        imgParams[g][k].val = Number(inputEl.value);
         paramsUpdated(imgParams);
     }
 
     function handleChoiceChange(e: Event) {
         const selectEl = (e.target as HTMLSelectElement);
-        const k = selectEl.dataset.k as ParamChoiceKey;
-        selectEl.selectedIndex
-        imgParams[k].val = imgParams[k].choices[selectEl.selectedIndex];
+        const g = selectEl.dataset.g;
+        const k = selectEl.dataset.k;
+        imgParams[g][k].val = imgParams[g][k].choices[selectEl.selectedIndex];
         paramsUpdated(imgParams);
     }
 
     function handleColorChange(e: Event) {
         const inputEl = (e.target as HTMLInputElement);
-        const k = inputEl.dataset.k as ParamColorKey;
-        imgParams[k].val = inputEl.value;
+        const g = inputEl.dataset.g;
+        const k = inputEl.dataset.k;
+        imgParams[g][k].val = inputEl.value;
         paramsUpdated(imgParams);
     }
 </script>
