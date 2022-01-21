@@ -69,17 +69,6 @@
         background: #fffffff8;
     }
 
-    .btn-pic {
-        fill: #000000d0;
-        height: var(--btn-pic-size);
-        stroke: none;
-        transition: transform var(--tr-std);
-        width: var(--btn-pic-size);
-    }
-
-    .btn-pic.rotate180 {
-        transform: rotate(-180deg);
-    }
 </style>
 
 <canvas class='rasterize-font-canvas' bind:this={rasterCanvasEl} width='2048'></canvas>
@@ -87,13 +76,13 @@
     <div class='code-wr'>
         <canvas class='code-canvas' bind:this={codeCanvasEl}></canvas>
         <button class='round-btn left' on:click={() => menuOpen = !menuOpen}>
-            <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' class={`btn-pic ${menuOpen ? 'rotate180' : ''}`}><path d='M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6-1.41-1.41z'/></svg>
+            <Icon pic='arrow down' rotate={menuOpen}/>
         </button>
         <button class='round-btn second-to-right' on:click={handleGenerateClick}>
-            <svg xmlns='http://www.w3.org/2000/svg' viewBox="0 0 24 24" class='btn-pic'><path d='M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z'/></svg>
+            <Icon pic='reload'/>
         </button>
         <button class='round-btn right' on:click={() => {}}>
-            <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' class='btn-pic'><path d='M18,15v3H6v-3H4v3c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2v-3H18z M17,11l-1.41-1.41L13,12.17V4h-2v8.17L8.41,9.59L7,11l5,5 L17,11z'/></svg>
+            <Icon pic='download'/>
         </button>
         {#if imgParams}
             <ImgParamsMenu imgParams={imgParams} menuOpen={menuOpen} paramsUpdated={onParamsUpdate} clickedOutside={onClickedOutsideMenu}/>
@@ -117,6 +106,7 @@
     import { percentLogToVal } from './util/percentLogToVal';
     import type { Mat4 } from './util/matrices';
     import { getTxMax } from './getTxMax';
+    import Icon from './Icon.svelte';
 
     let codeCanvasEl: HTMLCanvasElement;
     let rasterCanvasEl: HTMLCanvasElement;

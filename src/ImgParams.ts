@@ -1,26 +1,3 @@
-// export type ImgParams = {
-//     [k in ParamSliderKey]: {
-//         group: ParamGroup,
-//         type: 'slider',
-//         min: number,
-//         val: number,
-//         max: number,
-//     }
-// } & {
-//     [k in ParamChoiceKey]: {
-//         group: ParamGroup,
-//         type: 'choices',
-//         val: string,
-//         choices: string[],
-//     }
-// } & {
-//     [k in ParamColorKey]: {
-//         group: ParamGroup,
-//         type: 'color',
-//         val: string,
-//     }
-// }
-
 type SliderVal = {
     type: 'slider',
     min: number,
@@ -38,8 +15,6 @@ type ColorVal = {
     type: 'color',
     val: string,
 }
-
-// export type ParamGroup = 'angle' | 'position' | 'font' | 'source' | 'color' | 'glow' | 'fade';
 
 export type ImgParams = {
     angle: {
@@ -78,35 +53,4 @@ export type ImgParams = {
     },
 }
 
-// export type ParamSliderKey =
-//     'angle x'
-//     | 'angle y'
-//     | 'angle z'
-//     | 'translate x'
-//     | 'translate y'
-//     | 'translate z'
-//     | 'scroll'
-//     | 'font size'
-//     | 'blur'
-//     | 'glow radius'
-//     | 'color amplification'
-//     | 'glow amplification'
-//     | 'glow color shift'
-//     | 'fade'
-//     | 'fade distortion'
-//     ;
-//
-// export type ParamChoiceKey =
-//     'color scheme'
-//     | 'source'
-//     ;
-//
-// export type ParamColorKey =
-//     'glow shifted color'
-//     | 'fade in distortion'
-//     | 'fade out distortion'
-//     ;
-//
-//
-// export const paramGroups: ParamGroup[] = ['angle' as const, 'position' as const, 'font' as const,
-//     'source' as const, 'color' as const, 'glow' as const, 'fade' as const];
+export type ParamGroup = keyof ImgParams;

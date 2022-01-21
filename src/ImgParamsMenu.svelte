@@ -74,49 +74,59 @@
 
 <menu class={`menu-root ${menuOpen ? 'open' : ''}`} bind:this={menuRootEl}>
     {#each Object.entries(imgParams) as [g, ps]}
-        {#each Object.entries(ps) as [k, p]}
-            {#if p.type === 'slider'}
-                <div class='slider-wr'>
-                    <label class='slider-label' for={toId(k)}>{k}</label>
-                    <div class='slider-min'>{toLabelNum(k, p.min)}</div>
-                    <!--suppress XmlDuplicatedId -->
-                    <input class='slider-slider' id={toId(k)} data-g={g} data-k={k} type='range' min='{p.min}' max='{p.max}' step='any' value='{p.val}' on:input={handleSliderChange}/>
-                    <div class='slider-max'>{toLabelNum(k, p.max)}</div>
-                </div>
+        <div class='group'>
+            <button aria-label={`Toggle section: ${g}`} data-g={g} on:click={handleToggleGroup}>
+                <Icon pic='arrow down' rotate={openGroups.includes(g)}/>{g}
+            </button>
+
+            {#if openGroups.includes(g)}
+                {#each Object.entries(ps) as [k, p]}
+                    {#if p.type === 'slider'}
+                        <div class='slider-wr'>
+                            <label class='slider-label' for={toId(k)}>{k}</label>
+                            <div class='slider-min'>{toLabelNum(k, p.min)}</div>
+                            <!--suppress XmlDuplicatedId -->
+                            <input class='slider-slider' id={toId(k)} data-g={g} data-k={k} type='range' min='{p.min}' max='{p.max}' step='any' value='{p.val}' on:input={handleSliderChange}/>
+                            <div class='slider-max'>{toLabelNum(k, p.max)}</div>
+                        </div>
+                    {/if}
+            
+                    {#if p.type === 'choices'}
+                        <div class='choices-wr'>
+                            <label class='choices-label' for={toId(k)}>{k}</label>
+                            <!--suppress XmlDuplicatedId -->
+                            <select class='choices-select' id={toId(k)} data-g={g} data-k={k} on:change={handleChoiceChange}>
+                                {#each p.choices as choice}
+                                    {#if p.val === choice}
+                                        <option value={choice} selected>{choice}</option>
+                                    {:else}
+                                        <option value={choice}>{choice}</option>
+                                    {/if}
+                                {/each}
+                            </select>
+                        </div>
+                    {/if}
+            
+                    {#if p.type === 'color'}
+                        <div class='choices-wr'>
+                            <label for={toId(k)}>{k}</label>
+                            <div class='input-color-wr'>
+                                <!--suppress XmlDuplicatedId -->
+                                <input id={toId(k)} data-g={g} data-k={k} type='color' class='input-color' value='{p.val}' on:change={handleColorChange}/>
+                            </div>
+                        </div>
+                    {/if}
+                {/each}
             {/if}
-    
-            {#if p.type === 'choices'}
-                <div class='choices-wr'>
-                    <label class='choices-label' for={toId(k)}>{k}</label>
-                    <!--suppress XmlDuplicatedId -->
-                    <select class='choices-select' id={toId(k)} data-g={g} data-k={k} on:change={handleChoiceChange}>
-                        {#each p.choices as choice}
-                            {#if p.val === choice}
-                                <option value={choice} selected>{choice}</option>
-                            {:else}
-                                <option value={choice}>{choice}</option>
-                            {/if}
-                        {/each}
-                    </select>
-                </div>
-            {/if}
-    
-            {#if p.type === 'color'}
-                <div class='choices-wr'>
-                    <label for={toId(k)}>{k}</label>
-                    <div class='input-color-wr'>
-                        <!--suppress XmlDuplicatedId -->
-                        <input id={toId(k)} data-g={g} data-k={k} type='color' class='input-color' value='{p.val}' on:change={handleColorChange}/>
-                    </div>
-                </div>
-            {/if}
-        {/each}
+        </div>
     {/each}
 </menu>
 
 <script lang='ts'>
-    import { ImgParams } from './ImgParams';
+    import { ImgParams, ParamGroup } from './ImgParams';
     import { afterUpdate, onDestroy } from 'svelte';
+    import Icon from './Icon.svelte';
+    import { getFromSelfOrParentDataset } from './util/getFromSelfOrParentDataset';
 
     export let imgParams: ImgParams;
     export let menuOpen: boolean;
@@ -141,6 +151,17 @@
             s = String(val);
         }
         return s.replace(/-/, '\u2212');
+    }
+
+    let openGroups: ParamGroup[] = [];
+
+    function handleToggleGroup(e: MouseEvent) {
+        const g = getFromSelfOrParentDataset(e.target as HTMLElement, 'g') as ParamGroup;
+        if (openGroups.includes(g)) {
+            openGroups = openGroups.filter(_g => _g !== g);
+        } else {
+            openGroups = [g, ...openGroups];
+        }
     }
 
     let menuRootEl: HTMLElement;
