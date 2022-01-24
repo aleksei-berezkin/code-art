@@ -1,4 +1,4 @@
-import type { RGB } from './util/RGB';
+import type { RGB } from './RGB';
 
 export type ColorScheme = {
     background: RGB,

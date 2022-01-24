@@ -3,7 +3,7 @@ export const blurKernelSize = 15;
 const center = Math.floor(blurKernelSize / 2);
 const radius = center;
 
-// TODO move both to texture
+// TODO move both to texture or calc in shader
 export const blurKernel: number[] = Array.from({length: blurKernelSize ** 2})
     .map(mapFunc((x, y) => (x**2 + y**2 <= radius**2) ? 1 : 0))
 

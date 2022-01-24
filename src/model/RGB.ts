@@ -1,4 +1,4 @@
-import {pluck} from "./pluck";
+import { pluck } from '../util/pluck';
 
 export type RGB = [number, number, number];
 

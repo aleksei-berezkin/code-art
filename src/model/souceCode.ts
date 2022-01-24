@@ -1,4 +1,4 @@
-import { pluck } from './util/pluck';
+import { pluck } from '../util/pluck';
 
 export const sourceDetails = {
     'React DOM min': {

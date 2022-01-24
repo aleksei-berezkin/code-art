@@ -1,9 +1,9 @@
-import { pickRandom } from './util/pickRandom';
+import { pickRandom } from '../util/pickRandom';
 import { Source, sourceCodeNames } from './souceCode';
 import type { ImgParams } from './ImgParams';
-import { degToRad } from './util/degToRad';
+import { degToRad } from '../util/degToRad';
 import { colorSchemeNames } from './colorSchemes';
-import { RGB, rgbToHex } from './util/RGB';
+import { RGB, rgbToHex } from './RGB';
 import {
     calcExtensions,
     Extensions,
@@ -12,12 +12,12 @@ import {
     PixelSpace,
     SceneBounds
 } from './PixelSpace';
-import type { GlyphRaster } from './rasterizeFont';
-import { percentLogToVal } from './util/percentLogToVal';
+import type { GlyphRaster } from '../draw/rasterizeFont';
+import { percentLogToVal } from '../util/percentLogToVal';
 import { getTxMax } from './getTxMax';
-import type { Mat4 } from './util/matrices';
+import type { Mat4 } from '../util/matrices';
 import { iterateCode } from './iterateCode';
-import { mulVec } from './util/matrices';
+import { mulVec } from '../util/matrices';
 
 export function genAllParams(w: number, h: number, fontSize: number, source: Source, glyphRaster: GlyphRaster): {
     pixelSpace: PixelSpace,

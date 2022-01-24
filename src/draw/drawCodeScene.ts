@@ -1,18 +1,18 @@
-import { createProgram } from './util/createProgram';
-import vertexShaderSource from './shader/codeVertex.shader';
-import fragmentShaderSource from './shader/codeFragment.shader';
-import type { ImgParams } from './ImgParams';
-import type { Mat4} from './util/matrices';
+import { createProgram } from './createProgram';
+import vertexShaderSource from '../shader/codeVertex.shader';
+import fragmentShaderSource from '../shader/codeFragment.shader';
+import type { ImgParams } from '../model/ImgParams';
+import type { Mat4 } from '../util/matrices';
 import { createCodeSceneData } from './createCodeSceneData';
-import { vertexSize2d } from './util/rect';
+import { vertexSize2d } from './rect';
 import type { GlyphRaster } from './rasterizeFont';
-import type { Source } from './souceCode';
-import { uploadArrayToAttribute } from './util/uploadArrayToAttribute';
-import { uploadTexture } from './util/uploadTexture';
-import { Extensions, getSceneBounds, PixelSpace } from './PixelSpace';
-import { colorizeCode } from './colorizeCode';
-import type { ColorSchemeName } from './colorSchemes';
-import { RGB, rgbSize } from './util/RGB';
+import type { Source } from '../model/souceCode';
+import { uploadArrayToAttribute } from './uploadArrayToAttribute';
+import { uploadTexture } from './uploadTexture';
+import { Extensions, getSceneBounds, PixelSpace } from '../model/PixelSpace';
+import { colorizeCode } from '../model/colorizeCode';
+import type { ColorSchemeName } from '../model/colorSchemes';
+import { RGB, rgbSize } from '../model/RGB';
 
 export type CodeSceneDrawn = {
     pixelSpace: PixelSpace,

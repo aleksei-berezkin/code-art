@@ -1,4 +1,4 @@
-import {hexToRgb} from "./util/RGB";
+import { hexToRgb } from './RGB';
 
 export const colorSchemes = {
     'VS Code Dark+': {

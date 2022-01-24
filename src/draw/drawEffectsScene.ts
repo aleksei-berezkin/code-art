@@ -1,14 +1,14 @@
 import type { CodeSceneDrawn } from './drawCodeScene';
-import vertexShaderSource from './shader/effectsVertex.shader';
-import fragmentShaderSourceWithMacro from './shader/effectsFragment.shader';
-import { createProgram } from './util/createProgram';
-import { vertexSize2d } from './util/rect';
-import { uploadArrayToAttribute } from './util/uploadArrayToAttribute';
-import { uploadTexture } from './util/uploadTexture';
-import {blurKernel, blurKernelSize, blurKernelWeight, gaussianBlurKernel, gaussianBlurKernelWeight} from './blurKernel';
+import vertexShaderSource from '../shader/effectsVertex.shader';
+import fragmentShaderSourceWithMacro from '../shader/effectsFragment.shader';
+import { createProgram } from './createProgram';
+import { vertexSize2d } from './rect';
+import { uploadArrayToAttribute } from './uploadArrayToAttribute';
+import { uploadTexture } from './uploadTexture';
+import { blurKernel, blurKernelSize, blurKernelWeight, gaussianBlurKernel, gaussianBlurKernelWeight } from '../model/blurKernel';
 import { createEffectsGrid } from './createEffectsGrid';
-import type { ImgParams } from './ImgParams';
-import {hexToRgb} from "./util/RGB";
+import type { ImgParams } from '../model/ImgParams';
+import { hexToRgb } from '../model/RGB';
 
 const fragmentShaderSource = fragmentShaderSourceWithMacro
     .replaceAll('_BLUR_K_SZ_', String(blurKernelSize));

@@ -7,7 +7,7 @@ import * as acorn from 'acorn';
 import * as acornWalk from 'acorn-walk';
 import type { ColorSchemeName } from './colorSchemes';
 import { colorSchemes } from './colorSchemes';
-import type {RGB} from "./util/RGB";
+import type { RGB } from './RGB';
 
 export type CodeColorization = {
     bgColor: RGB,

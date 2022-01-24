@@ -1,6 +1,6 @@
 import type { SceneBounds } from './PixelSpace';
 import type { Source } from './souceCode';
-import type { GlyphRaster } from './rasterizeFont';
+import type { GlyphRaster } from '../draw/rasterizeFont';
 import { getSourceStartPos } from './souceCode';
 import { getSceneLinesNum } from './PixelSpace';
 

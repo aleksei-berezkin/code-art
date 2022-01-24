@@ -92,21 +92,21 @@
 </section>
     
 <script lang='ts'>
-    import { ImgParams } from './ImgParams';
-    import { drawCodeScene } from './drawCodeScene';
-    import { GlyphRaster, rasterizeFont } from './rasterizeFont';
-    import { getSource, Source, SourceCodeName, sourceCodeNames } from './souceCode';
+    import { ImgParams } from './model/ImgParams';
+    import { drawCodeScene } from './draw/drawCodeScene';
+    import { GlyphRaster, rasterizeFont } from './draw/rasterizeFont';
+    import { getSource, Source, SourceCodeName, sourceCodeNames } from './model/souceCode';
     import { dpr } from './util/dpr';
-    import { drawEffectsScene } from './drawEffectsScene';
-    import { genAllParams } from './genAllParams';
+    import { drawEffectsScene } from './draw/drawEffectsScene';
+    import { genAllParams } from './model/genAllParams';
     import ImgParamsMenu from './ImgParamsMenu.svelte';
-    import type { Extensions, PixelSpace } from "./PixelSpace";
+    import type { Extensions, PixelSpace } from "./model/PixelSpace";
     import { onMount } from 'svelte';
     import { pickRandom } from './util/pickRandom';
-    import { calcExtensions, makePixelSpace } from './PixelSpace';
+    import { calcExtensions, makePixelSpace } from './model/PixelSpace';
     import { percentLogToVal } from './util/percentLogToVal';
     import type { Mat4 } from './util/matrices';
-    import { getTxMax } from './getTxMax';
+    import { getTxMax } from './model/getTxMax';
     import Icon from './Icon.svelte';
 
     let codeCanvasEl: HTMLCanvasElement;

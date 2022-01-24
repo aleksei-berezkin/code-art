@@ -157,7 +157,7 @@
 </menu>
 
 <script lang='ts'>
-    import { ImgParams, ParamGroup, SliderVal } from './ImgParams';
+    import { ImgParams, ParamGroup, SliderVal } from './model/ImgParams';
     import { afterUpdate, onDestroy } from 'svelte';
     import Icon from './Icon.svelte';
     import { getFromSelfOrParentDataset } from './util/getFromSelfOrParentDataset';

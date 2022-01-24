@@ -1,5 +1,5 @@
-import { degToRad } from './util/degToRad';
-import { pluck } from './util/pluck';
+import { degToRad } from '../util/degToRad';
+import { pluck } from '../util/pluck';
 
 export type PixelSpace = ReturnType<typeof makePixelSpace>;
 

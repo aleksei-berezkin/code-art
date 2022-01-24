@@ -1,9 +1,9 @@
-import { rect2d, vertexSize2d } from './util/rect';
+import { rect2d, vertexSize2d } from './rect';
 import type { GlyphRaster } from './rasterizeFont';
-import type { Source } from './souceCode';
-import type { CodeColorization } from './colorizeCode';
-import type { SceneBounds } from './PixelSpace';
-import { iterateCode } from './iterateCode';
+import type { Source } from '../model/souceCode';
+import type { CodeColorization } from '../model/colorizeCode';
+import type { SceneBounds } from '../model/PixelSpace';
+import { iterateCode } from '../model/iterateCode';
 
 export function createCodeSceneData(bounds: SceneBounds,
                                     scrollFraction: number,
