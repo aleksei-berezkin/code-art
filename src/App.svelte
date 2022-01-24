@@ -4,6 +4,13 @@
 </script>
 
 <style>
+    :global(body) {
+        color: #333;
+        font-family: Roboto, sans-serif;
+        margin: 0;
+        padding: 8px;
+    }
+
     main {
         margin: 0;
     }

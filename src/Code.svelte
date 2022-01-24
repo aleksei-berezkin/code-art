@@ -80,7 +80,7 @@
             <Icon pic={menuOpen ? 'close' : 'menu'}/>
         </button>
         <button class='round-btn second-to-right' on:click={handleGenerateClick}>
-            <Icon pic='reload'/>
+            <Icon pic='reload' rotateDeg={genRotateDeg}/>
         </button>
         <button class='round-btn right' on:click={() => {}}>
             <Icon pic='download'/>
@@ -114,16 +114,21 @@
 
     let imgParams: ImgParams | undefined = undefined;
     let menuOpen = false;
-    
+
+    let genRotateDeg = 0;
+
     onMount(function () {
         generateScene(36);
     });
 
     function handleGenerateClick() {
         if (imgParams) {
-            // The only preserved param
-            const fontSize = imgParams.font.size.val;
-            generateScene(fontSize);
+            genRotateDeg += 360;
+            setTimeout(() => {
+                // The only preserved param
+                const fontSize = imgParams!.font.size.val;
+                generateScene(fontSize);
+            }, 160);
         }
     }
 

@@ -19,13 +19,13 @@
     .ic.scale-to-0 {
         transform: scale(0);
     }
-
-    .ic.rotate180 {
-        transform: rotate(-180deg);
-    }
 </style>
 
-<svg xmlns='http://www.w3.org/2000/svg' viewBox='4 4 16 16' class={`ic ${size} ${rotate ? 'rotate180' : ''} ${scaleTo0 ? 'scale-to-0' : '' }`} bind:this={svgEl}>
+<svg xmlns='http://www.w3.org/2000/svg'
+     viewBox='4 4 16 16'
+     class={`ic ${size} ${scaleTo0 ? 'scale-to-0' : '' }`}
+     style={ rotateDeg ? `transform: rotate(${rotateDeg}deg)` : undefined}
+     bind:this={svgEl}>
     {#if p === 'arrow down'}
         <path d='M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6-1.41-1.41z'/>
     {/if}
@@ -49,7 +49,7 @@
     type Pic = 'arrow down' | 'close' | 'download' | 'menu' | 'reload' | undefined;
     export let pic: Pic = undefined;
     export let size: 'std' | 'sm' = 'std';
-    export let rotate: boolean = false;
+    export let rotateDeg: number = 0;
 
     let svgEl: HTMLElement;
     let p: Pic = pic;

@@ -110,7 +110,7 @@
     {#each Object.entries(imgParams) as [g, ps]}
         <div class='group'>
             <button class='group-button' aria-label={`Toggle group: ${g}`} data-g={g} on:click={handleToggleGroup}>
-                <Icon pic='arrow down' size='sm' rotate={openGroups.includes(g)}/> <span class='group-button-txt'>{g}</span>
+                <Icon pic='arrow down' size='sm' rotateDeg={openGroups.includes(g) ? -180 : 0}/> <span class='group-button-txt'>{g}</span>
             </button>
 
             <div class={`group-body ${openGroups.includes(g) ? 'open' : ''}`}>
