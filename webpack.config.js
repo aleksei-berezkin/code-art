@@ -1,6 +1,5 @@
 const path = require('path');
 
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const sveltePreprocess = require('svelte-preprocess');
 
@@ -44,13 +43,6 @@ module.exports = {
                 },
             },
             {
-                test: /\.css$/,
-                use: [
-                    MiniCssExtractPlugin.loader,
-                    'css-loader',
-                ],
-            },
-            {
                 test: /\.shader/,
                 type: 'asset/source',
             },
@@ -62,9 +54,6 @@ module.exports = {
             template: './index.ejs',
             filename: 'index.html',
             inject: true,
-        }),
-        new MiniCssExtractPlugin({
-            filename: '[name]-[contenthash].css',
         }),
     ],
     devtool: prod ? false : 'source-map',
