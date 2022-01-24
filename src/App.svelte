@@ -9,6 +9,12 @@
         font-family: Roboto, sans-serif;
         margin: 0;
         padding: 8px;
+
+        --bord-r-std: 8px;
+        --btn-size: 48px;
+        --ic-size-std: 32px;
+        --ic-tx: 200ms;
+        --pad-std: 16px;
     }
 
     main {

@@ -11,13 +11,6 @@
         align-items: center;
         display: flex;
         flex-direction: column;
-        --bord-r-std: 8px;
-        --btn-size: 48px;
-        --ic-std-size: 22px;
-        --ic-sm-size: 18px;
-        --pad-std: 16px;
-        --tr-fast: 150ms;
-        --tr-std: 250ms;
     }
 
     .code-wr {
@@ -44,7 +37,7 @@
         margin: 0;
         padding: 0;
         position: absolute;
-        transition: background-color var(--tr-std);
+        transition: background-color 250ms;
         top: var(--pad-std);
         width: var(--btn-size);
         -webkit-tap-highlight-color: transparent;
@@ -82,8 +75,8 @@
         <button class='round-btn second-to-right' on:click={handleGenerateClick}>
             <Icon pic='reload' rotateDeg={genRotateDeg}/>
         </button>
-        <button class='round-btn right' on:click={() => {}}>
-            <Icon pic='download'/>
+        <button class='round-btn right' on:click={handleDownload}>
+            <Icon pic={downloading ? 'pending' : 'download'}/>
         </button>
         {#if imgParams}
             <ImgParamsMenu imgParams={imgParams} menuOpen={menuOpen} paramsUpdated={onParamsUpdate} clickedOutside={onClickedOutsideMenu}/>
@@ -108,6 +101,7 @@
     import type { Mat4 } from './util/matrices';
     import { getTxMax } from './model/getTxMax';
     import Icon from './Icon.svelte';
+    import { parseMs } from './util/parseMs';
 
     let codeCanvasEl: HTMLCanvasElement;
     let rasterCanvasEl: HTMLCanvasElement;
@@ -121,14 +115,16 @@
         generateScene(36);
     });
 
+
     function handleGenerateClick() {
         if (imgParams) {
+            const icTxMs = parseMs(getComputedStyle(document.body).getPropertyValue('--ic-tx'));
             genRotateDeg += 360;
             setTimeout(() => {
                 // The only preserved param
                 const fontSize = imgParams!.font.size.val;
                 generateScene(fontSize);
-            }, 160);
+            }, icTxMs + 10);
         }
     }
 
@@ -142,7 +138,17 @@
             drawScene(allParams.pixelSpace, allParams.extensions, source, allParams.imgParams, allParams.txMat, glyphRaster);
         });
     }
-        
+
+    let downloading = false;
+    function handleDownload() {
+        if (!downloading) {
+            downloading = true;
+            setTimeout(
+                () => downloading = false,
+                1000,
+            );
+        }
+    }
 
     function onParamsUpdate() {
         if (!imgParams) {

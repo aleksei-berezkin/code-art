@@ -11,7 +11,7 @@
         position: absolute;
         transform: scale(0);
         transform-origin: top left;
-        transition: transform var(--tr-fast), opacity var(--tr-fast);
+        transition: transform var(--ic-tx), opacity var(--ic-tx);
         top: calc(var(--pad-std) * 2 + var(--btn-size));
     }
 
@@ -45,7 +45,7 @@
         font-size: .9em;
         transform: scale(0);
         transform-origin: top left;
-        transition: all var(--tr-fast);
+        transition: transform var(--ic-tx);
     }
 
     .group-body.open {
@@ -110,7 +110,7 @@
     {#each Object.entries(imgParams) as [g, ps]}
         <div class='group'>
             <button class='group-button' aria-label={`Toggle group: ${g}`} data-g={g} on:click={handleToggleGroup}>
-                <Icon pic='arrow down' size='sm' rotateDeg={openGroups.includes(g) ? -180 : 0}/> <span class='group-button-txt'>{g}</span>
+                <Icon pic='arrow-down' size='inl' rotateDeg={openGroups.includes(g) ? -180 : 0}/> <span class='group-button-txt'>{g}</span>
             </button>
 
             <div class={`group-body ${openGroups.includes(g) ? 'open' : ''}`}>
