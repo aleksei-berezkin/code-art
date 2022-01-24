@@ -13,7 +13,8 @@
         flex-direction: column;
         --bord-r-std: 8px;
         --btn-size: 48px;
-        --btn-pic-size: 32px;
+        --ic-std-size: 22px;
+        --ic-sm-size: 18px;
         --pad-std: 16px;
         --tr-fast: 150ms;
         --tr-std: 250ms;
@@ -76,7 +77,7 @@
     <div class='code-wr'>
         <canvas class='code-canvas' bind:this={codeCanvasEl}></canvas>
         <button class='round-btn left' on:click={() => menuOpen = !menuOpen}>
-            <Icon pic='arrow down' rotate={menuOpen}/>
+            <Icon pic={menuOpen ? 'close' : 'menu'}/>
         </button>
         <button class='round-btn second-to-right' on:click={handleGenerateClick}>
             <Icon pic='reload'/>

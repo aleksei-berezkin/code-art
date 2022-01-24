@@ -20,6 +20,40 @@
         opacity: 1;
     }
 
+    .group:not(:last-child) {
+        padding-bottom: calc(var(--pad-std) / 2);
+    }
+
+    .group-button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font: inherit;
+        margin: 0;
+        padding: 0;
+    }
+
+    .group-button-txt {
+        padding-left: .5em;
+    }
+
+    .group-body {
+        height: 0;
+        opacity: 0;
+        padding-top: calc(var(--pad-std) / 2);
+        padding-left: calc(var(--pad-std) * .75);
+        font-size: .9em;
+        transform: scale(0);
+        transform-origin: top left;
+        transition: all var(--tr-fast);
+    }
+
+    .group-body.open {
+        height: auto;
+        opacity: 1;
+        transform: scale(1);
+    }
+
     .slider-wr {
         align-items: center;
         display: flex;
@@ -75,11 +109,11 @@
 <menu class={`menu-root ${menuOpen ? 'open' : ''}`} bind:this={menuRootEl}>
     {#each Object.entries(imgParams) as [g, ps]}
         <div class='group'>
-            <button aria-label={`Toggle section: ${g}`} data-g={g} on:click={handleToggleGroup}>
-                <Icon pic='arrow down' rotate={openGroups.includes(g)}/>{g}
+            <button class='group-button' aria-label={`Toggle group: ${g}`} data-g={g} on:click={handleToggleGroup}>
+                <Icon pic='arrow down' size='sm' rotate={openGroups.includes(g)}/> <span class='group-button-txt'>{g}</span>
             </button>
 
-            {#if openGroups.includes(g)}
+            <div class={`group-body ${openGroups.includes(g) ? 'open' : ''}`}>
                 {#each Object.entries(ps) as [k, p]}
                     {#if p.type === 'slider'}
                         <div class='slider-wr'>
@@ -117,7 +151,7 @@
                         </div>
                     {/if}
                 {/each}
-            {/if}
+            </div>
         </div>
     {/each}
 </menu>
