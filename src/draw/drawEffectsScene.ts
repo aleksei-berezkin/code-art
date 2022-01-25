@@ -5,14 +5,13 @@ import { createProgram } from './createProgram';
 import { vertexSize2d } from './rect';
 import { uploadArrayToAttribute } from './uploadArrayToAttribute';
 import { uploadTexture } from './uploadTexture';
-import { blurKernel, blurKernelSize, blurKernelWeight, gaussianBlurKernel, gaussianBlurKernelWeight } from '../model/blurKernel';
 import { createEffectsGrid } from './createEffectsGrid';
 import type { ImgParams } from '../model/ImgParams';
 import { hexToRgb } from '../model/RGB';
 import { getSliderVal } from '../model/ImgParams';
 
 const fragmentShaderSource = fragmentShaderSourceWithMacro
-    .replaceAll('_BLUR_K_SZ_', String(blurKernelSize));
+    .replaceAll('_BLUR_K_SZ_', String('15'));
 
 export function drawEffectsScene(canvasEl: HTMLCanvasElement, codeSceneDrawn: CodeSceneDrawn, imgParams: ImgParams) {
     const gl = canvasEl.getContext('webgl2')!;
@@ -52,10 +51,6 @@ export function drawEffectsScene(canvasEl: HTMLCanvasElement, codeSceneDrawn: Co
 
     gl.uniform3fv(gl.getUniformLocation(program, 'u_bg'), codeSceneDrawn.bgColor);
 
-    gl.uniform1fv(gl.getUniformLocation(program, 'u_blurKernel'), gaussianBlurKernel);
-
-    gl.uniform1f(gl.getUniformLocation(program, 'u_blurKernelWeight'), gaussianBlurKernelWeight);
-
     gl.uniform1f(gl.getUniformLocation(program, 'u_glowRadius'), getSliderVal(imgParams.font.size) * getSliderVal(imgParams.glow.radius) / 2);
 
     gl.uniform1f(gl.getUniformLocation(program, 'u_glowBrightness'), getSliderVal(imgParams.glow.brightness));
@@ -81,10 +76,6 @@ export function drawEffectsScene(canvasEl: HTMLCanvasElement, codeSceneDrawn: Co
     gl.drawArrays(gl.TRIANGLES, 0, gridVertices.length / vertexSize2d);
 
     uploadTexture(canvasEl, gl.TEXTURE0, gl);
-
-    gl.uniform1fv(gl.getUniformLocation(program, 'u_blurKernel'), blurKernel);
-
-    gl.uniform1f(gl.getUniformLocation(program, 'u_blurKernelWeight'), blurKernelWeight);
 
     gl.uniform1i(gl.getUniformLocation(program, 'u_mode'), 1);
 

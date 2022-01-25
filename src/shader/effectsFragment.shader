@@ -10,9 +10,6 @@ uniform int u_mode;
 
 uniform sampler2D u_image;
 
-uniform float[_BLUR_K_SZ_ * _BLUR_K_SZ_] u_blurKernel;
-uniform float u_blurKernelWeight;
-
 uniform vec3 u_glowShiftedColor;
 uniform float u_glowColorShift;
 uniform float u_glowBrightness;
@@ -32,6 +29,24 @@ in float v_w;
 
 out vec4 outColor;
 
+float kernel(int mode, int row, int col) {
+    int x = col - _BLUR_K_SZ_ / 2;
+    int y = row - _BLUR_K_SZ_ / 2;
+    if (mode == MODE_GLOW) {
+        // Gaussian
+        float sigma = float(_BLUR_K_SZ_) / 8.0;
+        return 1.0 / sigma / sqrt(2.0 * 3.14159265359) * exp(-float(x * x + y * y) / 2.0 / (sigma * sigma));
+    }
+    if (mode == MODE_BLUR) {
+        // Round
+        if (x * x + y * y <= (_BLUR_K_SZ_ / 2) * (_BLUR_K_SZ_ / 2)) {
+            return 1.0;
+        }
+        return 0.0;
+    }
+    return 0.0;
+}
+
 float screen(float a, float b) {
     return 1.0 - (1.0 - a) * (1.0 - b);
 }
@@ -46,15 +61,17 @@ float avg(vec3 a) {
 
 void main() {
     vec3 blurred = vec3(0);
+    float kWeight = 0.0;
     for (int row = 0; row < _BLUR_K_SZ_; row++) {
         for (int col = 0; col < _BLUR_K_SZ_; col++) {
             vec2 delta = -v_blurTexCoordsRadii + 2.0 * v_blurTexCoordsRadii * vec2(row, col) / float(_BLUR_K_SZ_ - 1);
-            blurred += u_blurKernel[row * _BLUR_K_SZ_ + col]
-                * (texture(u_image, v_texCoords + delta).rgb - u_bg);
+            float k = kernel(u_mode, row, col);
+            blurred += k * (texture(u_image, v_texCoords + delta).rgb - u_bg);
+            kWeight += k;
         }
     }
 
-    blurred = blurred / u_blurKernelWeight;
+    blurred = blurred / kWeight;
 
     if (u_mode == MODE_GLOW) {
         vec3 selfRgb = texture(u_image, v_texCoords).rgb;

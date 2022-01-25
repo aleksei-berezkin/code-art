@@ -1,7 +1,7 @@
 <!--suppress CssNonIntegerLengthInPixels -->
 <style>
     .menu-root {
-        background-color: #ffffffb0;
+        background-color: #ffffffc0;
         border-radius: var(--bord-r-std);
         box-sizing: border-box;
         box-shadow: var(--menu-shadow);

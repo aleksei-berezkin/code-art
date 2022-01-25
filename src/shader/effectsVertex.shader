@@ -41,7 +41,6 @@ void main() {
     );
 
     if (u_mode == MODE_GLOW) {
-        // TODO divide by w
         // x: -u_glowRadius..+u_glowRadius -> -.5..+.5
         // y: -u_glowRadius..+u_glowRadius -> +.5..-.5
         v_blurTexCoordsRadii = vec2(
