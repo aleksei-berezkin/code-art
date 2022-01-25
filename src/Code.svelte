@@ -29,7 +29,7 @@
         background: #ffffffc0;
         border: none;
         border-radius: 50%;
-        box-shadow: 0 1px 2px 0 rgb(60 64 67 / 30%), 0 2px 6px 2px rgb(60 64 67 / 15%);
+        box-shadow: var(--btn-shadow);
         cursor: pointer;
         display: flex;
         justify-content: center;

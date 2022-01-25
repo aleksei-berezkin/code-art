@@ -1,9 +1,10 @@
+<!--suppress CssNonIntegerLengthInPixels -->
 <style>
     .menu-root {
         background-color: #ffffffb0;
         border-radius: var(--bord-r-std);
         box-sizing: border-box;
-        box-shadow: 0 2px 4px -1px rgb(0 0 0 / 20%), 0 4px 5px 0 rgb(0 0 0 / 14%), 0 1px 10px 0 rgb(0 0 0 / 12%);
+        box-shadow: var(--menu-shadow);
         left: var(--pad-std);
         margin: 0;
         opacity: 0;
@@ -13,6 +14,11 @@
         transform-origin: top left;
         transition: transform var(--ic-tx), opacity var(--ic-tx);
         top: calc(var(--pad-std) * 2 + var(--btn-size));
+
+        --pad-gr: calc(var(--pad-std) *.75);
+        --input-w: 12rem;
+        --label-p: .75rem;
+        --label-w: 2.5rem;
     }
 
     .menu-root.open {
@@ -21,7 +27,7 @@
     }
 
     .group:not(:last-child) {
-        padding-bottom: calc(var(--pad-std) / 2);
+        padding-bottom: var(--pad-gr);
     }
 
     .group-button {
@@ -33,6 +39,10 @@
         padding: 0;
     }
 
+    .group-button:active {
+        color: unset;
+    }
+
     .group-button-txt {
         padding-left: .5em;
     }
@@ -40,8 +50,7 @@
     .group-body {
         height: 0;
         opacity: 0;
-        padding-top: calc(var(--pad-std) / 2);
-        padding-left: calc(var(--pad-std) * .75);
+        padding-left: calc(1.6em);
         font-size: .9em;
         transform: scale(0);
         transform-origin: top left;
@@ -59,30 +68,28 @@
         display: flex;
         flex-direction: row;
         justify-content: space-between;
-        margin-bottom: .5em;
+        padding-top: calc(var(--pad-gr) * .75);
     }
 
     .slider-label {
         flex-grow: 1;
-        text-align: left;
     }
 
     .slider-min {
-        padding-right: 1em;
+        padding-right: var(--label-p);
         text-align: right;
-        width: 4em;
+        width: var(--label-w);
     }
 
     .slider-slider {
         margin: 0;
         max-width: 50vw;
-        padding: 0;
-        width: 240px;
+        width: var(--input-w);
     }
 
     .slider-max {
-        width: 4em;
-        text-align: right;
+        padding-left: var(--label-p);
+        width: var(--label-w);
     }
 
     .choices-wr {
@@ -90,19 +97,19 @@
         display: flex;
         flex-direction: row;
         justify-content: space-between;
-        margin-bottom: .5em;
+        padding-top: calc(var(--pad-gr) * .25);
     }
 
     .choices-select {
         font: inherit;
-        margin: 0 4em 0.5em 0;
-        padding: 0.4em;
-        width: 240px;
+        margin-right: calc(var(--label-w) + var(--label-p));
+        padding: 0.25em;
+        width: var(--input-w);
     }
 
     .input-color-wr {
-        width: calc(240px + 4em);
-        text-align: left;
+        padding-top: calc(var(--pad-gr) * .3);
+        width: calc(var(--input-w) + var(--label-w) + var(--label-p));
     }
 </style>
 
@@ -110,7 +117,8 @@
     {#each Object.entries(imgParams) as [g, ps]}
         <div class='group'>
             <button class='group-button' aria-label={`Toggle group: ${g}`} data-g={g} on:click={handleToggleGroup}>
-                <Icon pic='arrow-down' size='inl' rotateDeg={openGroups.includes(g) ? -180 : 0}/> <span class='group-button-txt'>{g}</span>
+                <Icon pic='arrow-down' size='inl' rotateDeg={openGroups.includes(g) ? -180 : 0}/>
+                <span class='group-button-txt'>{g}</span>
             </button>
 
             <div class={`group-body ${openGroups.includes(g) ? 'open' : ''}`}>
@@ -120,7 +128,13 @@
                             <label class='slider-label' for={toId(k)}>{k}</label>
                             <div class='slider-min'>{toLabelNum(p, 'min')}</div>
                             <!--suppress XmlDuplicatedId -->
-                            <input class='slider-slider' id={toId(k)} data-g={g} data-k={k} type='range' min='{p.min}' max='{p.max}' step='any' value='{p.val}' on:input={handleSliderChange}/>
+                            <input class='slider-slider' id={toId(k)}
+                                   data-g={g} data-k={k}
+                                   type='range' min='{p.min}' max='{p.max}' step='any'
+                                   value='{p.val}'
+                                   on:input={handleSliderChange}
+                                   title='{p.val}'
+                            />
                             <div class='slider-max'>{toLabelNum(p, 'max')}</div>
                         </div>
                     {/if}
