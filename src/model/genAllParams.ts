@@ -13,11 +13,11 @@ import {
     SceneBounds
 } from './PixelSpace';
 import type { GlyphRaster } from '../draw/rasterizeFont';
-import { percentLogToVal } from '../util/percentLogToVal';
 import { getTxMax } from './getTxMax';
 import type { Mat4 } from '../util/matrices';
 import { iterateCode } from './iterateCode';
 import { mulVec } from '../util/matrices';
+import { getSliderVal } from './ImgParams';
 
 export function genAllParams(w: number, h: number, fontSize: number, source: Source, glyphRaster: GlyphRaster): {
     pixelSpace: PixelSpace,
@@ -29,7 +29,14 @@ export function genAllParams(w: number, h: number, fontSize: number, source: Sou
 
     const angles = createAngles(source.lang === 'js min')
 
-    const pixelSpace = makePixelSpace(w, h, percentLogToVal(blurFactorPercentLog));
+    const fadeBlurSlider = {
+        type: 'slider' as const,
+        min: 1,
+        val: blurFactorPercentLog,
+        max: 3,
+        unit: 'log10%' as const,
+    };
+    const pixelSpace = makePixelSpace(w, h, getSliderVal(fadeBlurSlider));
     const extensions = calcExtensions(pixelSpace, angles.x, angles.y, angles.z);
 
     const txMat = getTxMax(pixelSpace, angles.x, angles.y, angles.z, 0, 0, 0);
@@ -113,8 +120,9 @@ export function genAllParams(w: number, h: number, fontSize: number, source: Sou
             brightness: {
                 type: 'slider',
                 min: 0,
-                val: .9 + Math.random() * .2,
-                max: 3,
+                val: 90 + Math.random() * 20,
+                max: 300,
+                unit: '%',
             },
         },
         glow: {
@@ -128,8 +136,9 @@ export function genAllParams(w: number, h: number, fontSize: number, source: Sou
             brightness: {
                 type: 'slider',
                 min: 0,
-                val: 1 + Math.random() * 1.2,
-                max: 4,
+                val: 100 + Math.random() * 120,
+                max: 400,
+                unit: '%',
             },
             recolor: {
                 type: 'slider',
@@ -145,13 +154,7 @@ export function genAllParams(w: number, h: number, fontSize: number, source: Sou
             },
         },
         fade: {
-            'blur': {
-                type: 'slider',
-                min: 1,
-                val: blurFactorPercentLog,
-                max: 3,
-                unit: 'log10%',
-            },
+            'blur': fadeBlurSlider,
             'fade': {
                 type: 'slider',
                 min: -2,

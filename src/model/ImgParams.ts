@@ -57,3 +57,43 @@ export type ImgParams = {
 }
 
 export type ParamGroup = keyof ImgParams;
+
+export function getSliderLabel(sv: SliderVal, which: 'min' | 'val' | 'max') {
+    const u = sv.unit;
+    const v = sv[which];
+    let s;
+    if (u === 'rad') {
+        s = `${roundTo2(v / Math.PI * 180)}\u00B0`;
+    } else if (u === '%') {
+        s = `${roundTo2(v)}%`;
+    } else if (u === 'log10') {
+        s = String(roundTo2(10 ** v));
+    } else if (u === 'log10%') {
+        s = `${roundTo2(10 ** v)}%`;
+    } else {
+        s = String(roundTo2(v));
+    }
+    return s.replace(/-/, '\u2212');
+}
+
+function roundTo2(n: number) {
+    return Math.round(n * 100) / 100;
+}
+
+export function getSliderVal(sv: SliderVal) {
+    const u = sv.unit;
+    const v = sv.val;
+    if (u === 'rad') {
+        return v;
+    }
+    if (u === '%') {
+        return v / 100;
+    }
+    if (u === 'log10') {
+        return 10**v;
+    }
+    if (u === 'log10%') {
+        return 10**(v - 2);
+    }
+    return v;
+}

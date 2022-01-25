@@ -13,6 +13,7 @@ import { Extensions, getSceneBounds, PixelSpace } from '../model/PixelSpace';
 import { colorizeCode } from '../model/colorizeCode';
 import type { ColorSchemeName } from '../model/colorSchemes';
 import { RGB, rgbSize } from '../model/RGB';
+import { getSliderVal } from '../model/ImgParams';
 
 export type CodeSceneDrawn = {
     pixelSpace: PixelSpace,
@@ -41,7 +42,7 @@ export function drawCodeScene(canvasEl: HTMLCanvasElement,
 
     const sceneData = createCodeSceneData(
         getSceneBounds(pixelSpace, extensions),
-        params.position.scroll.val / 100,
+        getSliderVal(params.position.scroll),
         params.font.size.val,
         source,
         codeColorization,

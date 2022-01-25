@@ -85,7 +85,7 @@
 </section>
     
 <script lang='ts'>
-    import { ImgParams } from './model/ImgParams';
+    import { getSliderVal, ImgParams } from './model/ImgParams';
     import { drawCodeScene } from './draw/drawCodeScene';
     import { GlyphRaster, rasterizeFont } from './draw/rasterizeFont';
     import { getSource, Source, SourceCodeName, sourceCodeNames } from './model/souceCode';
@@ -97,7 +97,6 @@
     import { onMount } from 'svelte';
     import { pickRandom } from './util/pickRandom';
     import { calcExtensions, makePixelSpace } from './model/PixelSpace';
-    import { percentLogToVal } from './util/percentLogToVal';
     import type { Mat4 } from './util/matrices';
     import { getTxMax } from './model/getTxMax';
     import Icon from './Icon.svelte';
@@ -155,20 +154,22 @@
             return;
         }
 
-        const pixelSpace = makePixelSpace(getW(), getH(), percentLogToVal(imgParams.fade.blur.val));
-        const xAngle = imgParams.angle.x.val;
-        const yAngle = imgParams.angle.y.val;
-        const zAngle = imgParams.angle.z.val;
+        const pixelSpace = makePixelSpace(getW(), getH(), getSliderVal(imgParams.fade.blur));
+        const xAngle = getSliderVal(imgParams.angle.x);
+        const yAngle = getSliderVal(imgParams.angle.y);
+        const zAngle = getSliderVal(imgParams.angle.z);
         const extensions = calcExtensions(pixelSpace, xAngle, yAngle, zAngle);
         getSource(imgParams.source['source'].val as SourceCodeName).then(source => {
             if (!imgParams) {
                 return;
             }
 
-            const glyphRaster = rasterizeFont(source, rasterCanvasEl, imgParams.font.size.val);
+            const glyphRaster = rasterizeFont(source, rasterCanvasEl, getSliderVal(imgParams.font.size));
             const txMat = getTxMax(pixelSpace,
                 xAngle, yAngle, zAngle,
-                imgParams.position.x.val, imgParams.position.y.val, imgParams.position.z.val
+                getSliderVal(imgParams.position.x),
+                getSliderVal(imgParams.position.y),
+                getSliderVal(imgParams.position.z),
             );
             drawScene(pixelSpace, extensions, source, imgParams, txMat, glyphRaster);
         })

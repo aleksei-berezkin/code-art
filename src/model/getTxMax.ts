@@ -1,14 +1,14 @@
 import { asMat4, getRotateXMat, getRotateYMat, getRotateZMat, getTranslateMat, mul } from '../util/matrices';
 import type { PixelSpace } from './PixelSpace';
 
-export function getTxMax(pixelSpace: PixelSpace, xAngle: number, yAngle: number, zAngle: number, xTransPercent: number, yTransPercent: number, zTransPercent: number) {
+export function getTxMax(pixelSpace: PixelSpace, xAngle: number, yAngle: number, zAngle: number, xTrans: number, yTrans: number, zTrans: number) {
     // Transform in pixel space
     const txMatPixels =
         mul(
             getTranslateMat(
-                xTransPercent / 100 * pixelSpace.w,
-                yTransPercent / 100 * pixelSpace.h,
-                zTransPercent / 100 * pixelSpace.zBase,
+                xTrans * pixelSpace.w,
+                yTrans * pixelSpace.h,
+                zTrans * pixelSpace.zBase,
             ),
             getRotateXMat(xAngle),
             getRotateYMat(yAngle),

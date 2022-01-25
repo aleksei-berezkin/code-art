@@ -45,6 +45,7 @@
 
     .group-button-txt {
         padding-left: .5em;
+        padding-right: var(--input-w);
     }
 
     .group-body {
@@ -126,16 +127,16 @@
                     {#if p.type === 'slider'}
                         <div class='slider-wr'>
                             <label class='slider-label' for={toId(k)}>{k}</label>
-                            <div class='slider-min'>{toLabelNum(p, 'min')}</div>
+                            <div class='slider-min'>{getSliderLabel(p, 'min')}</div>
                             <!--suppress XmlDuplicatedId -->
                             <input class='slider-slider' id={toId(k)}
                                    data-g={g} data-k={k}
                                    type='range' min='{p.min}' max='{p.max}' step='any'
                                    value='{p.val}'
                                    on:input={handleSliderChange}
-                                   title='{p.val}'
+                                   title="{getSliderLabel(p, 'val')}"
                             />
-                            <div class='slider-max'>{toLabelNum(p, 'max')}</div>
+                            <div class='slider-max'>{getSliderLabel(p, 'max')}</div>
                         </div>
                     {/if}
             
@@ -171,7 +172,7 @@
 </menu>
 
 <script lang='ts'>
-    import { ImgParams, ParamGroup, SliderVal } from './model/ImgParams';
+    import { getSliderLabel, getSliderVal, ImgParams, ParamGroup } from './model/ImgParams';
     import { afterUpdate, onDestroy } from 'svelte';
     import Icon from './Icon.svelte';
     import { getFromSelfOrParentDataset } from './util/getFromSelfOrParentDataset';
@@ -183,23 +184,6 @@
 
     function toId(k: string) {
         return 'code-scene-control-' + k.replace(/\s/g, '-');
-    }
-
-    function toLabelNum(p: SliderVal, which: 'min' | 'max') {
-        const val = p[which];
-        let s;
-        if (p.unit === 'rad') {
-            s = `${val / Math.PI * 180}\u00B0`;
-        } else if (p.unit === '%') {
-            s = `${val}%`;
-        } else if (p.unit === 'log10') {
-            s = String(10 ** val);
-        } else if (p.unit === 'log10%') {
-            s = `${10 ** val}%`;
-        } else {
-            s = String(val);
-        }
-        return s.replace(/-/, '\u2212');
     }
 
     let openGroups: ParamGroup[] = [];

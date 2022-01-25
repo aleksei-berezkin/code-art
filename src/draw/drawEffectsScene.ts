@@ -9,6 +9,7 @@ import { blurKernel, blurKernelSize, blurKernelWeight, gaussianBlurKernel, gauss
 import { createEffectsGrid } from './createEffectsGrid';
 import type { ImgParams } from '../model/ImgParams';
 import { hexToRgb } from '../model/RGB';
+import { getSliderVal } from '../model/ImgParams';
 
 const fragmentShaderSource = fragmentShaderSourceWithMacro
     .replaceAll('_BLUR_K_SZ_', String(blurKernelSize));
@@ -55,23 +56,23 @@ export function drawEffectsScene(canvasEl: HTMLCanvasElement, codeSceneDrawn: Co
 
     gl.uniform1f(gl.getUniformLocation(program, 'u_blurKernelWeight'), gaussianBlurKernelWeight);
 
-    gl.uniform1f(gl.getUniformLocation(program, 'u_glowRadius'), imgParams.font.size.val * imgParams.glow.radius.val / 200);
+    gl.uniform1f(gl.getUniformLocation(program, 'u_glowRadius'), getSliderVal(imgParams.font.size) * getSliderVal(imgParams.glow.radius) / 2);
 
-    gl.uniform1f(gl.getUniformLocation(program, 'u_glowBrightness'), imgParams.glow.brightness.val);
+    gl.uniform1f(gl.getUniformLocation(program, 'u_glowBrightness'), getSliderVal(imgParams.glow.brightness));
 
-    gl.uniform1f(gl.getUniformLocation(program, 'u_glowColorShift'), imgParams.glow.recolor.val / 100);
+    gl.uniform1f(gl.getUniformLocation(program, 'u_glowColorShift'), getSliderVal(imgParams.glow.recolor));
 
     gl.uniform3fv(gl.getUniformLocation(program, 'u_glowShiftedColor'), hexToRgb(imgParams.glow.to.val));
 
-    gl.uniform1f(gl.getUniformLocation(program, 'u_colorBrightness'), imgParams.color.brightness.val);
+    gl.uniform1f(gl.getUniformLocation(program, 'u_colorBrightness'), getSliderVal(imgParams.color.brightness));
 
-    gl.uniform1f(gl.getUniformLocation(program, 'u_fade'), 10**imgParams.fade.fade.val);
+    gl.uniform1f(gl.getUniformLocation(program, 'u_fade'), getSliderVal(imgParams.fade.fade));
 
     gl.uniform3fv(gl.getUniformLocation(program, 'u_fadeNearColor'), hexToRgb(imgParams.fade.near.val));
 
     gl.uniform3fv(gl.getUniformLocation(program, 'u_fadeFarColor'), hexToRgb(imgParams.fade.far.val));
 
-    gl.uniform1f(gl.getUniformLocation(program, 'u_fadeRecolor'), imgParams.fade.recolor.val);
+    gl.uniform1f(gl.getUniformLocation(program, 'u_fadeRecolor'), getSliderVal(imgParams.fade.recolor));
 
     gl.uniform1i(gl.getUniformLocation(program, 'u_mode'), 0);
 
