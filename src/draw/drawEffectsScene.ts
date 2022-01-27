@@ -10,8 +10,14 @@ import type { ImgParams } from '../model/ImgParams';
 import { hexToRgb } from '../model/RGB';
 import { getSliderVal } from '../model/ImgParams';
 
+// TODO calculate based on input data
+const glowKSz = 11;
+const blurKSz = 15;
+
 const fragmentShaderSource = fragmentShaderSourceWithMacro
-    .replaceAll('_BLUR_K_SZ_', String('15'));
+    .replaceAll('_GLOW_K_SZ_', String(glowKSz))
+    .replaceAll('_BLUR_K_SZ_', String(blurKSz))
+    .replaceAll('_MAX_K_SZ_', String(Math.max(glowKSz, blurKSz)));
 
 export function drawEffectsScene(canvasEl: HTMLCanvasElement, codeSceneDrawn: CodeSceneDrawn, imgParams: ImgParams) {
     const gl = canvasEl.getContext('webgl2')!;

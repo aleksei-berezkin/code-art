@@ -29,17 +29,17 @@ in float v_w;
 
 out vec4 outColor;
 
-float kernel(int mode, int row, int col) {
-    int x = col - _BLUR_K_SZ_ / 2;
-    int y = row - _BLUR_K_SZ_ / 2;
+float kernel(int mode, int kSz, int row, int col) {
+    int x = col - kSz / 2;
+    int y = row - kSz / 2;
     if (mode == MODE_GLOW) {
         // Gaussian
-        float sigma = float(_BLUR_K_SZ_) / 8.0;
+        float sigma = float(kSz) / 8.0;
         return 1.0 / sigma / sqrt(2.0 * 3.14159265359) * exp(-float(x * x + y * y) / 2.0 / (sigma * sigma));
     }
     if (mode == MODE_BLUR) {
         // Round
-        if (x * x + y * y <= (_BLUR_K_SZ_ / 2) * (_BLUR_K_SZ_ / 2)) {
+        if (x * x + y * y <= (kSz / 2) * (kSz / 2)) {
             return 1.0;
         }
         return 0.0;
@@ -62,10 +62,18 @@ float avg(vec3 a) {
 void main() {
     vec3 blurred = vec3(0);
     float kWeight = 0.0;
-    for (int row = 0; row < _BLUR_K_SZ_; row++) {
-        for (int col = 0; col < _BLUR_K_SZ_; col++) {
-            vec2 delta = -v_blurTexCoordsRadii + 2.0 * v_blurTexCoordsRadii * vec2(row, col) / float(_BLUR_K_SZ_ - 1);
-            float k = kernel(u_mode, row, col);
+    int kSz = u_mode == MODE_GLOW ? _GLOW_K_SZ_ : _BLUR_K_SZ_;
+
+    for (int row = 0; row < _MAX_K_SZ_; row++) {
+        if (row >= kSz) {
+            break;
+        }
+        for (int col = 0; col < _MAX_K_SZ_; col++) {
+            if (col >= kSz) {
+                break;
+            }
+            vec2 delta = -v_blurTexCoordsRadii + 2.0 * v_blurTexCoordsRadii * vec2(row, col) / float(kSz - 1);
+            float k = kernel(u_mode, kSz, row, col);
             blurred += k * (texture(u_image, v_texCoords + delta).rgb - u_bg);
             kWeight += k;
         }
