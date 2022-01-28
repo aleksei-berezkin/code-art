@@ -85,22 +85,13 @@
 </section>
     
 <script lang='ts'>
-    import { getSliderVal, ImgParams } from './model/ImgParams';
-    import { drawCodeScene } from './draw/drawCodeScene';
-    import { GlyphRaster, rasterizeFont } from './draw/rasterizeFont';
-    import { getSource, Source, SourceCodeName, sourceCodeNames } from './model/souceCode';
+    import { ImgParams } from './model/ImgParams';
     import { dpr } from './util/dpr';
-    import { drawEffectsScene } from './draw/drawEffectsScene';
-    import { genAllParams } from './model/genAllParams';
     import ImgParamsMenu from './ImgParamsMenu.svelte';
-    import type { Extensions, PixelSpace } from "./model/PixelSpace";
     import { onMount } from 'svelte';
-    import { pickRandom } from './util/pickRandom';
-    import { calcExtensions, makePixelSpace } from './model/PixelSpace';
-    import type { Mat4 } from './util/matrices';
-    import { getTxMax } from './model/getTxMax';
     import Icon from './Icon.svelte';
     import { parseMs } from './util/parseMs';
+    import { drawRandomScene, drawScene } from './draw/drawScene';
 
     let codeCanvasEl: HTMLCanvasElement;
     let rasterCanvasEl: HTMLCanvasElement;
@@ -110,8 +101,8 @@
 
     let genRotateDeg = 0;
 
-    onMount(function () {
-        generateScene(36);
+    onMount(async function () {
+        await generateScene(36);
     });
 
 
@@ -119,23 +110,17 @@
         if (imgParams) {
             const icTxMs = parseMs(getComputedStyle(document.body).getPropertyValue('--ic-tx'));
             genRotateDeg += 360;
-            setTimeout(() => {
+            setTimeout(async () => {
                 // The only preserved param
                 const fontSize = imgParams!.font.size.val;
-                generateScene(fontSize);
+                await generateScene(fontSize);
             }, icTxMs + 10);
         }
     }
 
-    function generateScene(fontSize: number) {
+    async function generateScene(fontSize: number) {
         setWH();
-        const sourceName = pickRandom(sourceCodeNames);
-        getSource(sourceName).then(source => {
-            const glyphRaster = rasterizeFont(source, rasterCanvasEl, fontSize);
-            const allParams = genAllParams(getW(), getH(), fontSize, source, glyphRaster);
-            imgParams = allParams.imgParams;
-            drawScene(allParams.pixelSpace, allParams.extensions, source, allParams.imgParams, allParams.txMat, glyphRaster);
-        });
+        imgParams = await drawRandomScene(fontSize, codeCanvasEl, rasterCanvasEl);
     }
 
     let downloading = false;
@@ -149,47 +134,16 @@
         }
     }
 
-    function onParamsUpdate() {
+    async function onParamsUpdate() {
         if (!imgParams) {
             return;
         }
 
-        const pixelSpace = makePixelSpace(getW(), getH(), getSliderVal(imgParams.fade.blur));
-        const xAngle = getSliderVal(imgParams.angle.x);
-        const yAngle = getSliderVal(imgParams.angle.y);
-        const zAngle = getSliderVal(imgParams.angle.z);
-        const extensions = calcExtensions(pixelSpace, xAngle, yAngle, zAngle);
-        getSource(imgParams.source['source'].val as SourceCodeName).then(source => {
-            if (!imgParams) {
-                return;
-            }
-
-            const glyphRaster = rasterizeFont(source, rasterCanvasEl, getSliderVal(imgParams.font.size));
-            const txMat = getTxMax(pixelSpace,
-                xAngle, yAngle, zAngle,
-                getSliderVal(imgParams.position.x),
-                getSliderVal(imgParams.position.y),
-                getSliderVal(imgParams.position.z),
-            );
-            drawScene(pixelSpace, extensions, source, imgParams, txMat, glyphRaster);
-        })
+        await drawScene(imgParams, codeCanvasEl, rasterCanvasEl);
     }
 
     function onClickedOutsideMenu() {
         menuOpen = false;
-    }
-
-    function drawScene(pixelSpace: PixelSpace, extensions: Extensions, source: Source, imgParams: ImgParams, txMat: Mat4, glyphRaster: GlyphRaster) {
-        const codeSceneDrawn = drawCodeScene(codeCanvasEl, rasterCanvasEl, pixelSpace, extensions, imgParams, txMat, source, glyphRaster);
-        drawEffectsScene(codeCanvasEl, codeSceneDrawn, imgParams);
-    }
-
-    function getW() {
-        return codeCanvasEl.width / dpr;
-    }
-
-    function getH() {
-        return codeCanvasEl.height / dpr;
     }
 
     function setWH() {

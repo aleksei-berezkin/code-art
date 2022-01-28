@@ -18,13 +18,16 @@ import type { Mat4 } from '../util/matrices';
 import { iterateCode } from './iterateCode';
 import { mulVec } from '../util/matrices';
 import { getSliderVal } from './ImgParams';
+import type { Size } from '../util/Size';
 
-export function genAllParams(w: number, h: number, fontSize: number, source: Source, glyphRaster: GlyphRaster): {
+export type SceneParams = {
     pixelSpace: PixelSpace,
     extensions: Extensions,
     txMat: Mat4,
     imgParams: ImgParams,
-} {
+};
+
+export function generateSceneParams(size: Size, fontSize: number, source: Source, glyphRaster: GlyphRaster): SceneParams {
     const blurFactorPercentLog = 1.3 + Math.random();
 
     const angles = createAngles(source.lang === 'js min')
@@ -36,7 +39,7 @@ export function genAllParams(w: number, h: number, fontSize: number, source: Sou
         max: 3,
         unit: 'log10%' as const,
     };
-    const pixelSpace = makePixelSpace(w, h, getSliderVal(fadeBlurSlider));
+    const pixelSpace = makePixelSpace(size, getSliderVal(fadeBlurSlider));
     const extensions = calcExtensions(pixelSpace, angles.x, angles.y, angles.z);
 
     const txMat = getTxMax(pixelSpace, angles.x, angles.y, angles.z, 0, 0, 0);

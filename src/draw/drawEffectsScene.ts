@@ -1,4 +1,3 @@
-import type { CodeSceneDrawn } from './drawCodeScene';
 import vertexShaderSource from '../shader/effectsVertex.shader';
 import fragmentShaderSource from '../shader/effectsFragment.shader';
 import { createProgram } from './createProgram';
@@ -6,18 +5,19 @@ import { vertexSize2d } from './rect';
 import { uploadArrayToAttribute } from './uploadArrayToAttribute';
 import { uploadTexture } from './uploadTexture';
 import { createEffectsGrid } from './createEffectsGrid';
-import type { ImgParams } from '../model/ImgParams';
-import { hexToRgb } from '../model/RGB';
+import { hexToRgb, RGB } from '../model/RGB';
 import { getSliderVal } from '../model/ImgParams';
 import { ceilToOdd } from '../util/ceilToOdd';
 import { getLoopSize } from './getLoopSize';
 import { dpr } from '../util/dpr';
+import type { SceneParams } from '../model/generateSceneParams';
 
 const maxKernel = 21;
 
-export function drawEffectsScene(canvasEl: HTMLCanvasElement, codeSceneDrawn: CodeSceneDrawn, imgParams: ImgParams) {
-    const gl = canvasEl.getContext('webgl2')!;
+export function drawEffectsScene(sceneParams: SceneParams, bgColor: RGB, codeCanvasEl: HTMLCanvasElement) {
+    const gl = codeCanvasEl.getContext('webgl2')!;
 
+    const { imgParams } = sceneParams;
     const glowRadius = getSliderVal(imgParams.font.size) * getSliderVal(imgParams.glow.radius) / 2;
     const glowKSize = ceilToOdd(glowRadius / 2 * dpr, maxKernel);
     const blurKSize = ceilToOdd(3 * imgParams.fade.blur.val * dpr, maxKernel);
@@ -28,10 +28,10 @@ export function drawEffectsScene(canvasEl: HTMLCanvasElement, codeSceneDrawn: Co
 
     const program = createProgram(vertexShaderSource, fragmentShaderSourceProcessed, gl);
 
-    const gridVertices = createEffectsGrid(codeSceneDrawn.pixelSpace, codeSceneDrawn.extensions, imgParams.font.size.val);
+    const gridVertices = createEffectsGrid(sceneParams.pixelSpace, sceneParams.extensions, imgParams.font.size.val);
     uploadArrayToAttribute('a_position', new Float32Array(gridVertices), vertexSize2d, program, gl);
 
-    uploadTexture(canvasEl, gl.TEXTURE0, gl);
+    uploadTexture(codeCanvasEl, gl.TEXTURE0, gl);
 
     gl.useProgram(program);
 
@@ -44,26 +44,26 @@ export function drawEffectsScene(canvasEl: HTMLCanvasElement, codeSceneDrawn: Co
     gl.uniformMatrix4fv(
         gl.getUniformLocation(program, 'u_tx'),
         false,
-        codeSceneDrawn.txMat,
+        sceneParams.txMat,
     );
 
-    gl.uniform1f(gl.getUniformLocation(program, 'u_xMax'), codeSceneDrawn.pixelSpace.xMax);
+    gl.uniform1f(gl.getUniformLocation(program, 'u_xMax'), sceneParams.pixelSpace.xMax);
 
     // noinspection JSSuspiciousNameCombination
-    gl.uniform1f(gl.getUniformLocation(program, 'u_yMax'), codeSceneDrawn.pixelSpace.yMax);
+    gl.uniform1f(gl.getUniformLocation(program, 'u_yMax'), sceneParams.pixelSpace.yMax);
 
-    gl.uniform1f(gl.getUniformLocation(program, 'u_zBase'), codeSceneDrawn.pixelSpace.zBase);
+    gl.uniform1f(gl.getUniformLocation(program, 'u_zBase'), sceneParams.pixelSpace.zBase);
 
-    gl.uniform1f(gl.getUniformLocation(program, 'u_focalLength'), codeSceneDrawn.pixelSpace.optics.focalLength);
+    gl.uniform1f(gl.getUniformLocation(program, 'u_focalLength'), sceneParams.pixelSpace.optics.focalLength);
 
     gl.uniform1f(
         gl.getUniformLocation(program, 'u_distanceToSensor'),
-        1 / (1 / codeSceneDrawn.pixelSpace.optics.focalLength - 1 / codeSceneDrawn.pixelSpace.zBase),
+        1 / (1 / sceneParams.pixelSpace.optics.focalLength - 1 / sceneParams.pixelSpace.zBase),
     );
 
-    gl.uniform1f(gl.getUniformLocation(program, 'u_lensDiameter'), codeSceneDrawn.pixelSpace.optics.lensDiameter);
+    gl.uniform1f(gl.getUniformLocation(program, 'u_lensDiameter'), sceneParams.pixelSpace.optics.lensDiameter);
 
-    gl.uniform3fv(gl.getUniformLocation(program, 'u_bg'), codeSceneDrawn.bgColor);
+    gl.uniform3fv(gl.getUniformLocation(program, 'u_bg'), bgColor);
 
     gl.uniform1f(gl.getUniformLocation(program, 'u_glowRadius'), glowRadius);
 
@@ -89,7 +89,7 @@ export function drawEffectsScene(canvasEl: HTMLCanvasElement, codeSceneDrawn: Co
 
     gl.drawArrays(gl.TRIANGLES, 0, gridVertices.length / vertexSize2d);
 
-    uploadTexture(canvasEl, gl.TEXTURE0, gl);
+    uploadTexture(codeCanvasEl, gl.TEXTURE0, gl);
 
     gl.uniform1i(gl.getUniformLocation(program, 'u_mode'), 1);
 

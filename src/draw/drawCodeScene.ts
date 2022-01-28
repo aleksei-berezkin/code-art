@@ -1,49 +1,35 @@
 import { createProgram } from './createProgram';
 import vertexShaderSource from '../shader/codeVertex.shader';
 import fragmentShaderSource from '../shader/codeFragment.shader';
-import type { ImgParams } from '../model/ImgParams';
-import type { Mat4 } from '../util/matrices';
 import { createCodeSceneData } from './createCodeSceneData';
 import { vertexSize2d } from './rect';
 import type { GlyphRaster } from './rasterizeFont';
 import type { Source } from '../model/souceCode';
 import { uploadArrayToAttribute } from './uploadArrayToAttribute';
 import { uploadTexture } from './uploadTexture';
-import { Extensions, getSceneBounds, PixelSpace } from '../model/PixelSpace';
-import { colorizeCode } from '../model/colorizeCode';
-import type { ColorSchemeName } from '../model/colorSchemes';
-import { RGB, rgbSize } from '../model/RGB';
+import { getSceneBounds } from '../model/PixelSpace';
+import type { CodeColorization } from '../model/colorizeCode';
+import { rgbSize } from '../model/RGB';
 import { getSliderVal } from '../model/ImgParams';
-
-export type CodeSceneDrawn = {
-    pixelSpace: PixelSpace,
-    extensions: Extensions,
-    txMat: Mat4,
-    bgColor: RGB,
-}
+import type { SceneParams } from '../model/generateSceneParams';
 
 // TODO render to texture
-export function drawCodeScene(canvasEl: HTMLCanvasElement,
-                              rasterCanvasEl: HTMLCanvasElement,
-                              pixelSpace: PixelSpace,
-                              extensions: Extensions,
-                              // TODO params not orthogonal here
-                              params: ImgParams,
-                              txMat: Mat4,
-                              source: Source,
+export function drawCodeScene(source: Source,
+                              codeColorization: CodeColorization,
+                              sceneParams: SceneParams,
                               glyphRaster: GlyphRaster,
-): CodeSceneDrawn {
-    const gl = canvasEl.getContext('webgl2');
+                              codeCanvasEl: HTMLCanvasElement,
+                              rasterCanvasEl: HTMLCanvasElement,
+) {
+    const gl = codeCanvasEl.getContext('webgl2');
     if (!gl) {
         throw new Error('webgl2 not supported');
     }
 
-    const codeColorization = colorizeCode(source, params.color.scheme.val as ColorSchemeName);
-
     const sceneData = createCodeSceneData(
-        getSceneBounds(pixelSpace, extensions),
-        getSliderVal(params.position.scroll),
-        params.font.size.val,
+        getSceneBounds(sceneParams.pixelSpace, sceneParams.extensions),
+        getSliderVal(sceneParams.imgParams.position.scroll),
+        sceneParams.imgParams.font.size.val,
         source,
         codeColorization,
         glyphRaster,
@@ -70,7 +56,7 @@ export function drawCodeScene(canvasEl: HTMLCanvasElement,
     gl.uniformMatrix4fv(
         gl.getUniformLocation(program, 'u_tx'),
         false,
-        txMat,
+        sceneParams.txMat,
     );
 
     gl.uniform3fv(
@@ -84,11 +70,4 @@ export function drawCodeScene(canvasEl: HTMLCanvasElement,
     gl.clear(gl.COLOR_BUFFER_BIT);
 
     gl.drawArrays(gl.TRIANGLES, 0, sceneData.vertices.length / vertexSize2d);
-
-    return {
-        pixelSpace,
-        extensions,
-        txMat,
-        bgColor: codeColorization.bgColor,
-    };
 }

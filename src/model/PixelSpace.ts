@@ -1,5 +1,6 @@
 import { degToRad } from '../util/degToRad';
 import { pluck } from '../util/pluck';
+import type { Size } from '../util/Size';
 
 export type PixelSpace = ReturnType<typeof makePixelSpace>;
 
@@ -18,7 +19,8 @@ export type PixelSpace = ReturnType<typeof makePixelSpace>;
  * An object at z=+zBase (2*zBase distance from the camera) is twice smaller than that
  * at z=0, so w = (zBase + z) / zBase = 1 + z / zBase
  */
-export function makePixelSpace(w: number, h: number, blurFactor: number) {
+export function makePixelSpace(size: Size, blurFactor: number) {
+    const {w, h} = size;
     const viewAngleV = degToRad(115);
     const zBase = h / 2 / Math.tan(viewAngleV / 2);
     const viewAngleH = Math.atan(w / 2 / zBase) * 2;
