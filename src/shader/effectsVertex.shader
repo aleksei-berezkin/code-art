@@ -40,6 +40,10 @@ void main() {
         1.0 - (gl_Position.y + 1.0) / 2.0
     );
 
+    if (u_mode == MODE_BLUR) {
+        gl_Position.y = -gl_Position.y;
+    }
+
     if (u_mode == MODE_GLOW) {
         // x: -u_glowRadius..+u_glowRadius -> -.5..+.5
         // y: -u_glowRadius..+u_glowRadius -> +.5..-.5

@@ -6,14 +6,15 @@ import { vertexSize2d } from './rect';
 import type { GlyphRaster } from './rasterizeFont';
 import type { Source } from '../model/souceCode';
 import { uploadArrayToAttribute } from './uploadArrayToAttribute';
-import { uploadTexture } from './uploadTexture';
+import { createEmptyTexture, uploadTexture } from './uploadTexture';
 import { getSceneBounds } from '../model/PixelSpace';
 import type { CodeColorization } from '../model/colorizeCode';
 import { rgbSize } from '../model/RGB';
 import { getSliderVal } from '../model/ImgParams';
 import type { SceneParams } from '../model/generateSceneParams';
+import { renderColorToTexture } from './renderColorToTexture';
 
-// TODO render to texture
+// Renders to 0 tex unit
 export function drawCodeScene(source: Source,
                               codeColorization: CodeColorization,
                               sceneParams: SceneParams,
@@ -44,13 +45,13 @@ export function drawCodeScene(source: Source,
 
     uploadArrayToAttribute('a_color', new Float32Array(sceneData.colors), rgbSize, program, gl);
 
-    uploadTexture(rasterCanvasEl, gl.TEXTURE0, gl);
+    uploadTexture(1, rasterCanvasEl, gl);
 
     gl.useProgram(program);
 
     gl.uniform1i(
         gl.getUniformLocation(program, 'u_letters'),
-        0,
+        1,
     );
 
     gl.uniformMatrix4fv(
@@ -64,10 +65,15 @@ export function drawCodeScene(source: Source,
         codeColorization.bgColor,
     );
 
+    const targetTex = createEmptyTexture(0, {w: codeCanvasEl.width, h: codeCanvasEl.height}, gl)
+    renderColorToTexture(targetTex, gl);
+
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
     gl.clearColor(...codeColorization.bgColor, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
     gl.drawArrays(gl.TRIANGLES, 0, sceneData.vertices.length / vertexSize2d);
+
+    return targetTex;
 }

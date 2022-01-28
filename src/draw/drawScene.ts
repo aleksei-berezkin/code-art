@@ -46,10 +46,9 @@ export async function drawScene(imgParams: ImgParams, codeCanvasEl: HTMLCanvasEl
 async function _drawScene(source: Source, sceneParams: SceneParams, glyphRaster: GlyphRaster, codeCanvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement) {
     const codeColorization = colorizeCode(source, sceneParams.imgParams.color.scheme.val as ColorSchemeName);
     await delay();
-    drawCodeScene(source, codeColorization, sceneParams, glyphRaster, codeCanvasEl, rasterCanvasEl);
-    // TODO uncomment reveals bug: image changes
-    // await delay(500);
-    drawEffectsScene(sceneParams, codeColorization.bgColor, codeCanvasEl);
+    const targetTex = drawCodeScene(source, codeColorization, sceneParams, glyphRaster, codeCanvasEl, rasterCanvasEl);
+    await delay();
+    drawEffectsScene(sceneParams, codeColorization.bgColor, targetTex, codeCanvasEl);
 }
 
 function getPixelSpaceSize(codeCanvasEl: HTMLCanvasElement): Size {

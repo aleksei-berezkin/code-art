@@ -3,7 +3,7 @@ import fragmentShaderSource from '../shader/effectsFragment.shader';
 import { createProgram } from './createProgram';
 import { vertexSize2d } from './rect';
 import { uploadArrayToAttribute } from './uploadArrayToAttribute';
-import { uploadTexture } from './uploadTexture';
+import { createEmptyTexture, uploadTexture } from './uploadTexture';
 import { createEffectsGrid } from './createEffectsGrid';
 import { hexToRgb, RGB } from '../model/RGB';
 import { getSliderVal } from '../model/ImgParams';
@@ -11,10 +11,11 @@ import { ceilToOdd } from '../util/ceilToOdd';
 import { getLoopSize } from './getLoopSize';
 import { dpr } from '../util/dpr';
 import type { SceneParams } from '../model/generateSceneParams';
+import { renderColorToTexture, renderToCanvas } from './renderColorToTexture';
 
 const maxKernel = 21;
 
-export function drawEffectsScene(sceneParams: SceneParams, bgColor: RGB, codeCanvasEl: HTMLCanvasElement) {
+export function drawEffectsScene(sceneParams: SceneParams, bgColor: RGB, inputTexture: WebGLTexture, codeCanvasEl: HTMLCanvasElement) {
     const gl = codeCanvasEl.getContext('webgl2')!;
 
     const { imgParams } = sceneParams;
@@ -31,7 +32,8 @@ export function drawEffectsScene(sceneParams: SceneParams, bgColor: RGB, codeCan
     const gridVertices = createEffectsGrid(sceneParams.pixelSpace, sceneParams.extensions, imgParams.font.size.val);
     uploadArrayToAttribute('a_position', new Float32Array(gridVertices), vertexSize2d, program, gl);
 
-    uploadTexture(codeCanvasEl, gl.TEXTURE0, gl);
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, inputTexture);
 
     gl.useProgram(program);
 
@@ -39,7 +41,7 @@ export function drawEffectsScene(sceneParams: SceneParams, bgColor: RGB, codeCan
 
     gl.uniform1i(gl.getUniformLocation(program, 'u_blurKSize'), blurKSize);
 
-    gl.uniform1i(gl.getUniformLocation(program, 'u_image'), 0);
+    gl.uniform1i(gl.getUniformLocation(program, 'u_image'), 1);
 
     gl.uniformMatrix4fv(
         gl.getUniformLocation(program, 'u_tx'),
@@ -85,13 +87,18 @@ export function drawEffectsScene(sceneParams: SceneParams, bgColor: RGB, codeCan
 
     gl.uniform1i(gl.getUniformLocation(program, 'u_mode'), 0);
 
+    const targetTex = createEmptyTexture(0, {w: codeCanvasEl.width, h: codeCanvasEl.height}, gl)
+    renderColorToTexture(targetTex, gl);
+
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
     gl.drawArrays(gl.TRIANGLES, 0, gridVertices.length / vertexSize2d);
 
-    uploadTexture(codeCanvasEl, gl.TEXTURE0, gl);
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, targetTex);
 
     gl.uniform1i(gl.getUniformLocation(program, 'u_mode'), 1);
 
+    renderToCanvas(gl);
     gl.drawArrays(gl.TRIANGLES, 0, gridVertices.length / vertexSize2d);
 }
