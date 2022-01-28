@@ -12,4 +12,5 @@ export function uploadTexture(texSource: TexImageSource, level: number, gl: WebG
         gl.UNSIGNED_BYTE,
         texSource,
     );
+    gl.bindTexture(gl.TEXTURE_2D_ARRAY, null);
 }

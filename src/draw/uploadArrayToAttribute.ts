@@ -6,4 +6,6 @@ export function uploadArrayToAttribute(attrName: string, array: Float32Array, it
     gl.vertexAttribPointer(attrLocation, itemSize, gl.FLOAT, false, 0, 0);
 
     gl.enableVertexAttribArray(attrLocation);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
 }
