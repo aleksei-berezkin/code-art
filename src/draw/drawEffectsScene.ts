@@ -3,7 +3,7 @@ import fragmentShaderSource from '../shader/effectsFragment.shader';
 import { createProgram } from './createProgram';
 import { vertexSize2d } from './rect';
 import { uploadArrayToAttribute } from './uploadArrayToAttribute';
-import { createEmptyTexture, uploadTexture } from './uploadTexture';
+import { createEmptyTexture } from './uploadTexture';
 import { createEffectsGrid } from './createEffectsGrid';
 import { hexToRgb, RGB } from '../model/RGB';
 import { getSliderVal } from '../model/ImgParams';
@@ -13,10 +13,17 @@ import { dpr } from '../util/dpr';
 import type { SceneParams } from '../model/generateSceneParams';
 import { renderColorToTexture, renderToCanvas } from './renderColorToTexture';
 import { drawTriangles } from './drawTriangles';
+import type { IsInterrupted } from '../util/interrupted';
 
 const maxKernel = 21;
 
-export async function drawEffectsScene(sceneParams: SceneParams, bgColor: RGB, inputTexture: WebGLTexture, codeCanvasEl: HTMLCanvasElement) {
+export async function drawEffectsScene(
+    sceneParams: SceneParams,
+    bgColor: RGB,
+    inputTexture: WebGLTexture,
+    codeCanvasEl: HTMLCanvasElement,
+    isInterrupted: IsInterrupted,
+) {
     const gl = codeCanvasEl.getContext('webgl2', {preserveDrawingBuffer: true})!;
 
     const { imgParams } = sceneParams;
@@ -94,7 +101,7 @@ export async function drawEffectsScene(sceneParams: SceneParams, bgColor: RGB, i
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
     gl.drawArrays(gl.TRIANGLES, 0, gridVertices.length / vertexSize2d);
-    await drawTriangles(gridVertices.length / vertexSize2d, gl);
+    await drawTriangles(gridVertices.length / vertexSize2d, gl, isInterrupted);
 
     gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, targetTex);
@@ -102,5 +109,6 @@ export async function drawEffectsScene(sceneParams: SceneParams, bgColor: RGB, i
     gl.uniform1i(gl.getUniformLocation(program, 'u_mode'), 1);
 
     renderToCanvas(gl);
-    await drawTriangles(gridVertices.length / vertexSize2d, gl);
+
+    await drawTriangles(gridVertices.length / vertexSize2d, gl, isInterrupted);
 }

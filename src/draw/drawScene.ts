@@ -13,21 +13,36 @@ import type { Size } from '../util/Size';
 import { delay } from '../util/delay';
 import { colorizeCode } from '../model/colorizeCode';
 import type { ColorSchemeName } from '../model/colorSchemes';
+import type { IsInterrupted } from '../util/interrupted';
 
-export async function drawRandomScene(fontSize: number, codeCanvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement): Promise<ImgParams> {
+export async function drawRandomScene(fontSize: number, codeCanvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement): Promise<ImgParams | undefined> {
+    const isInterrupted = startNewInterruptableDraw(codeCanvasEl);
+
     const sourceName = pickRandom(sourceCodeNames);
-    const source = await getSource(sourceName)
+    const source = await getSource(sourceName, isInterrupted);
+
     const glyphRaster = rasterizeFont(source, rasterCanvasEl, fontSize);
-    await delay();
+    await delay(isInterrupted);
+
     const sceneParams = generateSceneParams(getPixelSpaceSize(codeCanvasEl), fontSize, source, glyphRaster);
-    await _drawScene(source, sceneParams, glyphRaster, codeCanvasEl, rasterCanvasEl);
+    await _drawScene(source, sceneParams, glyphRaster, codeCanvasEl, rasterCanvasEl, isInterrupted);
+    if (isInterrupted()) {
+        return undefined;
+    }
+
     return sceneParams.imgParams;
 }
 
 export async function drawScene(imgParams: ImgParams, codeCanvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement) {
-    const source = await getSource(imgParams.source['source'].val as SourceCodeName)
+    const isInterrupted = startNewInterruptableDraw(codeCanvasEl);
+
+    const source = await getSource(imgParams.source['source'].val as SourceCodeName, isInterrupted)
+    if (isInterrupted()) {
+        return;
+    }
+
     const glyphRaster = rasterizeFont(source, rasterCanvasEl, getSliderVal(imgParams.font.size));
-    await delay();
+    await delay(isInterrupted);
 
     const pixelSpace = makePixelSpace(getPixelSpaceSize(codeCanvasEl), getSliderVal(imgParams.fade.blur));
     const xAngle = getSliderVal(imgParams.angle.x);
@@ -40,15 +55,24 @@ export async function drawScene(imgParams: ImgParams, codeCanvasEl: HTMLCanvasEl
         getSliderVal(imgParams.position.y),
         getSliderVal(imgParams.position.z),
     );
-    await _drawScene(source, {pixelSpace, extensions, imgParams, txMat}, glyphRaster, codeCanvasEl, rasterCanvasEl);
+    await _drawScene(source, {pixelSpace, extensions, imgParams, txMat}, glyphRaster, codeCanvasEl, rasterCanvasEl, isInterrupted);
 }
 
-async function _drawScene(source: Source, sceneParams: SceneParams, glyphRaster: GlyphRaster, codeCanvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement) {
+async function _drawScene(source: Source, sceneParams: SceneParams, glyphRaster: GlyphRaster, codeCanvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement, isInterrupted: IsInterrupted) {
     const codeColorization = colorizeCode(source, sceneParams.imgParams.color.scheme.val as ColorSchemeName);
-    await delay();
-    const targetTex = await drawCodeScene(source, codeColorization, sceneParams, glyphRaster, codeCanvasEl, rasterCanvasEl);
-    await delay();
-    await drawEffectsScene(sceneParams, codeColorization.bgColor, targetTex, codeCanvasEl);
+    await delay(isInterrupted);
+    const targetTex = await drawCodeScene(source, codeColorization, sceneParams, glyphRaster, codeCanvasEl, rasterCanvasEl, isInterrupted);
+    await delay(isInterrupted);
+    await drawEffectsScene(sceneParams, codeColorization.bgColor, targetTex, codeCanvasEl, isInterrupted);
+}
+
+let nextDrawId = 0;
+function startNewInterruptableDraw(codeCanvasEl: HTMLCanvasElement) {
+    const id = String(nextDrawId++);
+    codeCanvasEl.dataset.drawId = id;
+    return function isInterrupted() {
+        return codeCanvasEl.dataset.drawId !== id;
+    }
 }
 
 function getPixelSpaceSize(codeCanvasEl: HTMLCanvasElement): Size {

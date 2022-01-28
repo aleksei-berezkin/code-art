@@ -92,6 +92,7 @@
     import Icon from './Icon.svelte';
     import { parseMs } from './util/parseMs';
     import { drawRandomScene, drawScene } from './draw/drawScene';
+    import { interrupted } from './util/interrupted';
 
     let codeCanvasEl: HTMLCanvasElement;
     let rasterCanvasEl: HTMLCanvasElement;
@@ -101,8 +102,10 @@
 
     let genRotateDeg = 0;
 
+    const fontSize = 36;
+
     onMount(async function () {
-        await generateScene(36);
+        await generateScene(fontSize);
     });
 
 
@@ -111,8 +114,6 @@
             const icTxMs = parseMs(getComputedStyle(document.body).getPropertyValue('--ic-tx'));
             genRotateDeg += 360;
             setTimeout(async () => {
-                // The only preserved param
-                const fontSize = imgParams!.font.size.val;
                 await generateScene(fontSize);
             }, icTxMs + 10);
         }
@@ -120,7 +121,16 @@
 
     async function generateScene(fontSize: number) {
         setWH();
-        imgParams = await drawRandomScene(fontSize, codeCanvasEl, rasterCanvasEl);
+        try {
+            const p = await drawRandomScene(fontSize, codeCanvasEl, rasterCanvasEl);
+            if (p) {
+                imgParams = p;
+            }
+        } catch (e) {
+            if (e !== interrupted) {
+                throw e;
+            }
+        }
     }
 
     let downloading = false;
@@ -139,7 +149,13 @@
             return;
         }
 
-        await drawScene(imgParams, codeCanvasEl, rasterCanvasEl);
+        try {
+            await drawScene(imgParams, codeCanvasEl, rasterCanvasEl);
+        } catch (e) {
+            if (e !== interrupted) {
+                throw e;
+            }
+        }
     }
 
     function onClickedOutsideMenu() {
