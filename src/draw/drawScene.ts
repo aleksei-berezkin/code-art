@@ -46,9 +46,9 @@ export async function drawScene(imgParams: ImgParams, codeCanvasEl: HTMLCanvasEl
 async function _drawScene(source: Source, sceneParams: SceneParams, glyphRaster: GlyphRaster, codeCanvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement) {
     const codeColorization = colorizeCode(source, sceneParams.imgParams.color.scheme.val as ColorSchemeName);
     await delay();
-    const targetTex = drawCodeScene(source, codeColorization, sceneParams, glyphRaster, codeCanvasEl, rasterCanvasEl);
+    const targetTex = await drawCodeScene(source, codeColorization, sceneParams, glyphRaster, codeCanvasEl, rasterCanvasEl);
     await delay();
-    drawEffectsScene(sceneParams, codeColorization.bgColor, targetTex, codeCanvasEl);
+    await drawEffectsScene(sceneParams, codeColorization.bgColor, targetTex, codeCanvasEl);
 }
 
 function getPixelSpaceSize(codeCanvasEl: HTMLCanvasElement): Size {

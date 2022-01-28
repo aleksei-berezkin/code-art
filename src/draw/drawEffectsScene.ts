@@ -12,11 +12,12 @@ import { getLoopSize } from './getLoopSize';
 import { dpr } from '../util/dpr';
 import type { SceneParams } from '../model/generateSceneParams';
 import { renderColorToTexture, renderToCanvas } from './renderColorToTexture';
+import { drawTriangles } from './drawTriangles';
 
 const maxKernel = 21;
 
-export function drawEffectsScene(sceneParams: SceneParams, bgColor: RGB, inputTexture: WebGLTexture, codeCanvasEl: HTMLCanvasElement) {
-    const gl = codeCanvasEl.getContext('webgl2')!;
+export async function drawEffectsScene(sceneParams: SceneParams, bgColor: RGB, inputTexture: WebGLTexture, codeCanvasEl: HTMLCanvasElement) {
+    const gl = codeCanvasEl.getContext('webgl2', {preserveDrawingBuffer: true})!;
 
     const { imgParams } = sceneParams;
     const glowRadius = getSliderVal(imgParams.font.size) * getSliderVal(imgParams.glow.radius) / 2;
@@ -93,6 +94,7 @@ export function drawEffectsScene(sceneParams: SceneParams, bgColor: RGB, inputTe
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
     gl.drawArrays(gl.TRIANGLES, 0, gridVertices.length / vertexSize2d);
+    await drawTriangles(gridVertices.length / vertexSize2d, gl);
 
     gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, targetTex);
@@ -100,5 +102,5 @@ export function drawEffectsScene(sceneParams: SceneParams, bgColor: RGB, inputTe
     gl.uniform1i(gl.getUniformLocation(program, 'u_mode'), 1);
 
     renderToCanvas(gl);
-    gl.drawArrays(gl.TRIANGLES, 0, gridVertices.length / vertexSize2d);
+    await drawTriangles(gridVertices.length / vertexSize2d, gl);
 }

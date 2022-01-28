@@ -13,16 +13,17 @@ import { rgbSize } from '../model/RGB';
 import { getSliderVal } from '../model/ImgParams';
 import type { SceneParams } from '../model/generateSceneParams';
 import { renderColorToTexture } from './renderColorToTexture';
+import { drawTriangles } from './drawTriangles';
 
 // Renders to 0 tex unit
-export function drawCodeScene(source: Source,
+export async function drawCodeScene(source: Source,
                               codeColorization: CodeColorization,
                               sceneParams: SceneParams,
                               glyphRaster: GlyphRaster,
                               codeCanvasEl: HTMLCanvasElement,
                               rasterCanvasEl: HTMLCanvasElement,
 ) {
-    const gl = codeCanvasEl.getContext('webgl2');
+    const gl = codeCanvasEl.getContext('webgl2', {preserveDrawingBuffer: true});
     if (!gl) {
         throw new Error('webgl2 not supported');
     }
@@ -73,7 +74,7 @@ export function drawCodeScene(source: Source,
     gl.clearColor(...codeColorization.bgColor, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
-    gl.drawArrays(gl.TRIANGLES, 0, sceneData.vertices.length / vertexSize2d);
+    await drawTriangles(sceneData.vertices.length / vertexSize2d, gl);
 
     return targetTex;
 }
