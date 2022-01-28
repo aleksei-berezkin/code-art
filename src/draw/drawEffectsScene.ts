@@ -1,6 +1,6 @@
 import type { CodeSceneDrawn } from './drawCodeScene';
 import vertexShaderSource from '../shader/effectsVertex.shader';
-import fragmentShaderSourceWithMacro from '../shader/effectsFragment.shader';
+import fragmentShaderSource from '../shader/effectsFragment.shader';
 import { createProgram } from './createProgram';
 import { vertexSize2d } from './rect';
 import { uploadArrayToAttribute } from './uploadArrayToAttribute';
@@ -9,20 +9,24 @@ import { createEffectsGrid } from './createEffectsGrid';
 import type { ImgParams } from '../model/ImgParams';
 import { hexToRgb } from '../model/RGB';
 import { getSliderVal } from '../model/ImgParams';
+import { ceilToOdd } from '../util/ceilToOdd';
+import { getLoopSize } from './getLoopSize';
+import { dpr } from '../util/dpr';
 
-// TODO calculate based on input data
-const glowKSz = 11;
-const blurKSz = 15;
-
-const fragmentShaderSource = fragmentShaderSourceWithMacro
-    .replaceAll('_GLOW_K_SZ_', String(glowKSz))
-    .replaceAll('_BLUR_K_SZ_', String(blurKSz))
-    .replaceAll('_MAX_K_SZ_', String(Math.max(glowKSz, blurKSz)));
+const maxKernel = 21;
 
 export function drawEffectsScene(canvasEl: HTMLCanvasElement, codeSceneDrawn: CodeSceneDrawn, imgParams: ImgParams) {
     const gl = canvasEl.getContext('webgl2')!;
 
-    const program = createProgram(vertexShaderSource, fragmentShaderSource, gl);
+    const glowRadius = getSliderVal(imgParams.font.size) * getSliderVal(imgParams.glow.radius) / 2;
+    const glowKSize = ceilToOdd(glowRadius / 2 * dpr, maxKernel);
+    const blurKSize = ceilToOdd(3 * imgParams.fade.blur.val * dpr, maxKernel);
+    const loopSize = getLoopSize(glowKSize, blurKSize, maxKernel);
+
+    const fragmentShaderSourceProcessed = fragmentShaderSource
+        .replaceAll('_LOOP_SZ_', String(loopSize))
+
+    const program = createProgram(vertexShaderSource, fragmentShaderSourceProcessed, gl);
 
     const gridVertices = createEffectsGrid(codeSceneDrawn.pixelSpace, codeSceneDrawn.extensions, imgParams.font.size.val);
     uploadArrayToAttribute('a_position', new Float32Array(gridVertices), vertexSize2d, program, gl);
@@ -30,6 +34,10 @@ export function drawEffectsScene(canvasEl: HTMLCanvasElement, codeSceneDrawn: Co
     uploadTexture(canvasEl, gl.TEXTURE0, gl);
 
     gl.useProgram(program);
+
+    gl.uniform1i(gl.getUniformLocation(program, 'u_glowKSize'), glowKSize);
+
+    gl.uniform1i(gl.getUniformLocation(program, 'u_blurKSize'), blurKSize);
 
     gl.uniform1i(gl.getUniformLocation(program, 'u_image'), 0);
 
@@ -57,7 +65,7 @@ export function drawEffectsScene(canvasEl: HTMLCanvasElement, codeSceneDrawn: Co
 
     gl.uniform3fv(gl.getUniformLocation(program, 'u_bg'), codeSceneDrawn.bgColor);
 
-    gl.uniform1f(gl.getUniformLocation(program, 'u_glowRadius'), getSliderVal(imgParams.font.size) * getSliderVal(imgParams.glow.radius) / 2);
+    gl.uniform1f(gl.getUniformLocation(program, 'u_glowRadius'), glowRadius);
 
     gl.uniform1f(gl.getUniformLocation(program, 'u_glowBrightness'), getSliderVal(imgParams.glow.brightness));
 
