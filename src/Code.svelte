@@ -92,7 +92,6 @@
     import Icon from './Icon.svelte';
     import { parseMs } from './util/parseMs';
     import { drawRandomScene, drawScene } from './draw/drawScene';
-    import { interrupted } from './util/interrupted';
 
     let codeCanvasEl: HTMLCanvasElement;
     let rasterCanvasEl: HTMLCanvasElement;
@@ -121,16 +120,7 @@
 
     async function generateScene(fontSize: number) {
         setWH();
-        try {
-            const p = await drawRandomScene(fontSize, codeCanvasEl, rasterCanvasEl);
-            if (p) {
-                imgParams = p;
-            }
-        } catch (e) {
-            if (e !== interrupted) {
-                throw e;
-            }
-        }
+        await drawRandomScene(fontSize, codeCanvasEl, rasterCanvasEl, p => imgParams = p);
     }
 
     let downloading = false;
@@ -149,13 +139,7 @@
             return;
         }
 
-        try {
-            await drawScene(imgParams, codeCanvasEl, rasterCanvasEl);
-        } catch (e) {
-            if (e !== interrupted) {
-                throw e;
-            }
-        }
+        await drawScene(imgParams, codeCanvasEl, rasterCanvasEl);
     }
 
     function onClickedOutsideMenu() {

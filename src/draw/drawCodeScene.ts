@@ -14,7 +14,6 @@ import { getSliderVal } from '../model/ImgParams';
 import type { SceneParams } from '../model/generateSceneParams';
 import { renderColorToTexture } from './renderColorToTexture';
 import { drawTriangles } from './drawTriangles';
-import type { IsInterrupted } from '../util/interrupted';
 
 // Renders to 0 tex unit
 export async function drawCodeScene(
@@ -24,7 +23,6 @@ export async function drawCodeScene(
     glyphRaster: GlyphRaster,
     codeCanvasEl: HTMLCanvasElement,
     rasterCanvasEl: HTMLCanvasElement,
-    isInterrupted: IsInterrupted,
 ) {
     const gl = codeCanvasEl.getContext('webgl2', {preserveDrawingBuffer: true});
     if (!gl) {
@@ -77,7 +75,7 @@ export async function drawCodeScene(
     gl.clearColor(...codeColorization.bgColor, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
-    await drawTriangles(sceneData.vertices.length / vertexSize2d, gl, isInterrupted);
+    await drawTriangles(sceneData.vertices.length / vertexSize2d, gl);
 
     return targetTex;
 }

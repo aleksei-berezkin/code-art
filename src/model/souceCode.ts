@@ -1,6 +1,4 @@
 import { pluck } from '../util/pluck';
-import type { IsInterrupted } from '../util/interrupted';
-import { interrupted } from '../util/interrupted';
 
 export const sourceDetails = {
     'React DOM min': {
@@ -32,15 +30,12 @@ export type Source = {
     linesOffsets: number[], // value = pos in text
 }
 
-export async function getSource(name: SourceCodeName, isInterrupted: IsInterrupted): Promise<Source> {
+export async function getSource(name: SourceCodeName): Promise<Source> {
     if (name in cache) {
         return cache.get(name)!;
     }
 
     const text = await (await fetch(sourceDetails[name].url)).text();
-    if (isInterrupted()) {
-        throw interrupted;
-    }
 
     const source = {
         name,
