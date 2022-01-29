@@ -14,6 +14,7 @@ export type CodeColorization = {
     colors: RGB[],  // index = pos in text
 }
 
+// TODO heaviest call so far. web worker?
 export function colorizeCode(source: Source, colorSchemeName: ColorSchemeName): CodeColorization {
     const cacheKey = JSON.stringify([source.name, colorSchemeName])
 

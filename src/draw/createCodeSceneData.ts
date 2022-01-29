@@ -4,18 +4,27 @@ import type { Source } from '../model/souceCode';
 import type { CodeColorization } from '../model/colorizeCode';
 import type { SceneBounds } from '../model/PixelSpace';
 import { iterateCode } from '../model/iterateCode';
+import { delay } from '../util/delay';
 
-export function createCodeSceneData(bounds: SceneBounds,
+const pauseEvery = 1200;
+
+export async function createCodeSceneData(bounds: SceneBounds,
                                     scrollFraction: number,
                                     fontSize: number,
                                     source: Source,
                                     codeColorization: CodeColorization,
                                     glyphRaster: GlyphRaster,
-): CodeSceneData {
+): Promise<CodeSceneData> {
     const vertices = [];
     const glyphTexPosition = [];
     const colors = [];
+
+    let cnt = 0;
     for (const codeLetter of iterateCode(bounds, scrollFraction, fontSize, source, glyphRaster)) {
+        if (cnt++ % pauseEvery === 0) {
+            await delay(4)
+        }
+
         const {pos, letter, x, baseline} = codeLetter;
         const m = glyphRaster.glyphs.get(letter)!;
         const rectVertices = rect2d(
@@ -37,6 +46,7 @@ export function createCodeSceneData(bounds: SceneBounds,
             ...Array.from({length: verticesNum})
                 .flatMap(() => color)
         );
+
     }
 
     return {vertices, glyphTexPosition, colors};

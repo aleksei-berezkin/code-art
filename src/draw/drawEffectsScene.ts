@@ -12,7 +12,6 @@ import { getLoopSize } from './getLoopSize';
 import { dpr } from '../util/dpr';
 import type { SceneParams } from '../model/generateSceneParams';
 import { renderColorToTexture, renderToCanvas } from './renderColorToTexture';
-import { drawTriangles } from './drawTriangles';
 
 const maxKernel = 21;
 
@@ -33,7 +32,7 @@ export async function drawEffectsScene(
     const fragmentShaderSourceProcessed = fragmentShaderSource
         .replaceAll('_LOOP_SZ_', String(loopSize))
 
-    const program = createProgram(vertexShaderSource, fragmentShaderSourceProcessed, gl);
+    const program = await createProgram(vertexShaderSource, fragmentShaderSourceProcessed, gl);
 
     const gridVertices = createEffectsGrid(sceneParams.pixelSpace, sceneParams.extensions, imgParams.font.size.val);
     uploadArrayToAttribute('a_position', new Float32Array(gridVertices), vertexSize2d, program, gl);
@@ -99,7 +98,6 @@ export async function drawEffectsScene(
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
     gl.drawArrays(gl.TRIANGLES, 0, gridVertices.length / vertexSize2d);
-    await drawTriangles(gridVertices.length / vertexSize2d, gl);
 
     gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, targetTex);
@@ -108,5 +106,5 @@ export async function drawEffectsScene(
 
     renderToCanvas(gl);
 
-    await drawTriangles(gridVertices.length / vertexSize2d, gl);
+    gl.drawArrays(gl.TRIANGLES, 0, gridVertices.length / vertexSize2d);
 }

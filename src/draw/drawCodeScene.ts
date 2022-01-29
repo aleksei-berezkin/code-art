@@ -13,7 +13,6 @@ import { rgbSize } from '../model/RGB';
 import { getSliderVal } from '../model/ImgParams';
 import type { SceneParams } from '../model/generateSceneParams';
 import { renderColorToTexture } from './renderColorToTexture';
-import { drawTriangles } from './drawTriangles';
 
 // Renders to 0 tex unit
 export async function drawCodeScene(
@@ -29,7 +28,7 @@ export async function drawCodeScene(
         throw new Error('webgl2 not supported');
     }
 
-    const sceneData = createCodeSceneData(
+    const sceneData = await createCodeSceneData(
         getSceneBounds(sceneParams.pixelSpace, sceneParams.extensions),
         getSliderVal(sceneParams.imgParams.position.scroll),
         sceneParams.imgParams.font.size.val,
@@ -38,7 +37,7 @@ export async function drawCodeScene(
         glyphRaster,
     );
 
-    const program = createProgram(vertexShaderSource, fragmentShaderSource, gl);
+    const program = await createProgram(vertexShaderSource, fragmentShaderSource, gl);
 
     const verticesArray = new Float32Array(sceneData.vertices);
     uploadArrayToAttribute('a_position', verticesArray, vertexSize2d, program, gl);
@@ -75,7 +74,7 @@ export async function drawCodeScene(
     gl.clearColor(...codeColorization.bgColor, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
-    await drawTriangles(sceneData.vertices.length / vertexSize2d, gl);
+    gl.drawArrays(gl.TRIANGLES, 0, sceneData.vertices.length / vertexSize2d);
 
     return targetTex;
 }

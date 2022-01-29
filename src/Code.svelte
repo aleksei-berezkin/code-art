@@ -90,7 +90,6 @@
     import ImgParamsMenu from './ImgParamsMenu.svelte';
     import { onMount } from 'svelte';
     import Icon from './Icon.svelte';
-    import { parseMs } from './util/parseMs';
     import { drawRandomScene, drawScene } from './draw/drawScene';
 
     let codeCanvasEl: HTMLCanvasElement;
@@ -108,13 +107,10 @@
     });
 
 
-    function handleGenerateClick() {
+    async function handleGenerateClick() {
         if (imgParams) {
-            const icTxMs = parseMs(getComputedStyle(document.body).getPropertyValue('--ic-tx'));
             genRotateDeg += 360;
-            setTimeout(async () => {
-                await generateScene(fontSize);
-            }, icTxMs + 10);
+            await generateScene(fontSize);
         }
     }
 
