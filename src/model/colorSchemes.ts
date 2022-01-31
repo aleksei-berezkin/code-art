@@ -83,3 +83,7 @@ export const colorSchemes = {
 export type ColorSchemeName = keyof typeof colorSchemes;
 
 export const colorSchemeNames = Object.keys(colorSchemes) as ColorSchemeName[];
+
+export type ColorScheme = (typeof colorSchemes)[ColorSchemeName];
+
+export type ColorKey = keyof ColorScheme;

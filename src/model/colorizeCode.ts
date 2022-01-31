@@ -1,67 +1,57 @@
 // @ts-ignore
 import * as acornLoose from 'acorn-loose';
 import type { Source } from './souceCode';
-import type { ColorScheme } from './ColorScheme';
 import type { Options, Token } from 'acorn';
 import * as acorn from 'acorn';
 import * as acornWalk from 'acorn-walk';
-import type { ColorSchemeName } from './colorSchemes';
-import { colorSchemes } from './colorSchemes';
-import type { RGB } from './RGB';
+import type { ShortColorKey } from './ShortColorKey';
 
-export type CodeColorization = {
-    bgColor: RGB,
-    colors: RGB[],  // index = pos in text
-}
+// index = pos in text
+export type CodeColorization = ShortColorKey[];
 
-// TODO heaviest call so far. web worker?
-export function colorizeCode(source: Source, colorSchemeName: ColorSchemeName): CodeColorization {
-    const cacheKey = JSON.stringify([source.name, colorSchemeName])
+export function colorizeCode(source: Source): CodeColorization {
+    const cacheKey = source.name;
 
     if (idToColorizationCache.has(cacheKey)) {
         return idToColorizationCache.get(cacheKey)!;
     }
 
-    const colorScheme = colorSchemes[colorSchemeName];
-    const colorization = {
-        bgColor: colorScheme.background,
-        colors: highlight(source.text, colorScheme),
-    };
+    const colorization = highlight(source.text);
     idToColorizationCache.set(cacheKey, colorization);
     return colorization;
 }
 
 const idToColorizationCache: Map<string, CodeColorization> = new Map();
 
-function highlight(text: string, scheme: ColorScheme): RGB[] {
-    const colors: RGB[] = [];
-    function colorize(start: number, end: number, color: RGB) {
+function highlight(text: string): CodeColorization {
+    const colorKeys: ShortColorKey[] = [];
+    function colorize(start: number, end: number, colorKey: ShortColorKey) {
         for (let i = start; i < end; i++) {
-            colors[i] = color;
+            colorKeys[i] = colorKey;
         }
     }
 
     const options: Options = {
         ecmaVersion: 'latest',
         onComment(isBlock, text, start, end) {
-            colorize(start, end, scheme.comment);
+            colorize(start, end, 'c');
         },
         onToken(token: Token) {
-            let color;
+            let color: ShortColorKey;
             if (acorn.tokTypes.num === token.type) {
-                color = scheme.number;
+                color = 'n';
             } else if (acorn.tokTypes.string === token.type) {
-                color = scheme.string;
+                color = 's';
             } else if (acorn.tokTypes.name === token.type) {
-                color = scheme.name;
+                color = 'N';
             } else if (['class', 'const', 'false', 'function', 'in', 'let', 'new', 'null', 'of', 'this', 'true', 'undefined', 'var']
                 .includes(token.type.keyword)
             ) {
-                color = scheme.keyword1;
+                color = 'k';
             } else if (token.type.keyword) {
-                color = scheme.keyword2;
+                color = 'K';
             } else {
-                color = scheme.default;
+                color = 'd';
             }
 
             colorize(token.start, token.end, color);
@@ -74,11 +64,11 @@ function highlight(text: string, scheme: ColorScheme): RGB[] {
         {
             MemberExpression(node: any) {
                 if (!node.computed) {
-                    colorize(node.property.start, node.property.end, scheme.member);
+                    colorize(node.property.start, node.property.end, 'm');
                 }
             },
         },
     );
 
-    return colors;
+    return colorKeys;
 }

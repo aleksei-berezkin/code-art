@@ -13,10 +13,12 @@ import { rgbSize } from '../model/RGB';
 import { getSliderVal } from '../model/ImgParams';
 import type { SceneParams } from '../model/generateSceneParams';
 import { renderColorToTexture } from './renderColorToTexture';
+import type { ColorScheme } from '../model/colorSchemes';
 
 // Renders to 0 tex unit
 export async function drawCodeScene(
     source: Source,
+    colorScheme: ColorScheme,
     codeColorization: CodeColorization,
     sceneParams: SceneParams,
     glyphRaster: GlyphRaster,
@@ -33,6 +35,7 @@ export async function drawCodeScene(
         getSliderVal(sceneParams.imgParams.position.scroll),
         sceneParams.imgParams.font.size.val,
         source,
+        colorScheme,
         codeColorization,
         glyphRaster,
     );
@@ -63,7 +66,7 @@ export async function drawCodeScene(
 
     gl.uniform3fv(
         gl.getUniformLocation(program, 'u_bg'),
-        codeColorization.bgColor,
+        colorScheme.background,
     );
 
     const targetTex = createEmptyTexture(0, {w: codeCanvasEl.width, h: codeCanvasEl.height}, gl)
@@ -71,7 +74,7 @@ export async function drawCodeScene(
 
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
-    gl.clearColor(...codeColorization.bgColor, 1);
+    gl.clearColor(...colorScheme.background, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
     gl.drawArrays(gl.TRIANGLES, 0, sceneData.vertices.length / vertexSize2d);

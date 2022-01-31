@@ -14,6 +14,7 @@ import { delay } from '../util/delay';
 import { colorizeCode } from '../model/colorizeCode';
 import type { ColorSchemeName } from '../model/colorSchemes';
 import { throttle } from '../util/throttle';
+import { colorSchemes } from '../model/colorSchemes';
 
 export async function drawRandomScene(fontSize: number, codeCanvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement, setImgParams: (p: ImgParams) => void) {
     throttle(async function () {
@@ -53,11 +54,12 @@ export async function drawScene(imgParams: ImgParams, codeCanvasEl: HTMLCanvasEl
 }
 
 async function _drawScene(source: Source, sceneParams: SceneParams, glyphRaster: GlyphRaster, codeCanvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement) {
-    const codeColorization = colorizeCode(source, sceneParams.imgParams.color.scheme.val as ColorSchemeName);
+    const codeColorization = colorizeCode(source);
     await delay();
-    const targetTex = await drawCodeScene(source, codeColorization, sceneParams, glyphRaster, codeCanvasEl, rasterCanvasEl);
+    const colorScheme = colorSchemes[sceneParams.imgParams.color.scheme.val as ColorSchemeName];
+    const targetTex = await drawCodeScene(source, colorScheme, codeColorization, sceneParams, glyphRaster, codeCanvasEl, rasterCanvasEl);
     await delay();
-    await drawEffectsScene(sceneParams, codeColorization.bgColor, targetTex, codeCanvasEl);
+    await drawEffectsScene(sceneParams, colorScheme.background, targetTex, codeCanvasEl);
 }
 
 function getPixelSpaceSize(codeCanvasEl: HTMLCanvasElement): Size {

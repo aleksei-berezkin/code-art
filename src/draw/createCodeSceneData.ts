@@ -5,15 +5,19 @@ import type { CodeColorization } from '../model/colorizeCode';
 import type { SceneBounds } from '../model/PixelSpace';
 import { iterateCode } from '../model/iterateCode';
 import { delay } from '../util/delay';
+import type { ColorScheme } from '../model/colorSchemes';
+import { shortColorKeyToColorKey } from '../model/shortColorKeyToColorKey';
 
 const pauseEvery = 1200;
 
-export async function createCodeSceneData(bounds: SceneBounds,
-                                    scrollFraction: number,
-                                    fontSize: number,
-                                    source: Source,
-                                    codeColorization: CodeColorization,
-                                    glyphRaster: GlyphRaster,
+export async function createCodeSceneData(
+    bounds: SceneBounds,
+    scrollFraction: number,
+    fontSize: number,
+    source: Source,
+    colorScheme: ColorScheme,
+    codeColorization: CodeColorization,
+    glyphRaster: GlyphRaster,
 ): Promise<CodeSceneData> {
     const vertices = [];
     const glyphTexPosition = [];
@@ -40,7 +44,8 @@ export async function createCodeSceneData(bounds: SceneBounds,
             m.x + m.w, m.baseline + m.descent,
         ));
 
-        const color = codeColorization.colors[pos] || [1, 1, 1];
+        const color = colorScheme[shortColorKeyToColorKey[codeColorization[pos]]]
+            ?? colorScheme.default;
         const verticesNum = rectVertices.length / vertexSize2d;
         colors.push(
             ...Array.from({length: verticesNum})
