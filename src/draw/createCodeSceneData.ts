@@ -1,12 +1,12 @@
 import { rect2d, vertexSize2d } from './rect';
 import type { GlyphRaster } from './rasterizeFont';
 import type { Source } from '../model/souceCode';
-import type { CodeColorization } from '../model/colorizeCode';
 import type { SceneBounds } from '../model/PixelSpace';
 import { iterateCode } from '../model/iterateCode';
 import { delay } from '../util/delay';
 import type { ColorScheme } from '../model/colorSchemes';
 import { shortColorKeyToColorKey } from '../model/shortColorKeyToColorKey';
+import type { CodeColorization } from '../model/highlightProtocol';
 
 const pauseEvery = 1200;
 

@@ -54,8 +54,7 @@ export async function drawScene(imgParams: ImgParams, codeCanvasEl: HTMLCanvasEl
 }
 
 async function _drawScene(source: Source, sceneParams: SceneParams, glyphRaster: GlyphRaster, codeCanvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement) {
-    const codeColorization = colorizeCode(source);
-    await delay();
+    const codeColorization = await colorizeCode(source);
     const colorScheme = colorSchemes[sceneParams.imgParams.color.scheme.val as ColorSchemeName];
     const targetTex = await drawCodeScene(source, colorScheme, codeColorization, sceneParams, glyphRaster, codeCanvasEl, rasterCanvasEl);
     await delay();

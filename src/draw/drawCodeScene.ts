@@ -8,12 +8,12 @@ import type { Source } from '../model/souceCode';
 import { uploadArrayToAttribute } from './uploadArrayToAttribute';
 import { createEmptyTexture, uploadTexture } from './uploadTexture';
 import { getSceneBounds } from '../model/PixelSpace';
-import type { CodeColorization } from '../model/colorizeCode';
 import { rgbSize } from '../model/RGB';
 import { getSliderVal } from '../model/ImgParams';
 import type { SceneParams } from '../model/generateSceneParams';
 import { renderColorToTexture } from './renderColorToTexture';
 import type { ColorScheme } from '../model/colorSchemes';
+import type { CodeColorization } from '../model/highlightProtocol';
 
 // Renders to 0 tex unit
 export async function drawCodeScene(
