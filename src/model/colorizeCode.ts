@@ -1,5 +1,3 @@
-// @ts-ignore
-import * as acornLoose from 'acorn-loose';
 import type { Source } from './souceCode';
 import type { CodeColorization, HighlightRequestData, HighlightResponseData } from './highlightProtocol';
 
