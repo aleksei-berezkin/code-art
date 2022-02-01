@@ -23,23 +23,33 @@ export async function createProgram(vertexShaderSource: string, fragmentShaderSo
     const vertexShader = createShader(vertexShaderSource, gl.VERTEX_SHADER, gl);
     const fragmentShader = createShader(fragmentShaderSource, gl.FRAGMENT_SHADER, gl);
 
-    await Promise.all([awaitCompileStatus(vertexShader, gl), awaitCompileStatus(fragmentShader, gl)]);
-
     gl.attachShader(program, vertexShader);
     gl.attachShader(program, fragmentShader);
 
-    // TODO async
     gl.linkProgram(program);
+
+    const ext = gl.getExtension('KHR_parallel_shader_compile');
+    if (ext) {
+        while (!gl.getProgramParameter(program, ext.COMPLETION_STATUS_KHR)) {
+            await delay();
+        }
+    } else {
+        await delay(20);
+    }
+
     const success = gl.getProgramParameter(program, gl.LINK_STATUS);
     if (success) {
         cache.set(cacheKey, program);
         return program;
     }
 
-    const message = gl.getProgramInfoLog(program);
-    // TODO consistent cleanup
-    gl.deleteProgram(program);
+    [vertexShader, fragmentShader].forEach(shader => {
+        logCompileError(shader, gl);
+        gl.deleteShader(shader);
+    })
 
+    const message = gl.getProgramInfoLog(program);
+    gl.deleteProgram(program);
     throw new Error(String(message));
 }
 
@@ -54,16 +64,9 @@ function createShader(source: string, type: GLenum, gl: WebGL2RenderingContext) 
     return shader;
 }
 
-async function awaitCompileStatus(shader: WebGLShader, gl: WebGL2RenderingContext) {
-    await delay(20);
+function logCompileError(shader: WebGLShader, gl: WebGL2RenderingContext) {
     const success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
-    if (success) {
-        return;
+    if (!success) {
+        console.error(gl.getShaderInfoLog(shader));
     }
-
-    const msg = gl.getShaderInfoLog(shader);
-    gl.deleteShader(shader);
-
-    throw new Error(String(msg));
 }
-
