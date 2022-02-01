@@ -13,11 +13,11 @@ import type { Size } from '../util/Size';
 import { delay } from '../util/delay';
 import { colorizeCode } from '../model/colorizeCode';
 import type { ColorSchemeName } from '../model/colorSchemes';
-import { throttle } from '../util/throttle';
+import { throttle, throttleFast } from '../util/throttle';
 import { colorSchemes } from '../model/colorSchemes';
 
 export async function drawRandomScene(fontSize: number, codeCanvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement, setImgParams: (p: ImgParams) => void) {
-    throttle(async function () {
+    throttleFast(async function () {
         const sourceName = pickRandom(sourceCodeNames);
         const source = await getSource(sourceName);
     

@@ -1,10 +1,17 @@
-const firstDelay = 200;
-const nextDelay = 50;
+type Cb = () => Promise<void>;
 
+export function throttle(cb: Cb) {
+
+    _throttle(cb, 200);
+}
+
+export function throttleFast(cb: Cb) {
+    _throttle(cb, 20);
+}
+
+let nextCb: Cb | undefined;
 let state: 'idle' | 'working' = 'idle';
-let nextCb: (() => Promise<void>) | undefined;
-
-export function throttle(cb: () => Promise<void>) {
+function _throttle(cb: Cb, firstDelay: number) {
     nextCb = cb;
     if (state === 'idle') {
         setTimeout(task, firstDelay);
@@ -12,6 +19,7 @@ export function throttle(cb: () => Promise<void>) {
     }
 }
 
+const nextDelay = 50;
 async function task() {
     if (!nextCb) {
         state = 'idle';
