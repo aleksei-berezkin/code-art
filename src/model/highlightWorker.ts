@@ -1,16 +1,16 @@
 import type { ShortColorKey } from './ShortColorKey';
 import type { Options, Token } from 'acorn';
+import type { CodeColorization, HighlightRequestData, HighlightResponseData } from './highlightProtocol';
 // @ts-ignore
 import * as acornLoose from 'acorn-loose';
 import * as acorn from 'acorn';
 import * as acornWalk from 'acorn-walk';
-import type { CodeColorization, HighlightRequestData, HighlightResponseData } from './highlightProtocol';
 
-
-self.onmessage = function (msg: {data: HighlightRequestData}) {
-    const colorization = highlight(msg.data.text);
+self.onmessage = async function (msg: {data: HighlightRequestData}) {
+    const text = await (await fetch(msg.data.url)).text();
+    const colorization = highlight(text);
     const respData: HighlightResponseData = {
-        id: msg.data.id,
+        url: msg.data.url,
         colorization,
     };
     self.postMessage(respData);

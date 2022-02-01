@@ -4,11 +4,10 @@ import type { ShortColorKey } from './ShortColorKey';
 export type CodeColorization = ShortColorKey[];
 
 export type HighlightRequestData = {
-    id: string,
-    text: string,
+    url: string,
 };
 
 export type HighlightResponseData = {
-    id: string,
+    url: string,
     colorization: CodeColorization,
 };

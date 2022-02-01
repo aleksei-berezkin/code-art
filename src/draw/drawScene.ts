@@ -1,5 +1,5 @@
 import { pickRandom } from '../util/pickRandom';
-import { getSource, Source, SourceCodeName, sourceCodeNames } from '../model/souceCode';
+import { getSource, Source, SourceCodeName, sourceCodeNames, sourceDetails } from '../model/souceCode';
 import { GlyphRaster, rasterizeFont } from './rasterizeFont';
 import { generateSceneParams, SceneParams } from '../model/generateSceneParams';
 import { dpr } from '../util/dpr';
@@ -54,7 +54,7 @@ export async function drawScene(imgParams: ImgParams, codeCanvasEl: HTMLCanvasEl
 }
 
 async function _drawScene(source: Source, sceneParams: SceneParams, glyphRaster: GlyphRaster, codeCanvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement) {
-    const codeColorization = await colorizeCode(source);
+    const codeColorization = await colorizeCode(sourceDetails[sceneParams.imgParams.source.source.val as SourceCodeName].url);
     const colorScheme = colorSchemes[sceneParams.imgParams.color.scheme.val as ColorSchemeName];
     const targetTex = await drawCodeScene(source, colorScheme, codeColorization, sceneParams, glyphRaster, codeCanvasEl, rasterCanvasEl);
     await delay();
