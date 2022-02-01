@@ -33,14 +33,11 @@ void main() {
     float w = pos.w >= 0.0 ? pos.w : 0.0;
     gl_Position = vec4(pos.xy / w, 0, 1);
 
-    // x: -1..+1 -> 0..1
-    // y: -1..+1 -> 1..0
-    v_texCoords = vec2(
-        (gl_Position.x + 1.0) / 2.0,
-        1.0 - (gl_Position.y + 1.0) / 2.0
-    );
+    // -1..+1 -> 0..1
+    v_texCoords = (gl_Position.xy + 1.0) / 2.0;
 
     if (u_mode == MODE_BLUR) {
+        // Input texture and target canvas have different y direction
         gl_Position.y = -gl_Position.y;
     }
 
