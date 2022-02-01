@@ -1,15 +1,27 @@
 import { delay } from '../util/delay';
 
-const cache: Map<string, WebGLProgram> = new Map();
+type CachedProgram = {
+    program: WebGLProgram,
+    vertexShaderSource: string,
+    vertexShader: WebGLShader,
+    fragmentShaderSource: string,
+    fragmentShader: WebGLShader,
+}
+
+const cachedPrograms: CachedProgram[] = [];
+const maxCachedPrograms = 2;
 
 export async function createProgram(vertexShaderSource: string, fragmentShaderSource: string, gl: WebGL2RenderingContext) {
-    const cacheKey = vertexShaderSource + fragmentShaderSource;
-    if (cache.has(cacheKey)) {
-        const cachedProg = cache.get(cacheKey)!;
+    const cachedIndex = cachedPrograms.findIndex(p => p.vertexShaderSource === vertexShaderSource && p.fragmentShaderSource === fragmentShaderSource);
+    if (cachedIndex !== -1) {
         try {
+            const cachedProgram = cachedPrograms[cachedIndex];
             // Old program won't work for new gl context which is possible to happen in hot-reload
-            if (gl.getProgramParameter(cachedProg, gl.LINK_STATUS)) {
-                return cachedProg;
+            if (gl.getProgramParameter(cachedProgram.program, gl.LINK_STATUS)) {
+                cachedPrograms
+                    .splice(cachedIndex, 1)
+                    .forEach(p => cachedPrograms.push(p));
+                return cachedProgram.program;
             }
         } catch (_ignored) {
         }
@@ -39,7 +51,20 @@ export async function createProgram(vertexShaderSource: string, fragmentShaderSo
 
     const success = gl.getProgramParameter(program, gl.LINK_STATUS);
     if (success) {
-        cache.set(cacheKey, program);
+        cachedPrograms.push({
+            program,
+            vertexShaderSource,
+            vertexShader,
+            fragmentShaderSource,
+            fragmentShader,
+        });
+        cachedPrograms
+            .splice(0, cachedPrograms.length - maxCachedPrograms)
+            .forEach(cachedProgram => {
+                gl.deleteShader(cachedProgram.vertexShader);
+                gl.deleteShader(cachedProgram.fragmentShader);
+                gl.deleteProgram(cachedProgram.program);
+            });
         return program;
     }
 
