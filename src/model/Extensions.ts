@@ -2,13 +2,23 @@ import type { Mat4 } from '../util/matrices';
 import { pluck } from '../util/pluck';
 import type { PixelSpace } from './PixelSpace';
 
-export type Extensions = ReturnType<typeof calcExtensions>;
+export type Extensions = {
+    xMin: number,
+    xMax: number,
+    yMin: number,
+    yMax: number,
+};
 
 /**
  * Because code plane is rotated, bounds must be extended to fill the whole canvas.
  * Here, "extension" is a multiplier to multiply scene bounds by.
  */
-export function calcExtensions(pixelSpace: PixelSpace, xRotAngle: number, yRotAngle: number, zRotAngle: number, txMat: Mat4) {
+export function calcExtensions(pixelSpace: PixelSpace, xRotAngle: number, yRotAngle: number, zRotAngle: number, txMat: Mat4): Extensions {
+    const calculatedExt = calcExtensionsByRotation(pixelSpace, xRotAngle, yRotAngle, zRotAngle);
+    return enlargeExtensionsBySimulation(pixelSpace, calculatedExt, txMat);
+}
+
+function calcExtensionsByRotation(pixelSpace: PixelSpace, xRotAngle: number, yRotAngle: number, zRotAngle: number) {
     const {viewAngleH, viewAngleV} = pixelSpace;
 
     const maxYRot = Math.PI / 2 - viewAngleH / 2 - .01;
@@ -29,24 +39,21 @@ export function calcExtensions(pixelSpace: PixelSpace, xRotAngle: number, yRotAn
 
     const ratio = pixelSpace.xMax / pixelSpace.yMax;
     const clipByZRot = ratio * Math.abs(zRotAngle) / Math.PI * 2 + 1;
-    /*
-     * Just multiplying independently calculated fudges in 3d space is incorrect,
-     * but I can't imagine correct 3d geometry. The following is empiric formula
-     * works for moderate angles.
-     */
-    const extraFudge = 1 + (20 * Math.abs(xRotAngle) * Math.abs(yRotAngle)) ** 1.9;
-
-    const extraFudges = {
-        xMin: yRotAngle > 0 ? extraFudge : 1,
-        xMax: yRotAngle < 0 ? extraFudge : 1,
-        yMin: xRotAngle > 0 ? extraFudge : 1,
-        yMax: xRotAngle < 0 ? extraFudge : 1,
-    };
 
     return {
-        xMin: pluck(0, xMinByY * fudgeByXRot * extraFudges.xMin * clipByZRot, 20),
-        xMax: pluck(0, xMaxByY * fudgeByXRot * extraFudges.xMax * clipByZRot, 20),
-        yMin: pluck(0, yMinByX * fudgeByYRot * extraFudges.yMin * clipByZRot, 20),
-        yMax: pluck(0, yMaxByX * fudgeByYRot * extraFudges.yMax * clipByZRot, 20),
+        xMin: pluck(0, xMinByY * fudgeByXRot * clipByZRot, 20),
+        xMax: pluck(0, xMaxByY * fudgeByXRot * clipByZRot, 20),
+        yMin: pluck(0, yMinByX * fudgeByYRot * clipByZRot, 20),
+        yMax: pluck(0, yMaxByX * fudgeByYRot * clipByZRot, 20),
+    };
+}
+
+function enlargeExtensionsBySimulation(pixelSpace: PixelSpace, inputExtensions: Extensions, txMat: Mat4) {
+    return  {
+        // TODO
+        xMin: inputExtensions.xMin,
+        xMax: inputExtensions.xMax * 1.5,
+        yMin: inputExtensions.yMin,
+        yMax: inputExtensions.yMax * 1.5,
     };
 }
