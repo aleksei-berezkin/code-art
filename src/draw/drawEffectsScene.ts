@@ -12,6 +12,7 @@ import { getLoopSize } from './getLoopSize';
 import { dpr } from '../util/dpr';
 import type { SceneParams } from '../model/generateSceneParams';
 import { renderColorToTexture, renderToCanvas } from './renderColorToTexture';
+import { getOptics } from '../model/Optics';
 
 const maxKernel = 21;
 
@@ -61,14 +62,16 @@ export async function drawEffectsScene(
 
     gl.uniform1f(gl.getUniformLocation(program, 'u_zBase'), sceneParams.pixelSpace.zBase);
 
-    gl.uniform1f(gl.getUniformLocation(program, 'u_focalLength'), sceneParams.pixelSpace.optics.focalLength);
+    const optics = getOptics(sceneParams.pixelSpace, getSliderVal(sceneParams.imgParams.fade.blur));
+
+    gl.uniform1f(gl.getUniformLocation(program, 'u_focalLength'), optics.focalLength);
 
     gl.uniform1f(
         gl.getUniformLocation(program, 'u_distanceToSensor'),
-        1 / (1 / sceneParams.pixelSpace.optics.focalLength - 1 / sceneParams.pixelSpace.zBase),
+        1 / (1 / optics.focalLength - 1 / sceneParams.pixelSpace.zBase),
     );
 
-    gl.uniform1f(gl.getUniformLocation(program, 'u_lensDiameter'), sceneParams.pixelSpace.optics.lensDiameter);
+    gl.uniform1f(gl.getUniformLocation(program, 'u_lensDiameter'), optics.lensDiameter);
 
     gl.uniform3fv(gl.getUniformLocation(program, 'u_bg'), bgColor);
 

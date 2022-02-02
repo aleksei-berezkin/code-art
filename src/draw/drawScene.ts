@@ -39,7 +39,7 @@ export async function drawScene(imgParams: ImgParams, codeCanvasEl: HTMLCanvasEl
         const glyphRaster = rasterizeFont(source, rasterCanvasEl, getSliderVal(imgParams.font.size));
         await delay();
     
-        const pixelSpace = makePixelSpace(getPixelSpaceSize(codeCanvasEl), getSliderVal(imgParams.fade.blur));
+        const pixelSpace = makePixelSpace(getPixelSpaceSize(codeCanvasEl));
         const xAngle = getSliderVal(imgParams.angle.x);
         const yAngle = getSliderVal(imgParams.angle.y);
         const zAngle = getSliderVal(imgParams.angle.z);

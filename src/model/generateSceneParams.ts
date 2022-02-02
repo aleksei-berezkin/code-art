@@ -12,7 +12,6 @@ import type { GlyphRaster } from '../draw/rasterizeFont';
 import { getTxMax } from './getTxMax';
 import type { Mat4 } from '../util/matrices';
 import { iterateCode } from './iterateCode';
-import { getSliderVal } from './ImgParams';
 import type { Size } from '../util/Size';
 import { applyTx } from '../util/applyTx';
 import { isVisibleInClipSpace } from '../util/isVisibleInClipSpace';
@@ -31,14 +30,7 @@ export function generateSceneParams(size: Size, fontSize: number, source: Source
 
     const angles = createAngles(source.lang === 'js min')
 
-    const fadeBlurSlider = {
-        type: 'slider' as const,
-        min: 1,
-        val: blurFactorPercentLog,
-        max: 3,
-        unit: 'log10%' as const,
-    };
-    const pixelSpace = makePixelSpace(size, getSliderVal(fadeBlurSlider));
+    const pixelSpace = makePixelSpace(size);
     const txMat = getTxMax(pixelSpace, angles.x, angles.y, angles.z, 0, 0, 0);
     const extensions = calcExtensions(pixelSpace, angles.x, angles.y, angles.z, txMat);
     const scrollFraction = genScrollFraction(source, getSceneBounds(pixelSpace, extensions), txMat, fontSize, glyphRaster);
@@ -155,8 +147,14 @@ export function generateSceneParams(size: Size, fontSize: number, source: Source
             },
         },
         fade: {
-            'blur': fadeBlurSlider,
-            'fade': {
+            blur: {
+                type: 'slider' as const,
+                min: 1,
+                val: blurFactorPercentLog,
+                max: 3,
+                unit: 'log10%' as const,
+            },
+            fade: {
                 type: 'slider',
                 min: -2,
                 val: -1 + Math.random(),

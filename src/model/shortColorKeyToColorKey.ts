@@ -1,7 +1,7 @@
-// It's easier to typecheck this way
 import type { ColorKey } from './colorSchemes';
 import type { ShortColorKey } from './ShortColorKey';
 
+// It's easier to typecheck this way
 const colorKeyToShort: {[k in ColorKey]: ShortColorKey} = {
     background: 'b',
     comment: 'c',
