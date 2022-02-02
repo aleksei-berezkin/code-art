@@ -1,8 +1,7 @@
-import type { SceneBounds } from './PixelSpace';
 import type { Source } from './souceCode';
 import type { GlyphRaster } from '../draw/rasterizeFont';
 import { getSourceStartPos } from './souceCode';
-import { getSceneLinesNum } from './PixelSpace';
+import { getSceneLinesNum, SceneBounds } from './SceneBounds';
 
 type CodeLetter = {
     pos: number,

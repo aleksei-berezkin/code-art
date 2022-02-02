@@ -16,7 +16,7 @@ export const sourceDetails = {
     'vue: patch': {
         lang: 'js' as const,
         url: 'https://raw.githubusercontent.com/vuejs/vue/52608302e9bca84fb9e9f0499e89acade78d3d07/src/core/vdom/patch.js',
-    }
+    },
 };
 
 export type SourceCodeName = keyof typeof sourceDetails;

@@ -5,12 +5,8 @@ import { degToRad } from '../util/degToRad';
 import { colorSchemeNames } from './colorSchemes';
 import { RGB, rgbToHex } from './RGB';
 import {
-    calcExtensions,
-    Extensions,
-    getSceneBounds,
     makePixelSpace,
-    PixelSpace,
-    SceneBounds
+    PixelSpace
 } from './PixelSpace';
 import type { GlyphRaster } from '../draw/rasterizeFont';
 import { getTxMax } from './getTxMax';
@@ -20,6 +16,8 @@ import { getSliderVal } from './ImgParams';
 import type { Size } from '../util/Size';
 import { applyTx } from '../util/applyTx';
 import { isVisibleInClipSpace } from '../util/isVisibleInClipSpace';
+import { getSceneBounds, SceneBounds } from './SceneBounds';
+import { calcExtensions, Extensions } from './Extensions';
 
 export type SceneParams = {
     pixelSpace: PixelSpace,
@@ -41,9 +39,8 @@ export function generateSceneParams(size: Size, fontSize: number, source: Source
         unit: 'log10%' as const,
     };
     const pixelSpace = makePixelSpace(size, getSliderVal(fadeBlurSlider));
-    const extensions = calcExtensions(pixelSpace, angles.x, angles.y, angles.z);
-
     const txMat = getTxMax(pixelSpace, angles.x, angles.y, angles.z, 0, 0, 0);
+    const extensions = calcExtensions(pixelSpace, angles.x, angles.y, angles.z, txMat);
     const scrollFraction = genScrollFraction(source, getSceneBounds(pixelSpace, extensions), txMat, fontSize, glyphRaster);
 
     const imgParams: ImgParams = {

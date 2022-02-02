@@ -6,7 +6,7 @@ import { dpr } from '../util/dpr';
 import type { ImgParams } from '../model/ImgParams';
 import { drawCodeScene } from './drawCodeScene';
 import { drawEffectsScene } from './drawEffectsScene';
-import { calcExtensions, makePixelSpace } from '../model/PixelSpace';
+import { makePixelSpace } from '../model/PixelSpace';
 import { getSliderVal } from '../model/ImgParams';
 import { getTxMax } from '../model/getTxMax';
 import type { Size } from '../util/Size';
@@ -15,6 +15,7 @@ import { colorizeCode } from '../model/colorizeCode';
 import type { ColorSchemeName } from '../model/colorSchemes';
 import { throttle, throttleFast } from '../util/throttle';
 import { colorSchemes } from '../model/colorSchemes';
+import { calcExtensions } from '../model/Extensions';
 
 export async function drawRandomScene(fontSize: number, codeCanvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement, setImgParams: (p: ImgParams) => void) {
     throttleFast(async function () {
@@ -42,13 +43,13 @@ export async function drawScene(imgParams: ImgParams, codeCanvasEl: HTMLCanvasEl
         const xAngle = getSliderVal(imgParams.angle.x);
         const yAngle = getSliderVal(imgParams.angle.y);
         const zAngle = getSliderVal(imgParams.angle.z);
-        const extensions = calcExtensions(pixelSpace, xAngle, yAngle, zAngle);
         const txMat = getTxMax(pixelSpace,
             xAngle, yAngle, zAngle,
             getSliderVal(imgParams.position.x),
             getSliderVal(imgParams.position.y),
             getSliderVal(imgParams.position.z),
         );
+        const extensions = calcExtensions(pixelSpace, xAngle, yAngle, zAngle, txMat);
         await _drawScene(source, {pixelSpace, extensions, imgParams, txMat}, glyphRaster, codeCanvasEl, rasterCanvasEl);
     })
 }
@@ -65,5 +66,5 @@ function getPixelSpaceSize(codeCanvasEl: HTMLCanvasElement): Size {
     return {
         w: codeCanvasEl.width / dpr,
         h: codeCanvasEl.height / dpr,
-    }
+    };
 }

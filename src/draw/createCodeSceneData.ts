@@ -1,7 +1,6 @@
 import { rect2d, rect2dVerticesNum } from './rect';
 import type { GlyphRaster } from './rasterizeFont';
 import type { Source } from '../model/souceCode';
-import type { SceneBounds } from '../model/PixelSpace';
 import { iterateCode } from '../model/iterateCode';
 import { delay } from '../util/delay';
 import type { ColorScheme } from '../model/colorSchemes';
@@ -10,6 +9,7 @@ import type { CodeColorization } from '../model/highlightProtocol';
 import type { Mat4 } from '../util/matrices';
 import { applyTx } from '../util/applyTx';
 import { isVisibleInClipSpace } from '../util/isVisibleInClipSpace';
+import type { SceneBounds } from '../model/SceneBounds';
 
 export type CodeSceneData = {
     // only x, y; z is left default = 0

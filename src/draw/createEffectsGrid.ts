@@ -1,6 +1,7 @@
 import { rect2d } from './rect';
-import type {Extensions, PixelSpace, SceneBounds} from "../model/PixelSpace";
-import {getSceneBounds} from "../model/PixelSpace";
+import type {PixelSpace} from "../model/PixelSpace";
+import { getSceneBounds, SceneBounds } from '../model/SceneBounds';
+import type { Extensions } from '../model/Extensions';
 
 const cellSizeMultiplier = 4;
 
