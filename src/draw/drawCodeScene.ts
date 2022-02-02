@@ -32,6 +32,7 @@ export async function drawCodeScene(
 
     const sceneData = await createCodeSceneData(
         getSceneBounds(sceneParams.pixelSpace, sceneParams.extensions),
+        sceneParams.txMat,
         getSliderVal(sceneParams.imgParams.position.scroll),
         sceneParams.imgParams.font.size.val,
         source,

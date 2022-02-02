@@ -1,4 +1,4 @@
-import { rect2d, vertexSize2d } from './rect';
+import { rect2d, rect2dVerticesNum } from './rect';
 import type { GlyphRaster } from './rasterizeFont';
 import type { Source } from '../model/souceCode';
 import type { SceneBounds } from '../model/PixelSpace';
@@ -7,11 +7,24 @@ import { delay } from '../util/delay';
 import type { ColorScheme } from '../model/colorSchemes';
 import { shortColorKeyToColorKey } from '../model/shortColorKeyToColorKey';
 import type { CodeColorization } from '../model/highlightProtocol';
+import type { Mat4 } from '../util/matrices';
+import { applyTx } from '../util/applyTx';
+import { isVisibleInClipSpace } from '../util/isVisibleInClipSpace';
+
+export type CodeSceneData = {
+    // only x, y; z is left default = 0
+    vertices: number[],
+    // only x, y
+    glyphTexPosition: number[],
+    // RGB
+    colors: number[],
+}
 
 const pauseEvery = 1200;
 
 export async function createCodeSceneData(
     bounds: SceneBounds,
+    txMat: Mat4,
     scrollFraction: number,
     fontSize: number,
     source: Source,
@@ -31,13 +44,17 @@ export async function createCodeSceneData(
 
         const {pos, letter, x, baseline} = codeLetter;
         const m = glyphRaster.glyphs.get(letter)!;
-        const rectVertices = rect2d(
-            x,
-            baseline - m.ascent / glyphRaster.sizeRatio,
-            x + m.w / glyphRaster.sizeRatio,
-            baseline + m.descent / glyphRaster.sizeRatio,
-        )
-        vertices.push(...rectVertices);
+
+        const x1 = x;
+        const y1 = baseline - m.ascent / glyphRaster.sizeRatio;
+        const x2 = x + m.w / glyphRaster.sizeRatio;
+        const y2 = baseline + m.descent / glyphRaster.sizeRatio;
+
+        if (!isVisible(txMat, x1, y1, x2, y2)) {
+            continue;
+        }
+
+        vertices.push(...rect2d(x1, y1, x2, y2));
 
         glyphTexPosition.push(...rect2d(
             m.x, m.baseline - m.ascent,
@@ -46,9 +63,8 @@ export async function createCodeSceneData(
 
         const color = colorScheme[shortColorKeyToColorKey[codeColorization[pos]]]
             ?? colorScheme.default;
-        const verticesNum = rectVertices.length / vertexSize2d;
         colors.push(
-            ...Array.from({length: verticesNum})
+            ...Array.from({length: rect2dVerticesNum})
                 .flatMap(() => color)
         );
 
@@ -57,10 +73,10 @@ export async function createCodeSceneData(
     return {vertices, glyphTexPosition, colors};
 }
 
-export type CodeSceneData = {
-    // only x, y; z is left default = 0
-    vertices: number[],
-    // only x, y
-    glyphTexPosition: number[],
-    colors: number[],
+function isVisible(txMat: Mat4, x1: number, y1: number, x2: number, y2: number) {
+    return [[x1, y1], [x1, y2], [x2, y1], [x2, y2]]
+        .some(([x, y]) => {
+            const [_x, _y] = applyTx(txMat, x, y);
+            return isVisibleInClipSpace(_x, _y);
+        });
 }
