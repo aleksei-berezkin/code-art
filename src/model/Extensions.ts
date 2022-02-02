@@ -1,6 +1,9 @@
 import type { Mat4 } from '../util/matrices';
 import { pluck } from '../util/pluck';
 import type { PixelSpace } from './PixelSpace';
+import { getSceneBounds } from './SceneBounds';
+import { applyTx } from '../util/applyTx';
+import { isVisibleInClipSpace } from '../util/isVisibleInClipSpace';
 
 export type Extensions = {
     xMin: number,
@@ -14,8 +17,9 @@ export type Extensions = {
  * Here, "extension" is a multiplier to multiply scene bounds by.
  */
 export function calcExtensions(pixelSpace: PixelSpace, xRotAngle: number, yRotAngle: number, zRotAngle: number, txMat: Mat4): Extensions {
-    const calculatedExt = calcExtensionsByRotation(pixelSpace, xRotAngle, yRotAngle, zRotAngle);
-    return enlargeExtensionsBySimulation(pixelSpace, calculatedExt, txMat);
+    const ext = calcExtensionsByRotation(pixelSpace, xRotAngle, yRotAngle, zRotAngle);
+    enlargeExtensionsBySimulation(pixelSpace, ext, txMat);
+    return ext;
 }
 
 function calcExtensionsByRotation(pixelSpace: PixelSpace, xRotAngle: number, yRotAngle: number, zRotAngle: number) {
@@ -48,12 +52,44 @@ function calcExtensionsByRotation(pixelSpace: PixelSpace, xRotAngle: number, yRo
     };
 }
 
-function enlargeExtensionsBySimulation(pixelSpace: PixelSpace, inputExtensions: Extensions, txMat: Mat4) {
-    return  {
-        // TODO
-        xMin: inputExtensions.xMin,
-        xMax: inputExtensions.xMax * 1.5,
-        yMin: inputExtensions.yMin,
-        yMax: inputExtensions.yMax * 1.5,
-    };
+function enlargeExtensionsBySimulation(pixelSpace: PixelSpace, extensionsWritable: Extensions, txMat: Mat4) {
+    for ( ; ; ) {
+        let modified = false;
+        for (const side of ['top', 'right', 'bottom', 'left'] as const) {
+            modified ||= runEdge(side, pixelSpace, extensionsWritable, txMat);
+        }
+        if (!modified) {
+            break;
+        }
+    }
+}
+
+type Side = 'top' | 'right' | 'bottom' | 'left';
+
+const samplesNum = 20;
+const enlargeFactor = 1.2;
+
+function runEdge(side: Side, pixelSpace: PixelSpace, currentExtensionsWritable: Extensions, txMat: Mat4) {
+    const b = getSceneBounds(pixelSpace, currentExtensionsWritable);
+    const [[x1, y1], [x2, y2]] = side === 'top' ? [[b.xMin, b.yMin], [b.xMax, b.yMin]]
+        : side === 'right' ? [[b.xMax, b.yMin], [b.xMax, b.yMax]]
+        : side === 'bottom' ? [[b.xMax, b.yMax], [b.xMin, b.yMax]]
+        : side === 'left' ? [[b.xMin, b.yMax], [b.xMin, b.yMin]]
+        : undefined as never;
+    for (let i = 0; i < samplesNum; i++) {
+        const x = x1 + i / samplesNum * (x2 - x1);
+        const y = y1 + i / samplesNum * (y2 - y1);
+        const [_x, _y] = applyTx(txMat, x, y);
+        if (isVisibleInClipSpace(_x, _y)) {
+            currentExtensionsWritable[
+                side === 'top' ? 'yMin'
+                    : side === 'right' ? 'xMax'
+                    : side === 'bottom' ? 'yMax'
+                    : side === 'left' ? 'xMin'
+                    : undefined as never
+            ] *= enlargeFactor;
+            return true;
+        }
+    }
+    return false;
 }

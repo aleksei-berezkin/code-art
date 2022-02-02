@@ -3,12 +3,12 @@ import type { Extensions } from './Extensions';
 
 export type SceneBounds = ReturnType<typeof getSceneBounds>;
 
-export function getSceneBounds(pSp: PixelSpace, ext: Extensions) {
+export function getSceneBounds(pixelSpace: PixelSpace, ext: Extensions) {
     return {
-        xMin: pSp.xMin * ext.xMin,
-        yMin: pSp.yMin * ext.yMin,
-        xMax: pSp.xMax * ext.xMax,
-        yMax: pSp.yMax * ext.yMax,
+        xMin: pixelSpace.xMin * ext.xMin,
+        yMin: pixelSpace.yMin * ext.yMin,
+        xMax: pixelSpace.xMax * ext.xMax,
+        yMax: pixelSpace.yMax * ext.yMax,
     };
 }
 
