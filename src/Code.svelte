@@ -100,23 +100,21 @@
 
     let genRotateDeg = 0;
 
-    const fontSize = 36;
-
     onMount(async function () {
-        await generateScene(fontSize);
+        await generateScene();
     });
 
 
     async function handleGenerateClick() {
         if (imgParams) {
             genRotateDeg += 360;
-            await generateScene(fontSize);
+            await generateScene();
         }
     }
 
-    async function generateScene(fontSize: number) {
+    async function generateScene() {
         setWH();
-        await drawRandomScene(fontSize, codeCanvasEl, rasterCanvasEl, p => imgParams = p);
+        await drawRandomScene(codeCanvasEl, rasterCanvasEl, p => imgParams = p);
     }
 
     let downloading = false;

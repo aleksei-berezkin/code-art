@@ -17,15 +17,18 @@ import { throttle, throttleFast } from '../util/throttle';
 import { colorSchemes } from '../model/colorSchemes';
 import { calcExtensions } from '../model/Extensions';
 
-export async function drawRandomScene(fontSize: number, codeCanvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement, setImgParams: (p: ImgParams) => void) {
+export async function drawRandomScene(codeCanvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement, setImgParams: (p: ImgParams) => void) {
     throttleFast(async function () {
         const sourceName = pickRandom(sourceCodeNames);
         const source = await getSource(sourceName);
     
+        const sizePx = getSizePx(codeCanvasEl);
+        const fontSize = getFontSize(sizePx);
+
         const glyphRaster = rasterizeFont(source, rasterCanvasEl, fontSize);
         await delay();
     
-        const sceneParams = await generateSceneParams(getPixelSpaceSize(codeCanvasEl), fontSize, source, glyphRaster);
+        const sceneParams = await generateSceneParams(source, getSizePx(codeCanvasEl), fontSize, glyphRaster);
         await _drawScene(source, sceneParams, glyphRaster, codeCanvasEl, rasterCanvasEl);
     
         setImgParams(sceneParams.imgParams);
@@ -39,7 +42,7 @@ export async function drawScene(imgParams: ImgParams, codeCanvasEl: HTMLCanvasEl
         const glyphRaster = rasterizeFont(source, rasterCanvasEl, getSliderVal(imgParams.font.size));
         await delay();
     
-        const pixelSpace = makePixelSpace(getPixelSpaceSize(codeCanvasEl));
+        const pixelSpace = makePixelSpace(getSizePx(codeCanvasEl));
         const xAngle = getSliderVal(imgParams.angle.x);
         const yAngle = getSliderVal(imgParams.angle.y);
         const zAngle = getSliderVal(imgParams.angle.z);
@@ -62,9 +65,13 @@ async function _drawScene(source: Source, sceneParams: SceneParams, glyphRaster:
     await drawEffectsScene(sceneParams, colorScheme.background, targetTex, codeCanvasEl);
 }
 
-function getPixelSpaceSize(codeCanvasEl: HTMLCanvasElement): Size {
+function getSizePx(codeCanvasEl: HTMLCanvasElement): Size {
     return {
         w: codeCanvasEl.width / dpr,
         h: codeCanvasEl.height / dpr,
     };
+}
+
+function getFontSize(sizePx: Size) {
+    return Math.min(36, 18 + sizePx.w / 1280 * 18);
 }

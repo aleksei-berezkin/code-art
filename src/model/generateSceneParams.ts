@@ -4,19 +4,14 @@ import type { ImgParams } from './ImgParams';
 import { degToRad } from '../util/degToRad';
 import { colorSchemeNames } from './colorSchemes';
 import { RGB, rgbToHex } from './RGB';
-import {
-    makePixelSpace,
-    PixelSpace
-} from './PixelSpace';
+import { makePixelSpace, PixelSpace } from './PixelSpace';
 import type { GlyphRaster } from '../draw/rasterizeFont';
 import { getTxMax } from './getTxMax';
 import type { Mat4 } from '../util/matrices';
-import { iterateCode } from './iterateCode';
 import type { Size } from '../util/Size';
-import { applyTx } from '../util/applyTx';
-import { isVisibleInClipSpace } from '../util/isVisibleInClipSpace';
 import { getSceneBounds, SceneBounds } from './SceneBounds';
 import { calcExtensions, Extensions } from './Extensions';
+import { scoreScene } from './scoreScene';
 
 export type SceneParams = {
     pixelSpace: PixelSpace,
@@ -25,12 +20,12 @@ export type SceneParams = {
     imgParams: ImgParams,
 };
 
-export async function generateSceneParams(size: Size, fontSize: number, source: Source, glyphRaster: GlyphRaster): Promise<SceneParams> {
+export async function generateSceneParams(source: Source, sizePx: Size, fontSize: number, glyphRaster: GlyphRaster): Promise<SceneParams> {
     const blurFactorPercentLog = 1.3 + Math.random();
 
     const angles = createAngles(source.lang === 'js min')
 
-    const pixelSpace = makePixelSpace(size);
+    const pixelSpace = makePixelSpace(sizePx);
     const txMat = getTxMax(pixelSpace, angles.x, angles.y, angles.z, 0, 0, 0);
     const extensions = await calcExtensions(pixelSpace, angles.x, angles.y, angles.z, txMat);
     const scrollFraction = genScrollFraction(source, getSceneBounds(pixelSpace, extensions), txMat, fontSize, glyphRaster);
@@ -243,20 +238,9 @@ function genScrollFraction(source: Source, sceneBounds: SceneBounds, txMat: Mat4
             const scrollFraction = Math.random();
             return {
                 scrollFraction,
-                score: scoreScroll(source, sceneBounds, txMat, scrollFraction, fontSize, glyphRaster),
+                score: scoreScene(source, sceneBounds, txMat, scrollFraction, fontSize, glyphRaster),
             }
         })
         .reduce((a, b) => a.score > b.score ? a : b)
         .scrollFraction;
-}
-
-function scoreScroll(source: Source, sceneBounds: SceneBounds, txMat: Mat4, scrollFraction: number, fontSize: number, glyphRaster: GlyphRaster) {
-    let score = 0;
-    for (const c of iterateCode(sceneBounds, scrollFraction, fontSize, source, glyphRaster)) {
-        const [x, y, w] = applyTx(txMat, c.x, c.baseline);
-        if (isVisibleInClipSpace(x, y)) {
-            score += 1 / w**2;
-        }
-    }
-    return score;
 }
