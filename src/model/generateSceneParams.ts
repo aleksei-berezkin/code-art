@@ -11,7 +11,7 @@ import type { Mat4 } from '../util/matrices';
 import type { Size } from '../util/Size';
 import { getSceneBounds, SceneBounds } from './SceneBounds';
 import { calcExtensions, Extensions } from './Extensions';
-import { scoreScene } from './scoreScene';
+import { scoreFill } from './scoreFill';
 
 export type SceneParams = {
     pixelSpace: PixelSpace,
@@ -233,12 +233,12 @@ function genScrollFraction(source: Source, sceneBounds: SceneBounds, txMat: Mat4
         return Math.random();
     }
 
-    return Array.from({length: 5})
+    return Array.from({length: 9})
         .map(() => {
             const scrollFraction = Math.random();
             return {
                 scrollFraction,
-                score: scoreScene(source, sceneBounds, txMat, scrollFraction, fontSize, glyphRaster),
+                score: scoreFill(source, sceneBounds, txMat, scrollFraction, fontSize, glyphRaster),
             }
         })
         .reduce((a, b) => a.score > b.score ? a : b)
