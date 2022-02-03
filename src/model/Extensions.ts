@@ -53,24 +53,30 @@ function calcExtensionsByRotation(pixelSpace: PixelSpace, xRotAngle: number, yRo
     };
 }
 
+type Side = 'top' | 'right' | 'bottom' | 'left';
+const allSides: Side[] = ['top', 'right', 'bottom', 'left'];
+
 async function enlargeExtensionsBySimulation(pixelSpace: PixelSpace, extensionsWritable: Extensions, txMat: Mat4) {
     const workLimiter = createWorkLimiter();
-    for (let i = 0; i < 100; i++) {
+    let sides: Set<Side> = new Set(allSides);
+    for (let i = 0; i < 1000; i++) {
         await workLimiter.next();
-        let modified = false;
-        for (const side of ['top', 'right', 'bottom', 'left'] as const) {
-            modified ||= runEdge(side, pixelSpace, extensionsWritable, txMat);
+        const modifiedSides: Set<Side> = new Set();
+        for (const side of sides) {
+            if (runEdge(side, pixelSpace, extensionsWritable, txMat)) {
+                modifiedSides.add(side);
+            }
         }
-        if (!modified) {
+        if (!modifiedSides.size) {
             break;
         }
+        sides = modifiedSides;
     }
 }
 
-type Side = 'top' | 'right' | 'bottom' | 'left';
 
-const samplesNum = 50;
-const enlargeFactor = 1.1;
+const samplesNum = 200;
+const enlargeFactor = 1.001;
 
 function runEdge(side: Side, pixelSpace: PixelSpace, currentExtensionsWritable: Extensions, txMat: Mat4) {
     const b = getSceneBounds(pixelSpace, currentExtensionsWritable);

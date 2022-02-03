@@ -53,6 +53,7 @@ export async function drawScene(imgParams: ImgParams, codeCanvasEl: HTMLCanvasEl
             getSliderVal(imgParams.position.z),
         );
         const extensions = await calcExtensions(pixelSpace, xAngle, yAngle, zAngle, txMat);
+        await delay();
         await _drawScene(source, {pixelSpace, extensions, imgParams, txMat}, glyphRaster, codeCanvasEl, rasterCanvasEl);
     })
 }

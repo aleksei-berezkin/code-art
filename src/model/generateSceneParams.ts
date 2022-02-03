@@ -12,6 +12,7 @@ import type { Size } from '../util/Size';
 import { getSceneBounds, SceneBounds } from './SceneBounds';
 import { calcExtensions, Extensions } from './Extensions';
 import { scoreFill } from './scoreFill';
+import { delay } from '../util/delay';
 
 export type SceneParams = {
     pixelSpace: PixelSpace,
@@ -28,6 +29,7 @@ export async function generateSceneParams(source: Source, sizePx: Size, fontSize
     const pixelSpace = makePixelSpace(sizePx);
     const txMat = getTxMax(pixelSpace, angles.x, angles.y, angles.z, 0, 0, 0);
     const extensions = await calcExtensions(pixelSpace, angles.x, angles.y, angles.z, txMat);
+    await delay();
     const scrollFraction = genScrollFraction(source, getSceneBounds(pixelSpace, extensions), txMat, fontSize, glyphRaster);
 
     const imgParams: ImgParams = {
