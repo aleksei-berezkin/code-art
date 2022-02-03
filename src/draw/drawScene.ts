@@ -25,7 +25,7 @@ export async function drawRandomScene(fontSize: number, codeCanvasEl: HTMLCanvas
         const glyphRaster = rasterizeFont(source, rasterCanvasEl, fontSize);
         await delay();
     
-        const sceneParams = generateSceneParams(getPixelSpaceSize(codeCanvasEl), fontSize, source, glyphRaster);
+        const sceneParams = await generateSceneParams(getPixelSpaceSize(codeCanvasEl), fontSize, source, glyphRaster);
         await _drawScene(source, sceneParams, glyphRaster, codeCanvasEl, rasterCanvasEl);
     
         setImgParams(sceneParams.imgParams);
@@ -49,7 +49,7 @@ export async function drawScene(imgParams: ImgParams, codeCanvasEl: HTMLCanvasEl
             getSliderVal(imgParams.position.y),
             getSliderVal(imgParams.position.z),
         );
-        const extensions = calcExtensions(pixelSpace, xAngle, yAngle, zAngle, txMat);
+        const extensions = await calcExtensions(pixelSpace, xAngle, yAngle, zAngle, txMat);
         await _drawScene(source, {pixelSpace, extensions, imgParams, txMat}, glyphRaster, codeCanvasEl, rasterCanvasEl);
     })
 }

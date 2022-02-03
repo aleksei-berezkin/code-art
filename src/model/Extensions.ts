@@ -4,6 +4,7 @@ import type { PixelSpace } from './PixelSpace';
 import { getSceneBounds } from './SceneBounds';
 import { applyTx } from '../util/applyTx';
 import { isVisibleInClipSpace } from '../util/isVisibleInClipSpace';
+import { createWorkLimiter } from '../util/workLimiter';
 
 export type Extensions = {
     xMin: number,
@@ -16,9 +17,9 @@ export type Extensions = {
  * Because code plane is rotated, bounds must be extended to fill the whole canvas.
  * Here, "extension" is a multiplier to multiply scene bounds by.
  */
-export function calcExtensions(pixelSpace: PixelSpace, xRotAngle: number, yRotAngle: number, zRotAngle: number, txMat: Mat4): Extensions {
+export async function calcExtensions(pixelSpace: PixelSpace, xRotAngle: number, yRotAngle: number, zRotAngle: number, txMat: Mat4): Promise<Extensions> {
     const ext = calcExtensionsByRotation(pixelSpace, xRotAngle, yRotAngle, zRotAngle);
-    enlargeExtensionsBySimulation(pixelSpace, ext, txMat);
+    await enlargeExtensionsBySimulation(pixelSpace, ext, txMat);
     return ext;
 }
 
@@ -52,8 +53,10 @@ function calcExtensionsByRotation(pixelSpace: PixelSpace, xRotAngle: number, yRo
     };
 }
 
-function enlargeExtensionsBySimulation(pixelSpace: PixelSpace, extensionsWritable: Extensions, txMat: Mat4) {
-    for ( ; ; ) {
+async function enlargeExtensionsBySimulation(pixelSpace: PixelSpace, extensionsWritable: Extensions, txMat: Mat4) {
+    const workLimiter = createWorkLimiter();
+    for (let i = 0; i < 100; i++) {
+        await workLimiter.next();
         let modified = false;
         for (const side of ['top', 'right', 'bottom', 'left'] as const) {
             modified ||= runEdge(side, pixelSpace, extensionsWritable, txMat);
@@ -66,8 +69,8 @@ function enlargeExtensionsBySimulation(pixelSpace: PixelSpace, extensionsWritabl
 
 type Side = 'top' | 'right' | 'bottom' | 'left';
 
-const samplesNum = 20;
-const enlargeFactor = 1.2;
+const samplesNum = 50;
+const enlargeFactor = 1.1;
 
 function runEdge(side: Side, pixelSpace: PixelSpace, currentExtensionsWritable: Extensions, txMat: Mat4) {
     const b = getSceneBounds(pixelSpace, currentExtensionsWritable);
@@ -77,8 +80,8 @@ function runEdge(side: Side, pixelSpace: PixelSpace, currentExtensionsWritable: 
         : side === 'left' ? [[b.xMin, b.yMax], [b.xMin, b.yMin]]
         : undefined as never;
     for (let i = 0; i < samplesNum; i++) {
-        const x = x1 + i / samplesNum * (x2 - x1);
-        const y = y1 + i / samplesNum * (y2 - y1);
+        const x = x1 + i / (samplesNum - 1) * (x2 - x1);
+        const y = y1 + i / (samplesNum - 1) * (y2 - y1);
         const [_x, _y] = applyTx(txMat, x, y);
         if (isVisibleInClipSpace(_x, _y)) {
             currentExtensionsWritable[

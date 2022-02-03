@@ -3,9 +3,10 @@
     "include": ["src/**/*", "src/node_modules/**/*"],
     "exclude": ["node_modules/*", "__sapper__/*", "static/*"],
     "compilerOptions": {
-        "module": "esnext",
         "esModuleInterop": true,
         "lib": ["dom", "esnext"],
-        "strict": true
+        "module": "esnext",
+        "strict": true,
+        "target": "esnext"
     }
 }

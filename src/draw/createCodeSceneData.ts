@@ -2,7 +2,6 @@ import { rect2d, rect2dVerticesNum } from './rect';
 import type { GlyphRaster } from './rasterizeFont';
 import type { Source } from '../model/souceCode';
 import { iterateCode } from '../model/iterateCode';
-import { delay } from '../util/delay';
 import type { ColorScheme } from '../model/colorSchemes';
 import { shortColorKeyToColorKey } from '../model/shortColorKeyToColorKey';
 import type { CodeColorization } from '../model/highlightProtocol';
@@ -10,6 +9,7 @@ import type { Mat4 } from '../util/matrices';
 import { applyTx } from '../util/applyTx';
 import { isVisibleInClipSpace } from '../util/isVisibleInClipSpace';
 import type { SceneBounds } from '../model/SceneBounds';
+import { createWorkLimiter } from '../util/workLimiter';
 
 export type CodeSceneData = {
     // only x, y; z is left default = 0
@@ -19,8 +19,6 @@ export type CodeSceneData = {
     // RGB
     colors: number[],
 }
-
-const pauseEvery = 1200;
 
 export async function createCodeSceneData(
     bounds: SceneBounds,
@@ -36,11 +34,10 @@ export async function createCodeSceneData(
     const glyphTexPosition = [];
     const colors = [];
 
-    let cnt = 0;
+    const workLimiter = createWorkLimiter();
+
     for (const codeLetter of iterateCode(bounds, scrollFraction, fontSize, source, glyphRaster)) {
-        if (cnt++ % pauseEvery === 0) {
-            await delay(4)
-        }
+        await workLimiter.next();
 
         const {pos, letter, x, baseline} = codeLetter;
         const m = glyphRaster.glyphs.get(letter)!;

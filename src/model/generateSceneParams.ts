@@ -25,14 +25,14 @@ export type SceneParams = {
     imgParams: ImgParams,
 };
 
-export function generateSceneParams(size: Size, fontSize: number, source: Source, glyphRaster: GlyphRaster): SceneParams {
+export async function generateSceneParams(size: Size, fontSize: number, source: Source, glyphRaster: GlyphRaster): Promise<SceneParams> {
     const blurFactorPercentLog = 1.3 + Math.random();
 
     const angles = createAngles(source.lang === 'js min')
 
     const pixelSpace = makePixelSpace(size);
     const txMat = getTxMax(pixelSpace, angles.x, angles.y, angles.z, 0, 0, 0);
-    const extensions = calcExtensions(pixelSpace, angles.x, angles.y, angles.z, txMat);
+    const extensions = await calcExtensions(pixelSpace, angles.x, angles.y, angles.z, txMat);
     const scrollFraction = genScrollFraction(source, getSceneBounds(pixelSpace, extensions), txMat, fontSize, glyphRaster);
 
     const imgParams: ImgParams = {
