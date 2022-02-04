@@ -8,7 +8,7 @@ import { makePixelSpace, PixelSpace } from './PixelSpace';
 import type { GlyphRaster } from '../draw/rasterizeFont';
 import { getTxMax } from './getTxMax';
 import type { Mat4 } from '../util/matrices';
-import type { Size } from '../util/Size';
+import type { Size } from './Size';
 import { getSceneBounds, SceneBounds } from './SceneBounds';
 import { calcExtensions, Extensions } from './Extensions';
 import { scoreFill } from './scoreFill';

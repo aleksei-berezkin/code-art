@@ -1,4 +1,4 @@
-import type { Size } from '../util/Size';
+import type { Size } from '../model/Size';
 
 export function uploadTexture(unit: number, texSource: TexImageSource, gl: WebGL2RenderingContext) {
     gl.activeTexture(gl.TEXTURE0 + unit);

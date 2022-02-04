@@ -9,7 +9,7 @@ import { drawEffectsScene } from './drawEffectsScene';
 import { makePixelSpace } from '../model/PixelSpace';
 import { getSliderVal } from '../model/ImgParams';
 import { getTxMax } from '../model/getTxMax';
-import type { Size } from '../util/Size';
+import type { Size } from '../model/Size';
 import { delay } from '../util/delay';
 import { colorizeCode } from '../model/colorizeCode';
 import type { ColorSchemeName } from '../model/colorSchemes';

@@ -1,5 +1,5 @@
+import type { Size } from './Size';
 import { degToRad } from '../util/degToRad';
-import type { Size } from '../util/Size';
 
 export type PixelSpace = ReturnType<typeof makePixelSpace>;
 
