@@ -66,6 +66,8 @@ export function getSourceStartLine(source: Source, requiredLinesNum: number, scr
     }
     return pluck(
         0,
+        // TODO don't round, render part of line
+        // After this simulation can be eased
         Math.round((source.linesOffsets.length - requiredLinesNum) * scrollFraction),
         source.linesOffsets.length - 1,
     );

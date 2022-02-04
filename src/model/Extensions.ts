@@ -56,10 +56,14 @@ function calcExtensionsByRotation(pixelSpace: PixelSpace, xRotAngle: number, yRo
 type Side = 'top' | 'right' | 'bottom' | 'left';
 const allSides: Side[] = ['top', 'right', 'bottom', 'left'];
 
+const maxIterations = 3200;
+const samplesNum = 50;
+const enlargeFactor = .001;
+
 async function enlargeExtensionsBySimulation(pixelSpace: PixelSpace, extensionsWritable: Extensions, txMat: Mat4) {
     const workLimiter = createWorkLimiter();
     let sides: Set<Side> = new Set(allSides);
-    for (let i = 0; i < 1000; i++) {
+    for (let i = 0; i < maxIterations; i++) {
         await workLimiter.next();
         const modifiedSides: Set<Side> = new Set();
         for (const side of sides) {
@@ -74,10 +78,6 @@ async function enlargeExtensionsBySimulation(pixelSpace: PixelSpace, extensionsW
     }
 }
 
-
-const samplesNum = 200;
-const enlargeFactor = 1.001;
-
 function runEdge(side: Side, pixelSpace: PixelSpace, currentExtensionsWritable: Extensions, txMat: Mat4) {
     const b = getSceneBounds(pixelSpace, currentExtensionsWritable);
     const [[x1, y1], [x2, y2]] = side === 'top' ? [[b.xMin, b.yMin], [b.xMax, b.yMin]]
@@ -85,20 +85,28 @@ function runEdge(side: Side, pixelSpace: PixelSpace, currentExtensionsWritable: 
         : side === 'bottom' ? [[b.xMax, b.yMax], [b.xMin, b.yMax]]
         : side === 'left' ? [[b.xMin, b.yMax], [b.xMin, b.yMin]]
         : undefined as never;
+
+    let visibleCount = 0;
     for (let i = 0; i < samplesNum; i++) {
         const x = x1 + i / (samplesNum - 1) * (x2 - x1);
         const y = y1 + i / (samplesNum - 1) * (y2 - y1);
         const [_x, _y] = applyTx(txMat, x, y);
         if (isVisibleInClipSpace(_x, _y)) {
-            currentExtensionsWritable[
-                side === 'top' ? 'yMin'
-                    : side === 'right' ? 'xMax'
-                    : side === 'bottom' ? 'yMax'
-                    : side === 'left' ? 'xMin'
-                    : undefined as never
-            ] *= enlargeFactor;
-            return true;
+            visibleCount++;
         }
     }
-    return false;
+
+    if (!visibleCount) {
+        return false;
+    }
+
+    const visibleFraction = visibleCount / samplesNum;
+    const component = side === 'top' ? 'yMin'
+        : side === 'right' ? 'xMax'
+        : side === 'bottom' ? 'yMax'
+        : side === 'left' ? 'xMin'
+        : undefined as never
+
+    currentExtensionsWritable[component] *= 1 + enlargeFactor * visibleFraction;
+    return true;
 }
