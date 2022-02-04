@@ -46,12 +46,7 @@ export async function drawScene(imgParams: ImgParams, codeCanvasEl: HTMLCanvasEl
         const xAngle = getSliderVal(imgParams.angle.x);
         const yAngle = getSliderVal(imgParams.angle.y);
         const zAngle = getSliderVal(imgParams.angle.z);
-        const txMat = getTxMax(pixelSpace,
-            xAngle, yAngle, zAngle,
-            getSliderVal(imgParams.position.x),
-            getSliderVal(imgParams.position.y),
-            getSliderVal(imgParams.position.z),
-        );
+        const txMat = getTxMax(pixelSpace, xAngle, yAngle, zAngle);
         const extensions = await calcExtensions(pixelSpace, xAngle, yAngle, zAngle, txMat);
         await delay();
         await _drawScene(source, {pixelSpace, extensions, imgParams, txMat}, glyphRaster, codeCanvasEl, rasterCanvasEl);

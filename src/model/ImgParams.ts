@@ -25,11 +25,9 @@ export type ImgParams = {
         y: SliderVal,
         z: SliderVal,
     },
-    position: {
-        scroll: SliderVal,
-        x: SliderVal,
-        y: SliderVal,
-        z: SliderVal,
+    scroll: {
+        v: SliderVal,
+        h: SliderVal,
     },
     font: {
         size: SliderVal,

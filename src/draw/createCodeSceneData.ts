@@ -10,6 +10,7 @@ import { applyTx } from '../util/applyTx';
 import { isVisibleInClipSpace } from '../util/isVisibleInClipSpace';
 import type { SceneBounds } from '../model/SceneBounds';
 import { createWorkLimiter } from '../util/workLimiter';
+import type { ScrollFraction } from '../model/Scroll';
 
 export type CodeSceneData = {
     // only x, y; z is left default = 0
@@ -23,7 +24,7 @@ export type CodeSceneData = {
 export async function createCodeSceneData(
     bounds: SceneBounds,
     txMat: Mat4,
-    scrollFraction: number,
+    scrollFraction: ScrollFraction,
     fontSize: number,
     source: Source,
     colorScheme: ColorScheme,

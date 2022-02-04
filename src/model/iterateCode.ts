@@ -2,6 +2,7 @@ import type { Source } from './souceCode';
 import type { GlyphRaster } from '../draw/rasterizeFont';
 import type { SceneBounds } from './SceneBounds';
 import { pluck } from '../util/pluck';
+import type { ScrollFraction } from './Scroll';
 
 type CodeLetter = {
     pos: number,
@@ -11,13 +12,13 @@ type CodeLetter = {
 }
 
 export function* iterateCode(bounds: SceneBounds,
-                             scrollFraction: number,
+                             scrollFraction: ScrollFraction,
                              fontSize: number,
                              source: Source,
                              glyphRaster: GlyphRaster): Generator<CodeLetter> {
     const linesNumFractional = (bounds.yMax - bounds.yMin) / fontSize;
 
-    const startLineFractional = getStartLineFractional(source, linesNumFractional, scrollFraction);
+    const startLineFractional = getStartLineFractional(source, linesNumFractional, scrollFraction.v);
     const startLine = pluck(0, Math.floor(startLineFractional), source.linesOffsets.length - 1);
     // Negative means a line "before" startLine=0 visible
     const startLineScrolledOutFraction = startLineFractional - startLine;

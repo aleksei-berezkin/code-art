@@ -89,6 +89,7 @@ export function getRotateYMat(angleRad: number) {
     ]);
 }
 
+// noinspection JSUnusedGlobalSymbols
 export function getTranslateMat(x: number, y: number, z: number) {
     return asMat4([
         1, 0, 0, x,

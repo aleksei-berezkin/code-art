@@ -13,6 +13,7 @@ import { getSceneBounds, SceneBounds } from './SceneBounds';
 import { calcExtensions, Extensions } from './Extensions';
 import { scoreFill } from './scoreFill';
 import { delay } from '../util/delay';
+import type { ScrollFraction } from './Scroll';
 
 export type SceneParams = {
     pixelSpace: PixelSpace,
@@ -27,7 +28,7 @@ export async function generateSceneParams(source: Source, sizePx: Size, fontSize
     const angles = createAngles(source.lang === 'js min')
 
     const pixelSpace = makePixelSpace(sizePx);
-    const txMat = getTxMax(pixelSpace, angles.x, angles.y, angles.z, 0, 0, 0);
+    const txMat = getTxMax(pixelSpace, angles.x, angles.y, angles.z);
     const extensions = await calcExtensions(pixelSpace, angles.x, angles.y, angles.z, txMat);
     await delay();
     const scrollFraction = genScrollFraction(source, getSceneBounds(pixelSpace, extensions), txMat, fontSize, glyphRaster);
@@ -56,33 +57,19 @@ export async function generateSceneParams(source: Source, sizePx: Size, fontSize
                 unit: 'rad',
             },
         },
-        position: {
-            'scroll': {
+        scroll: {
+            v: {
                 type: 'slider',
                 min: -5,
-                val: scrollFraction * 100,
+                val: scrollFraction.v * 100,
                 max: 105,
                 unit: '%',
             },
-            x: {
+            h: {
                 type: 'slider',
-                min: -100,
-                val: 0,
-                max: 100,
-                unit: '%',
-            },
-            y: {
-                type: 'slider',
-                min: -100,
-                val: 0,
-                max: 100,
-                unit: '%',
-            },
-            z: {
-                type: 'slider',
-                min: -100,
-                val: 0,
-                max: 100,
+                min: -5,
+                val: scrollFraction.h * 100,
+                max: 105,
                 unit: '%',
             },
         },
@@ -230,14 +217,20 @@ function randomSign() {
     return Math.random() < .5 ? -1 : 1;
 }
 
-function genScrollFraction(source: Source, sceneBounds: SceneBounds, txMat: Mat4, fontSize: number, glyphRaster: GlyphRaster) {
+function genScrollFraction(source: Source, sceneBounds: SceneBounds, txMat: Mat4, fontSize: number, glyphRaster: GlyphRaster): ScrollFraction {
     if (source.lang === 'js min') {
-        return Math.random();
+        return {
+            v: Math.random(),
+            h: 0,
+        };
     }
 
     return Array.from({length: 9})
         .map(() => {
-            const scrollFraction = Math.random();
+            const scrollFraction = {
+                v: Math.random(),
+                h: 0,
+            };
             return {
                 scrollFraction,
                 score: scoreFill(source, sceneBounds, txMat, scrollFraction, fontSize, glyphRaster),

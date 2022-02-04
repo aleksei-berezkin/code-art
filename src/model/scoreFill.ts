@@ -6,6 +6,7 @@ import { iterateCode } from './iterateCode';
 import { applyTx } from '../util/applyTx';
 import { isVisibleInClipSpace } from '../util/isVisibleInClipSpace';
 import { pluck } from '../util/pluck';
+import type { ScrollFraction } from './Scroll';
 
 const fillMatrixSize = 4;
 
@@ -13,7 +14,7 @@ export function scoreFill(
     source: Source,
     sceneBounds: SceneBounds,
     txMat: Mat4,
-    scrollFraction: number,
+    scrollFraction: ScrollFraction,
     fontSize: number,
     glyphRaster: GlyphRaster,
 ) {

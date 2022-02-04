@@ -30,10 +30,15 @@ export async function drawCodeScene(
         throw new Error('webgl2 not supported');
     }
 
+    const scrollFraction = {
+        v: getSliderVal(sceneParams.imgParams.scroll.v),
+        h: getSliderVal(sceneParams.imgParams.scroll.h),
+    };
+
     const sceneData = await createCodeSceneData(
         getSceneBounds(sceneParams.pixelSpace, sceneParams.extensions),
         sceneParams.txMat,
-        getSliderVal(sceneParams.imgParams.position.scroll),
+        scrollFraction,
         sceneParams.imgParams.font.size.val,
         source,
         colorScheme,
