@@ -15,11 +15,15 @@ export function* iterateCode(bounds: SceneBounds,
                              fontSize: number,
                              source: Source,
                              glyphRaster: GlyphRaster): Generator<CodeLetter> {
-    const posMin = getSourceStartPos(source, getSceneLinesNum(bounds, fontSize), scrollFraction);
+    const linesNumFractional = (bounds.yMax - bounds.yMin) / fontSize;
+
+    const startLineFractional = getStartLineFractional(source, linesNumFractional, scrollFraction);
+    const startLine = Math.floor(startLineFractional);
+    const startLineVisibleFraction = startLineFractional - startLine;
 
     let x = bounds.xMin;
-    let y = bounds.yMin;
-    for (let pos = posMin; pos < source.text.length; pos++) {
+    let y = bounds.yMin - fontSize * startLineVisibleFraction;
+    for (let pos = source.linesOffsets[startLine]; pos < source.text.length; pos++) {
         let letter = source.text[pos];
         if (letter === '\n') {
             x = bounds.xMin;
@@ -56,24 +60,13 @@ export function* iterateCode(bounds: SceneBounds,
     }
 }
 
-function getSceneLinesNum(bounds: SceneBounds, fontSize: number) {
-    return Math.ceil((bounds.yMax - bounds.yMin) / fontSize)
-}
-
-function getSourceStartPos(source: Source, requiredLinesNum: number, scrollFraction: number) {
-    const startLine = getSourceStartLine(source, requiredLinesNum, scrollFraction);
-    return source.linesOffsets[startLine];
-}
-
-function getSourceStartLine(source: Source, requiredLinesNum: number, scrollFraction: number) {
-    if (source.linesOffsets.length <= requiredLinesNum) {
+function getStartLineFractional(source: Source, requiredLinesFractional: number, scrollFraction: number) {
+    if (source.linesOffsets.length <= requiredLinesFractional) {
         return 0;
     }
     return pluck(
         0,
-        // TODO don't round, render part of line
-        // After this simulation can be eased
-        Math.round((source.linesOffsets.length - requiredLinesNum) * scrollFraction),
+        (source.linesOffsets.length - requiredLinesFractional) * scrollFraction,
         source.linesOffsets.length - 1,
     );
 
