@@ -59,9 +59,9 @@ export async function generateSceneParams(source: Source, sizePx: Size, fontSize
         position: {
             'scroll': {
                 type: 'slider',
-                min: 0,
+                min: -5,
                 val: scrollFraction * 100,
-                max: 100,
+                max: 105,
                 unit: '%',
             },
             x: {

@@ -18,11 +18,12 @@ export function* iterateCode(bounds: SceneBounds,
     const linesNumFractional = (bounds.yMax - bounds.yMin) / fontSize;
 
     const startLineFractional = getStartLineFractional(source, linesNumFractional, scrollFraction);
-    const startLine = Math.floor(startLineFractional);
-    const startLineVisibleFraction = startLineFractional - startLine;
+    const startLine = pluck(0, Math.floor(startLineFractional), source.linesOffsets.length - 1);
+    // Negative means a line "before" startLine=0 visible
+    const startLineScrolledOutFraction = startLineFractional - startLine;
 
     let x = bounds.xMin;
-    let y = bounds.yMin - fontSize * startLineVisibleFraction;
+    let y = bounds.yMin - fontSize * startLineScrolledOutFraction;
     for (let pos = source.linesOffsets[startLine]; pos < source.text.length; pos++) {
         let letter = source.text[pos];
         if (letter === '\n') {
@@ -60,14 +61,7 @@ export function* iterateCode(bounds: SceneBounds,
     }
 }
 
+// May be negative or out-of-bounds
 function getStartLineFractional(source: Source, requiredLinesFractional: number, scrollFraction: number) {
-    if (source.linesOffsets.length <= requiredLinesFractional) {
-        return 0;
-    }
-    return pluck(
-        0,
-        (source.linesOffsets.length - requiredLinesFractional) * scrollFraction,
-        source.linesOffsets.length - 1,
-    );
-
+    return (source.linesOffsets.length - requiredLinesFractional) * scrollFraction;
 }
