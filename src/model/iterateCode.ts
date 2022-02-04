@@ -1,7 +1,7 @@
 import type { Source } from './souceCode';
 import type { GlyphRaster } from '../draw/rasterizeFont';
-import { getSourceStartPos } from './souceCode';
-import { getSceneLinesNum, SceneBounds } from './SceneBounds';
+import type { SceneBounds } from './SceneBounds';
+import { pluck } from '../util/pluck';
 
 type CodeLetter = {
     pos: number,
@@ -54,4 +54,27 @@ export function* iterateCode(bounds: SceneBounds,
 
         x += metrics.w / glyphRaster.sizeRatio;
     }
+}
+
+function getSceneLinesNum(bounds: SceneBounds, fontSize: number) {
+    return Math.ceil((bounds.yMax - bounds.yMin) / fontSize)
+}
+
+function getSourceStartPos(source: Source, requiredLinesNum: number, scrollFraction: number) {
+    const startLine = getSourceStartLine(source, requiredLinesNum, scrollFraction);
+    return source.linesOffsets[startLine];
+}
+
+function getSourceStartLine(source: Source, requiredLinesNum: number, scrollFraction: number) {
+    if (source.linesOffsets.length <= requiredLinesNum) {
+        return 0;
+    }
+    return pluck(
+        0,
+        // TODO don't round, render part of line
+        // After this simulation can be eased
+        Math.round((source.linesOffsets.length - requiredLinesNum) * scrollFraction),
+        source.linesOffsets.length - 1,
+    );
+
 }
