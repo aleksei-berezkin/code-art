@@ -58,18 +58,19 @@ export async function generateSceneParams(source: Source, sizePx: Size, fontSize
             },
         },
         scroll: {
+            // TODO patch min/max on lang change
             v: {
                 type: 'slider',
-                min: -5,
+                min: -20,
                 val: scrollFraction.v * 100,
-                max: 105,
+                max: 120,
                 unit: '%',
             },
             h: {
                 type: 'slider',
-                min: -5,
+                min: -20,
                 val: scrollFraction.h * 100,
-                max: 105,
+                max: 120,
                 unit: '%',
             },
         },

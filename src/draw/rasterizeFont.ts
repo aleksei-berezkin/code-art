@@ -6,6 +6,8 @@ export type GlyphRaster = {
     maxAscent: number,
     // Actual size on tex to passed font size
     sizeRatio: number,
+    // Not regarding letters frequency
+    avgW: number,
 }
 
 export type GlyphMetrics = {
@@ -72,8 +74,14 @@ export function rasterizeFont(source: Source, canvasEl: HTMLCanvasElement, fontS
     }
 
     const sizeRatio = _fontSize / fontSize;
-    const maxAscent = [...glyphs.values()]
-        .reduce((max, r) => r.ascent > max ? r.ascent : max, 0) / sizeRatio;
+    const _glyphs = [...glyphs.values()];
+    const maxAscent = _glyphs
+        .reduce((max, r) => r.ascent > max ? r.ascent : max, 0)
+        / sizeRatio;
+    const avgW = _glyphs
+        .reduce((s, g) => s + g.w, 0)
+        / _glyphs.length
+        / sizeRatio;
 
 
     canvasEl.dataset[dsSourceId] = source.name;
@@ -82,6 +90,7 @@ export function rasterizeFont(source: Source, canvasEl: HTMLCanvasElement, fontS
         glyphs,
         maxAscent,
         sizeRatio,
+        avgW,
     };
 
     return cachedRaster;

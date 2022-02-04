@@ -28,6 +28,7 @@ export type Source = {
     lang: 'js' | 'js min',
     text: string,
     linesOffsets: number[], // value = pos in text
+    longestLineLength: number,
 }
 
 export async function getSource(name: SourceCodeName): Promise<Source> {
@@ -37,11 +38,21 @@ export async function getSource(name: SourceCodeName): Promise<Source> {
 
     const text = await (await fetch(sourceDetails[name].url)).text();
 
+    const linesOffsets = getLinesOffsets(text);
+    const longestLineLength = linesOffsets
+        .map((offset, i) => {
+            if (i < linesOffsets.length - 1) {
+                return linesOffsets[i + 1] - offset - 1;
+            }
+            return text.length - offset;
+        })
+        .reduce((a, b) => a > b ? a : b);
     const source = {
         name,
         lang: sourceDetails[name].lang,
         text,
-        linesOffsets: getLinesOffsets(text),
+        linesOffsets,
+        longestLineLength,
     };
     cache.set(name, source);
     return source;

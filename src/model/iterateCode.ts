@@ -16,19 +16,21 @@ export function* iterateCode(bounds: SceneBounds,
                              fontSize: number,
                              source: Source,
                              glyphRaster: GlyphRaster): Generator<CodeLetter> {
-    const linesNumFractional = (bounds.yMax - bounds.yMin) / fontSize;
-
-    const startLineFractional = getStartLineFractional(source, linesNumFractional, scrollFraction.v);
-    const startLine = pluck(0, Math.floor(startLineFractional), source.linesOffsets.length - 1);
+    const requiredLinesReal = (bounds.yMax - bounds.yMin) / fontSize;
+    const startLineReal = (source.linesOffsets.length - requiredLinesReal) * scrollFraction.v;
+    const startLine = pluck(0, Math.floor(startLineReal), source.linesOffsets.length - 1);
     // Negative means a line "before" startLine=0 visible
-    const startLineScrolledOutFraction = startLineFractional - startLine;
+    const startLineScrolledOutFraction = startLineReal - startLine;
 
-    let x = bounds.xMin;
+    const requiredCharsReal = (bounds.xMax - bounds.xMin) / glyphRaster.avgW;
+    const xMin = bounds.xMin - scrollFraction.h * glyphRaster.avgW * (source.longestLineLength - requiredCharsReal);
+
+    let x = xMin;
     let y = bounds.yMin - fontSize * startLineScrolledOutFraction;
     for (let pos = source.linesOffsets[startLine]; pos < source.text.length; pos++) {
         let letter = source.text[pos];
         if (letter === '\n') {
-            x = bounds.xMin;
+            x = xMin;
             y += fontSize;
             if (y > bounds.yMax) {
                 break;
@@ -60,9 +62,4 @@ export function* iterateCode(bounds: SceneBounds,
 
         x += metrics.w / glyphRaster.sizeRatio;
     }
-}
-
-// May be negative or out-of-bounds
-function getStartLineFractional(source: Source, requiredLinesFractional: number, scrollFraction: number) {
-    return (source.linesOffsets.length - requiredLinesFractional) * scrollFraction;
 }
