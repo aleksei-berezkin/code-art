@@ -6,7 +6,7 @@ import { iterateCode } from './iterateCode';
 import { applyTx } from '../util/applyTx';
 import { isVisibleInClipSpace } from '../util/isVisibleInClipSpace';
 import { pluck } from '../util/pluck';
-import type { ScrollFraction } from './Scroll';
+import type { ScrollFraction } from './ScrollFraction';
 
 const fillMatrixSize = 4;
 

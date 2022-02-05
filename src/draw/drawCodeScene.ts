@@ -8,12 +8,12 @@ import type { Source } from '../model/souceCode';
 import { uploadArrayToAttribute } from './uploadArrayToAttribute';
 import { createEmptyTexture, uploadTexture } from './uploadTexture';
 import { rgbSize } from '../model/RGB';
-import { getSliderVal } from '../model/ImgParams';
 import type { SceneParams } from '../model/generateSceneParams';
 import { renderColorToTexture } from './renderColorToTexture';
 import type { ColorScheme } from '../model/colorSchemes';
 import type { CodeColorization } from '../model/highlightProtocol';
 import { getSceneBounds } from '../model/SceneBounds';
+import { getScrollFraction } from '../model/ScrollFraction';
 
 // Renders to 0 tex unit
 export async function drawCodeScene(
@@ -30,15 +30,10 @@ export async function drawCodeScene(
         throw new Error('webgl2 not supported');
     }
 
-    const scrollFraction = {
-        v: getSliderVal(sceneParams.imgParams.scroll.v),
-        h: getSliderVal(sceneParams.imgParams.scroll.h),
-    };
-
     const sceneData = await createCodeSceneData(
         getSceneBounds(sceneParams.pixelSpace, sceneParams.extensions),
         sceneParams.txMat,
-        scrollFraction,
+        getScrollFraction(sceneParams.imgParams),
         sceneParams.imgParams.font.size.val,
         source,
         colorScheme,

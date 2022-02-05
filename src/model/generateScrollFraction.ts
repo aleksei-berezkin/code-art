@@ -2,7 +2,7 @@ import type { Source } from './souceCode';
 import type { SceneBounds } from './SceneBounds';
 import type { Mat4 } from '../util/matrices';
 import type { GlyphRaster } from '../draw/rasterizeFont';
-import type { ScrollFraction } from './Scroll';
+import type { ScrollFraction } from './ScrollFraction';
 import { scoreFill } from './scoreFill';
 
 export function generateScrollFraction(

@@ -16,6 +16,7 @@ import type { ColorSchemeName } from '../model/colorSchemes';
 import { throttle, throttleFast } from '../util/throttle';
 import { colorSchemes } from '../model/colorSchemes';
 import { calcExtensions } from '../model/Extensions';
+import { getAdjustedImgParams } from '../model/getAdjustedImgParams';
 
 export async function drawRandomScene(codeCanvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement, setImgParams: (p: ImgParams) => void) {
     throttleFast(async function () {
@@ -35,9 +36,10 @@ export async function drawRandomScene(codeCanvasEl: HTMLCanvasElement, rasterCan
     })
 }
 
-export async function drawScene(imgParams: ImgParams, codeCanvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement) {
+export async function drawScene(_imgParams: ImgParams, codeCanvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement, setImgParams: (p: ImgParams) => void) {
     throttle(async function () {
-        const source = await getSource(imgParams.source['source'].val as SourceCodeName)
+        const source = await getSource(_imgParams.source['source'].val as SourceCodeName)
+        const imgParams = getAdjustedImgParams(source, _imgParams);
     
         const glyphRaster = rasterizeFont(source, rasterCanvasEl, getSliderVal(imgParams.font.size));
         await delay();
@@ -50,7 +52,9 @@ export async function drawScene(imgParams: ImgParams, codeCanvasEl: HTMLCanvasEl
         const extensions = await calcExtensions(pixelSpace, xAngle, yAngle, zAngle, txMat);
         await delay();
         await _drawScene(source, {pixelSpace, extensions, imgParams, txMat}, glyphRaster, codeCanvasEl, rasterCanvasEl);
-    })
+
+        setImgParams(imgParams);
+    });
 }
 
 async function _drawScene(source: Source, sceneParams: SceneParams, glyphRaster: GlyphRaster, codeCanvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement) {

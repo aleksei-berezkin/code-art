@@ -2,7 +2,7 @@ import type { Source } from './souceCode';
 import type { GlyphRaster } from '../draw/rasterizeFont';
 import type { SceneBounds } from './SceneBounds';
 import { pluck } from '../util/pluck';
-import type { ScrollFraction } from './Scroll';
+import type { ScrollFraction } from './ScrollFraction';
 
 type CodeLetter = {
     pos: number,

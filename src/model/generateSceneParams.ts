@@ -14,6 +14,7 @@ import { calcExtensions, Extensions } from './Extensions';
 import { delay } from '../util/delay';
 import { generateScrollFraction } from './generateScrollFraction';
 import { generateAngles } from './generateAngles';
+import { getScrollParam } from './scrollParam';
 
 export type SceneParams = {
     pixelSpace: PixelSpace,
@@ -57,23 +58,7 @@ export async function generateSceneParams(source: Source, sizePx: Size, fontSize
                 unit: 'rad',
             },
         },
-        scroll: {
-            // TODO patch min/max on lang change
-            v: {
-                type: 'slider',
-                min: -20,
-                val: scrollFraction.v * 100,
-                max: 120,
-                unit: '%',
-            },
-            h: {
-                type: 'slider',
-                min: -20,
-                val: scrollFraction.h * 100,
-                max: 120,
-                unit: '%',
-            },
-        },
+        scroll: getScrollParam(source, scrollFraction),
         font: {
             size: {
                 type: 'slider',

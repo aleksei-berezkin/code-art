@@ -133,7 +133,7 @@
             return;
         }
 
-        await drawScene(imgParams, codeCanvasEl, rasterCanvasEl);
+        await drawScene(imgParams, codeCanvasEl, rasterCanvasEl, p => imgParams = p);
     }
 
     function onClickedOutsideMenu() {
