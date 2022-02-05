@@ -56,7 +56,7 @@ function calcExtensionsByRotation(pixelSpace: PixelSpace, xRotAngle: number, yRo
 type Side = 'top' | 'right' | 'bottom' | 'left';
 const allSides: Side[] = ['top', 'right', 'bottom', 'left'];
 
-const maxIterations = 500;
+const maxIterations = 800;
 const samplesNum = 80;
 const enlargeFactor = .05;
 

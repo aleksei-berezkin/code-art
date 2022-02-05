@@ -32,7 +32,7 @@ export async function generateSceneParams(source: Source, sizePx: Size, fontSize
     const txMat = getTxMax(pixelSpace, angles.x, angles.y, angles.z);
     const extensions = await calcExtensions(pixelSpace, angles.x, angles.y, angles.z, txMat);
     await delay();
-    const scrollFraction = generateScrollFraction(source, getSceneBounds(pixelSpace, extensions), txMat, fontSize, glyphRaster);
+    const scrollFraction = await generateScrollFraction(source, getSceneBounds(pixelSpace, extensions), txMat, fontSize, glyphRaster);
 
     const imgParams: ImgParams = {
         angle: {
