@@ -15,6 +15,7 @@ import { delay } from '../util/delay';
 import { generateScrollFraction } from './generateScrollFraction';
 import { generateAngles } from './generateAngles';
 import { getScrollParam } from './scrollParam';
+import type { WorkLimiter } from '../util/workLimiter';
 
 export type SceneParams = {
     pixelSpace: PixelSpace,
@@ -23,16 +24,16 @@ export type SceneParams = {
     imgParams: ImgParams,
 };
 
-export async function generateSceneParams(source: Source, sizePx: Size, fontSize: number, glyphRaster: GlyphRaster): Promise<SceneParams> {
+export async function generateSceneParams(source: Source, sizePx: Size, fontSize: number, glyphRaster: GlyphRaster, workLimiter: WorkLimiter): Promise<SceneParams> {
     const blurFactorPercentLog = 1.3 + Math.random();
 
     const angles = generateAngles(source.lang === 'js min')
 
     const pixelSpace = makePixelSpace(sizePx);
     const txMat = getTxMax(pixelSpace, angles.x, angles.y, angles.z);
-    const extensions = await calcExtensions(pixelSpace, angles.x, angles.y, angles.z, txMat);
+    const extensions = await calcExtensions(pixelSpace, angles.x, angles.y, angles.z, txMat, workLimiter);
     await delay();
-    const scrollFraction = await generateScrollFraction(source, getSceneBounds(pixelSpace, extensions), txMat, fontSize, glyphRaster);
+    const scrollFraction = await generateScrollFraction(source, getSceneBounds(pixelSpace, extensions), txMat, fontSize, glyphRaster, workLimiter);
 
     const imgParams: ImgParams = {
         angle: {

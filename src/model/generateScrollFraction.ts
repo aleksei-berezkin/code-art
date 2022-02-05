@@ -3,8 +3,8 @@ import type { SceneBounds } from './SceneBounds';
 import type { Mat4 } from '../util/matrices';
 import type { GlyphRaster } from '../draw/rasterizeFont';
 import type { ScrollFraction } from './ScrollFraction';
+import type { WorkLimiter } from '../util/workLimiter';
 import { scoreFill } from './scoreFill';
-import { createWorkLimiter } from '../util/workLimiter';
 
 export async function generateScrollFraction(
     source: Source,
@@ -12,6 +12,7 @@ export async function generateScrollFraction(
     txMat: Mat4,
     fontSize: number,
     glyphRaster: GlyphRaster,
+    workLimiter: WorkLimiter,
 ): Promise<ScrollFraction> {
     if (source.lang === 'js min') {
         return {
@@ -20,7 +21,6 @@ export async function generateScrollFraction(
         };
     }
 
-    const workLimiter = createWorkLimiter();
     return (await Promise.all(
             Array.from({length: 15})
                 .map(async () => {

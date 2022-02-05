@@ -9,7 +9,7 @@ import type { Mat4 } from '../util/matrices';
 import { applyTx } from '../util/applyTx';
 import { isVisibleInClipSpace } from '../util/isVisibleInClipSpace';
 import type { SceneBounds } from '../model/SceneBounds';
-import { createWorkLimiter } from '../util/workLimiter';
+import type { WorkLimiter } from '../util/workLimiter';
 import type { ScrollFraction } from '../model/ScrollFraction';
 
 export type CodeSceneData = {
@@ -30,12 +30,11 @@ export async function createCodeSceneData(
     colorScheme: ColorScheme,
     codeColorization: CodeColorization,
     glyphRaster: GlyphRaster,
+    workLimiter: WorkLimiter,
 ): Promise<CodeSceneData> {
     const vertices = [];
     const glyphTexPosition = [];
     const colors = [];
-
-    const workLimiter = createWorkLimiter();
 
     for (const codeLetter of iterateCode(bounds, scrollFraction, fontSize, source, glyphRaster)) {
         await workLimiter.next();

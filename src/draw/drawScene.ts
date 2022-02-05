@@ -17,6 +17,7 @@ import { throttle, throttleFast } from '../util/throttle';
 import { colorSchemes } from '../model/colorSchemes';
 import { calcExtensions } from '../model/Extensions';
 import { getAdjustedImgParams } from '../model/getAdjustedImgParams';
+import { createWorkLimiter, WorkLimiter } from '../util/workLimiter';
 
 export async function drawRandomScene(codeCanvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement, setImgParams: (p: ImgParams) => void) {
     throttleFast(async function () {
@@ -26,11 +27,11 @@ export async function drawRandomScene(codeCanvasEl: HTMLCanvasElement, rasterCan
         const sizePx = getSizePx(codeCanvasEl);
         const fontSize = getFontSize(sizePx);
 
-        const glyphRaster = rasterizeFont(source, rasterCanvasEl, fontSize);
-        await delay();
+        const workLimiter = createWorkLimiter();
+        const glyphRaster = await rasterizeFont(source, rasterCanvasEl, fontSize, workLimiter);
     
-        const sceneParams = await generateSceneParams(source, getSizePx(codeCanvasEl), fontSize, glyphRaster);
-        await _drawScene(source, sceneParams, glyphRaster, codeCanvasEl, rasterCanvasEl);
+        const sceneParams = await generateSceneParams(source, getSizePx(codeCanvasEl), fontSize, glyphRaster, workLimiter);
+        await _drawScene(source, sceneParams, glyphRaster, codeCanvasEl, rasterCanvasEl, workLimiter);
     
         setImgParams(sceneParams.imgParams);
     })
@@ -40,27 +41,27 @@ export async function drawScene(_imgParams: ImgParams, codeCanvasEl: HTMLCanvasE
     throttle(async function () {
         const source = await getSource(_imgParams.source['source'].val as SourceCodeName)
         const imgParams = getAdjustedImgParams(source, _imgParams);
-    
-        const glyphRaster = rasterizeFont(source, rasterCanvasEl, getSliderVal(imgParams.font.size));
-        await delay();
+
+        const workLimiter = createWorkLimiter();
+        const glyphRaster = await rasterizeFont(source, rasterCanvasEl, getSliderVal(imgParams.font.size), workLimiter);
     
         const pixelSpace = makePixelSpace(getSizePx(codeCanvasEl));
         const xAngle = getSliderVal(imgParams.angle.x);
         const yAngle = getSliderVal(imgParams.angle.y);
         const zAngle = getSliderVal(imgParams.angle.z);
         const txMat = getTxMax(pixelSpace, xAngle, yAngle, zAngle);
-        const extensions = await calcExtensions(pixelSpace, xAngle, yAngle, zAngle, txMat);
+        const extensions = await calcExtensions(pixelSpace, xAngle, yAngle, zAngle, txMat, workLimiter);
         await delay();
-        await _drawScene(source, {pixelSpace, extensions, imgParams, txMat}, glyphRaster, codeCanvasEl, rasterCanvasEl);
+        await _drawScene(source, {pixelSpace, extensions, imgParams, txMat}, glyphRaster, codeCanvasEl, rasterCanvasEl, workLimiter);
 
         setImgParams(imgParams);
     });
 }
 
-async function _drawScene(source: Source, sceneParams: SceneParams, glyphRaster: GlyphRaster, codeCanvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement) {
+async function _drawScene(source: Source, sceneParams: SceneParams, glyphRaster: GlyphRaster, codeCanvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement, workLimiter: WorkLimiter) {
     const codeColorization = await colorizeCode(sourceDetails[sceneParams.imgParams.source.source.val as SourceCodeName].url);
     const colorScheme = colorSchemes[sceneParams.imgParams.color.scheme.val as ColorSchemeName];
-    const targetTex = await drawCodeScene(source, colorScheme, codeColorization, sceneParams, glyphRaster, codeCanvasEl, rasterCanvasEl);
+    const targetTex = await drawCodeScene(source, colorScheme, codeColorization, sceneParams, glyphRaster, codeCanvasEl, rasterCanvasEl, workLimiter);
     await delay();
     await drawEffectsScene(sceneParams, colorScheme.background, targetTex, codeCanvasEl);
 }

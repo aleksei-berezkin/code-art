@@ -4,7 +4,7 @@ import type { PixelSpace } from './PixelSpace';
 import { getSceneBounds } from './SceneBounds';
 import { applyTx } from '../util/applyTx';
 import { isVisibleInClipSpace } from '../util/isVisibleInClipSpace';
-import { createWorkLimiter } from '../util/workLimiter';
+import type { WorkLimiter } from '../util/workLimiter';
 
 export type Extensions = {
     xMin: number,
@@ -17,9 +17,9 @@ export type Extensions = {
  * Because code plane is rotated, bounds must be extended to fill the whole canvas.
  * Here, "extension" is a multiplier to multiply scene bounds by.
  */
-export async function calcExtensions(pixelSpace: PixelSpace, xRotAngle: number, yRotAngle: number, zRotAngle: number, txMat: Mat4): Promise<Extensions> {
+export async function calcExtensions(pixelSpace: PixelSpace, xRotAngle: number, yRotAngle: number, zRotAngle: number, txMat: Mat4, workLimiter: WorkLimiter): Promise<Extensions> {
     const ext = calcExtensionsByRotation(pixelSpace, xRotAngle, yRotAngle, zRotAngle);
-    await enlargeExtensionsBySimulation(pixelSpace, ext, txMat);
+    await enlargeExtensionsBySimulation(pixelSpace, ext, txMat, workLimiter);
     return ext;
 }
 
@@ -60,8 +60,7 @@ const maxIterations = 800;
 const samplesNum = 80;
 const enlargeFactor = .05;
 
-async function enlargeExtensionsBySimulation(pixelSpace: PixelSpace, extensionsWritable: Extensions, txMat: Mat4) {
-    const workLimiter = createWorkLimiter();
+async function enlargeExtensionsBySimulation(pixelSpace: PixelSpace, extensionsWritable: Extensions, txMat: Mat4, workLimiter: WorkLimiter) {
     let sides: Set<Side> = new Set(allSides);
     for (let i = 0; i < maxIterations; i++) {
         await workLimiter.next();

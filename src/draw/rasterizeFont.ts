@@ -1,5 +1,6 @@
 import { dpr } from '../util/dpr';
 import type { Source } from '../model/souceCode';
+import type { WorkLimiter } from '../util/workLimiter';
 
 export type GlyphRaster = {
     glyphs: Map<string, GlyphMetrics>,
@@ -26,7 +27,7 @@ const dsSourceId = 'sourceId';
 const dsFontSize = 'fontSize';
 let cachedRaster: GlyphRaster | undefined = undefined;
 
-export function rasterizeFont(source: Source, canvasEl: HTMLCanvasElement, fontSize: number): GlyphRaster {
+export async function rasterizeFont(source: Source, canvasEl: HTMLCanvasElement, fontSize: number, workLimiter: WorkLimiter): Promise<GlyphRaster> {
     if (cachedRaster && canvasEl.dataset[dsSourceId] === source.name && canvasEl.dataset[dsFontSize] === String(fontSize)) {
         return cachedRaster;
     }
@@ -39,7 +40,7 @@ export function rasterizeFont(source: Source, canvasEl: HTMLCanvasElement, fontS
     const _fontSize = fontSize * dpr * fontSizeMultiplier;
     const xMin = _fontSize * (spaceH - 1);
     const xMax = canvasEl.width - 1.5 *  _fontSize;
-    const alphabet = getAlphabet(source.text);
+    const alphabet = await getAlphabet(source.text, workLimiter);
     canvasEl.height = estimateNeededCanvasHeight(ctx, xMin, xMax, _fontSize, alphabet.size);
 
     ctx.fillStyle = 'black';
@@ -53,6 +54,7 @@ export function rasterizeFont(source: Source, canvasEl: HTMLCanvasElement, fontS
     const glyphs: Map<string, GlyphMetrics> = new Map();
 
     for (const letter of alphabet) {
+        await workLimiter.next();
         ctx.fillText(letter, x, baseline);
         const tm = ctx.measureText(letter);
         glyphs.set(
@@ -96,9 +98,10 @@ export function rasterizeFont(source: Source, canvasEl: HTMLCanvasElement, fontS
     return cachedRaster;
 }
 
-function getAlphabet(source: string) {
+async function getAlphabet(source: string, workLimiter: WorkLimiter) {
     const alphabet = new Set(source);
     for (let ch = 0; ch < 32; ch++) {
+        await workLimiter.next();
         alphabet.delete(String.fromCharCode(ch));
     }
     alphabet.add(' ');  // If it happens that no spaces, only tabs

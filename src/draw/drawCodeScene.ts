@@ -14,6 +14,7 @@ import type { ColorScheme } from '../model/colorSchemes';
 import type { CodeColorization } from '../model/highlightProtocol';
 import { getSceneBounds } from '../model/SceneBounds';
 import { getScrollFraction } from '../model/ScrollFraction';
+import type { WorkLimiter } from '../util/workLimiter';
 
 // Renders to 0 tex unit
 export async function drawCodeScene(
@@ -24,6 +25,7 @@ export async function drawCodeScene(
     glyphRaster: GlyphRaster,
     codeCanvasEl: HTMLCanvasElement,
     rasterCanvasEl: HTMLCanvasElement,
+    workLimiter: WorkLimiter,
 ) {
     const gl = codeCanvasEl.getContext('webgl2', {preserveDrawingBuffer: true});
     if (!gl) {
@@ -39,6 +41,7 @@ export async function drawCodeScene(
         colorScheme,
         codeColorization,
         glyphRaster,
+        workLimiter,
     );
 
     const program = await createProgram(vertexShaderSource, fragmentShaderSource, gl);
