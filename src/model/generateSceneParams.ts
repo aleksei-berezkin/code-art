@@ -9,11 +9,11 @@ import type { GlyphRaster } from '../draw/rasterizeFont';
 import { getTxMax } from './getTxMax';
 import type { Mat4 } from '../util/matrices';
 import type { Size } from './Size';
-import { getSceneBounds, SceneBounds } from './SceneBounds';
+import { getSceneBounds } from './SceneBounds';
 import { calcExtensions, Extensions } from './Extensions';
-import { scoreFill } from './scoreFill';
 import { delay } from '../util/delay';
-import type { ScrollFraction } from './Scroll';
+import { generateScrollFraction } from './generateScrollFraction';
+import { generateAngles } from './generateAngles';
 
 export type SceneParams = {
     pixelSpace: PixelSpace,
@@ -25,13 +25,13 @@ export type SceneParams = {
 export async function generateSceneParams(source: Source, sizePx: Size, fontSize: number, glyphRaster: GlyphRaster): Promise<SceneParams> {
     const blurFactorPercentLog = 1.3 + Math.random();
 
-    const angles = createAngles(source.lang === 'js min')
+    const angles = generateAngles(source.lang === 'js min')
 
     const pixelSpace = makePixelSpace(sizePx);
     const txMat = getTxMax(pixelSpace, angles.x, angles.y, angles.z);
     const extensions = await calcExtensions(pixelSpace, angles.x, angles.y, angles.z, txMat);
     await delay();
-    const scrollFraction = genScrollFraction(source, getSceneBounds(pixelSpace, extensions), txMat, fontSize, glyphRaster);
+    const scrollFraction = generateScrollFraction(source, getSceneBounds(pixelSpace, extensions), txMat, fontSize, glyphRaster);
 
     const imgParams: ImgParams = {
         angle: {
@@ -164,79 +164,4 @@ export async function generateSceneParams(source: Source, sizePx: Size, fontSize
     };
 
     return {pixelSpace, txMat, extensions, imgParams};
-}
-
-function createAngles(isMinified: boolean) {
-    const p = genRotationPatterns(isMinified);
-
-    const x = p.has('xSmall') ? randomAngle(4, 7) * randomSign()
-        : p.has('xMed') ? randomAngle(7, 11) * randomSign()
-        : p.has('xLarge') ? randomAngle(10, 13) * randomSign()
-        : 0;
-
-    const y = p.has('ySmall') ? randomAngle(4, 10) * (isMinified ? randomSign() : -1)
-        : p.has('yMed') ? randomAngle(10, 13) * (isMinified ? randomSign() : -1)
-        : p.has('yLarge') ? randomAngle(13, 15) * (isMinified ? randomSign() : -1)
-        : 0;
-
-    const z = (isMinified || Math.abs(x) < degToRad(5) && Math.abs(y) < degToRad(7))
-        ? randomAngle(1.5, 3.5) * randomSign()
-        : 0;
-
-    return {x, y, z};
-}
-
-type RotPattern = 'xSmall' | 'xMed' | 'xLarge' | 'ySmall' | 'yMed' | 'yLarge';
-
-function genRotationPatterns(isMinified: boolean): Set<RotPattern | undefined> {
-    const xOptions: (RotPattern | undefined)[] = isMinified
-        ? [undefined, 'xSmall', 'xMed', 'xLarge']
-        : [undefined, 'xSmall', 'xMed'];
-    const yOptions: (RotPattern | undefined)[] = isMinified
-        ? [undefined, 'ySmall', 'yMed', 'yLarge']
-        : [undefined, 'ySmall', 'yMed'];
-
-    const x = pickRandom<RotPattern | undefined>(xOptions);
-    const y = pickRandom<RotPattern | undefined>(yOptions);
-
-    if (!isMinified && x === 'xMed' && y === 'yMed'
-        || x === 'xSmall' && y === undefined
-        || x === undefined && y === 'ySmall'
-        || x === undefined && y === undefined
-    ) {
-        return genRotationPatterns(isMinified);
-    }
-
-    return new Set([x, y]);
-}
-
-function randomAngle(degMin: number, degMax: number) {
-    return degToRad(degMin) + Math.random() * degToRad(degMax - degMin);
-}
-
-function randomSign() {
-    return Math.random() < .5 ? -1 : 1;
-}
-
-function genScrollFraction(source: Source, sceneBounds: SceneBounds, txMat: Mat4, fontSize: number, glyphRaster: GlyphRaster): ScrollFraction {
-    if (source.lang === 'js min') {
-        return {
-            v: Math.random(),
-            h: 0,
-        };
-    }
-
-    return Array.from({length: 9})
-        .map(() => {
-            const scrollFraction = {
-                v: Math.random(),
-                h: 0,
-            };
-            return {
-                scrollFraction,
-                score: scoreFill(source, sceneBounds, txMat, scrollFraction, fontSize, glyphRaster),
-            }
-        })
-        .reduce((a, b) => a.score > b.score ? a : b)
-        .scrollFraction;
 }
