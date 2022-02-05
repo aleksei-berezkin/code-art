@@ -20,8 +20,21 @@
     }
 
     .code-canvas {
+        animation-duration: 2s;
+        animation-fill-mode: forwards;
+        animation-name: code-loading-bg;
         aspect-ratio: 3/2;
+        background-color: #eee;
         width: 100%;
+    }
+
+    @keyframes code-loading-bg {
+        from {
+            background-color: #ddd;
+        }
+        to {
+            background-color: #333;
+        }
     }
 
     .round-btn {
