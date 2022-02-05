@@ -46,7 +46,7 @@ export async function createProgram(vertexShaderSource: string, fragmentShaderSo
             await delay();
         }
     } else {
-        await delay(20);
+        await delay(30);
     }
 
     const success = gl.getProgramParameter(program, gl.LINK_STATUS);

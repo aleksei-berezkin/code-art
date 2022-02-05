@@ -9,7 +9,7 @@ import { pluck } from '../util/pluck';
 import type { ScrollFraction } from './ScrollFraction';
 import type { WorkLimiter } from '../util/workLimiter';
 
-const fillMatrixSize = 4;
+const fillMatrixSize = 5;
 
 export async function scoreFill(
     source: Source,

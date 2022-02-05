@@ -1,48 +1,17 @@
 import { degToRad } from '../util/degToRad';
-import { pickRandom } from '../util/pickRandom';
 
-export function generateAngles(isMinified: boolean) {
-    const p = generateRotationPatterns(isMinified);
+export function generateAngles(isMin: boolean): {x: number, y: number, z: number} {
+    const x = randomSign() * randomAngle(3, isMin ? 13 : 11);
+    const y = (isMin ? randomSign() : -1) * randomAngle(4, isMin ? 15 : 13);
 
-    const x = p.has('xSmall') ? randomAngle(4, 7) * randomSign()
-        : p.has('xMed') ? randomAngle(7, 11) * randomSign()
-        : p.has('xLarge') ? randomAngle(10, 13) * randomSign()
-        : 0;
-
-    const y = p.has('ySmall') ? randomAngle(4, 10) * (isMinified ? randomSign() : -1)
-        : p.has('yMed') ? randomAngle(10, 13) * (isMinified ? randomSign() : -1)
-        : p.has('yLarge') ? randomAngle(13, 15) * (isMinified ? randomSign() : -1)
-        : 0;
-
-    const z = (isMinified || Math.abs(x) < degToRad(5) && Math.abs(y) < degToRad(7))
-        ? randomAngle(1.5, 3.5) * randomSign()
-        : 0;
-
-    return {x, y, z};
-}
-
-type RotPattern = 'xSmall' | 'xMed' | 'xLarge' | 'ySmall' | 'yMed' | 'yLarge';
-
-function generateRotationPatterns(isMinified: boolean): Set<RotPattern | undefined> {
-    const xOptions: (RotPattern | undefined)[] = isMinified
-        ? [undefined, 'xSmall', 'xMed', 'xLarge']
-        : [undefined, 'xSmall', 'xMed'];
-    const yOptions: (RotPattern | undefined)[] = isMinified
-        ? [undefined, 'ySmall', 'yMed', 'yLarge']
-        : [undefined, 'ySmall', 'yMed'];
-
-    const x = pickRandom<RotPattern | undefined>(xOptions);
-    const y = pickRandom<RotPattern | undefined>(yOptions);
-
-    if (!isMinified && x === 'xMed' && y === 'yMed'
-        || x === 'xSmall' && y === undefined
-        || x === undefined && y === 'ySmall'
-        || x === undefined && y === undefined
-    ) {
-        return generateRotationPatterns(isMinified);
+    const xAbs = Math.abs(x);
+    const yAbs = Math.abs(y);
+    if (isMin && xAbs > 10.5 && yAbs > 12.5 || !isMin && xAbs > 7 && yAbs > 10) {
+        return generateAngles(isMin);
     }
 
-    return new Set([x, y]);
+    const z = isMin ? randomSign() * randomAngle(1.5, 3.5) : 0;
+    return {x, y, z};
 }
 
 function randomAngle(degMin: number, degMax: number) {
