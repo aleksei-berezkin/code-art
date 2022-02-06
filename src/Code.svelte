@@ -113,10 +113,8 @@
 
     let genRotateDeg = 0;
 
-    onMount(async function () {
-        await generateScene();
-    });
-
+    // In Safari sizes may be not ready on mount, that's why raf
+    onMount(() => requestAnimationFrame(async () => await generateScene()));
 
     async function handleGenerateClick() {
         if (imgParams) {
