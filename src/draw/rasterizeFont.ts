@@ -67,20 +67,18 @@ export async function rasterizeFont(
     const sizeRatio = _fontSize / fontSize;
     const _glyphs = [...glyphs.values()];
     const maxAscent = _glyphs
-        .reduce((max, r) => r.ascent > max ? r.ascent : max, 0)
-        / sizeRatio;
+        .reduce((max, r) => r.ascent > max ? r.ascent : max, 0);
     const avgW = _glyphs
         .reduce((s, g) => s + g.w, 0)
-        / _glyphs.length
-        / sizeRatio;
+        / _glyphs.length;
 
 
     canvasEl.dataset[dsSourceId] = source.name;
     canvasEl.dataset[dsFontSize] = String(fontSize);
     cachedRaster =  {
+        fontSize: _fontSize,
         glyphs,
         maxAscent,
-        sizeRatio,
         avgW,
     };
 

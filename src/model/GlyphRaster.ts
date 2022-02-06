@@ -1,8 +1,8 @@
 export type GlyphRaster = {
     glyphs: Map<string, GlyphMetrics>,
+    // Actual size on tex which may be greater than rendered font size
+    fontSize: number,
     maxAscent: number,
-    // Actual size on tex to passed font size
-    sizeRatio: number,
     // Not regarding letters frequency
     avgW: number,
 }

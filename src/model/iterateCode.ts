@@ -22,8 +22,10 @@ export function* iterateCode(bounds: SceneBounds,
     // Negative means a line "before" startLine=0 visible
     const startLineScrolledOutFraction = startLineReal - startLine;
 
-    const requiredCharsReal = (bounds.xMax - bounds.xMin) / glyphRaster.avgW;
-    const xMin = bounds.xMin - scrollFraction.h * glyphRaster.avgW * (source.longestLineLength - requiredCharsReal);
+    const fontSizeRatio = glyphRaster.fontSize / fontSize;
+
+    const requiredCharsReal = (bounds.xMax - bounds.xMin) / glyphRaster.avgW / fontSizeRatio;
+    const xMin = bounds.xMin - scrollFraction.h * glyphRaster.avgW /fontSizeRatio * (source.longestLineLength - requiredCharsReal);
 
     let x = xMin;
     let y = bounds.yMin - fontSize * startLineScrolledOutFraction;
@@ -48,7 +50,7 @@ export function* iterateCode(bounds: SceneBounds,
             continue;
         }
 
-        const baseline = y + glyphRaster.maxAscent;
+        const baseline = y + glyphRaster.maxAscent / fontSizeRatio;
         const metrics = glyphRaster.glyphs.get(letter)!;
 
         if (letter !== ' ') {
@@ -60,6 +62,6 @@ export function* iterateCode(bounds: SceneBounds,
             };
         }
 
-        x += metrics.w / glyphRaster.sizeRatio;
+        x += metrics.w / fontSizeRatio;
     }
 }
