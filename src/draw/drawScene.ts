@@ -1,6 +1,6 @@
 import { pickRandom } from '../util/pickRandom';
 import { getSource, Source, SourceCodeName, sourceCodeNames, sourceDetails } from '../model/souceCode';
-import { GlyphRaster, rasterizeFont } from './rasterizeFont';
+import { rasterizeFont } from './rasterizeFont';
 import { generateSceneParams, SceneParams } from '../model/generateSceneParams';
 import { dpr } from '../util/dpr';
 import type { ImgParams } from '../model/ImgParams';
@@ -18,6 +18,7 @@ import { colorSchemes } from '../model/colorSchemes';
 import { calcExtensions } from '../model/Extensions';
 import { getAdjustedImgParams } from '../model/getAdjustedImgParams';
 import { createWorkLimiter, WorkLimiter } from '../util/workLimiter';
+import type { GlyphRaster } from '../model/GlyphRaster';
 
 export async function drawRandomScene(codeCanvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement, setImgParams: (p: ImgParams) => void) {
     throttleFast(async function () {

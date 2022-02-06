@@ -5,7 +5,6 @@ import { degToRad } from '../util/degToRad';
 import { colorSchemeNames } from './colorSchemes';
 import { RGB, rgbToHex } from './RGB';
 import { makePixelSpace, PixelSpace } from './PixelSpace';
-import type { GlyphRaster } from '../draw/rasterizeFont';
 import { getTxMax } from './getTxMax';
 import type { Mat4 } from '../util/matrices';
 import type { Size } from './Size';
@@ -16,6 +15,7 @@ import { generateScrollFraction } from './generateScrollFraction';
 import { generateAngles } from './generateAngles';
 import { getScrollParam } from './scrollParam';
 import type { WorkLimiter } from '../util/workLimiter';
+import type { GlyphRaster } from './GlyphRaster';
 
 export type SceneParams = {
     pixelSpace: PixelSpace,

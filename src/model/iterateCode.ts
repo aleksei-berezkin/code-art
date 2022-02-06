@@ -1,8 +1,8 @@
 import type { Source } from './souceCode';
-import type { GlyphRaster } from '../draw/rasterizeFont';
 import type { SceneBounds } from './SceneBounds';
 import { pluck } from '../util/pluck';
 import type { ScrollFraction } from './ScrollFraction';
+import type { GlyphRaster } from './GlyphRaster';
 
 type CodeLetter = {
     pos: number,

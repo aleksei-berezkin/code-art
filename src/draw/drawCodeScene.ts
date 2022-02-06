@@ -3,7 +3,6 @@ import vertexShaderSource from '../shader/codeVertex.shader';
 import fragmentShaderSource from '../shader/codeFragment.shader';
 import { createCodeSceneData } from './createCodeSceneData';
 import { vertexSize2d } from './rect';
-import type { GlyphRaster } from './rasterizeFont';
 import type { Source } from '../model/souceCode';
 import { uploadArrayToAttribute } from './uploadArrayToAttribute';
 import { createEmptyTexture, uploadTexture } from './uploadTexture';
@@ -15,6 +14,7 @@ import type { CodeColorization } from '../model/highlightProtocol';
 import { getSceneBounds } from '../model/SceneBounds';
 import { getScrollFraction } from '../model/ScrollFraction';
 import type { WorkLimiter } from '../util/workLimiter';
+import type { GlyphRaster } from '../model/GlyphRaster';
 
 // Renders to 0 tex unit
 export async function drawCodeScene(

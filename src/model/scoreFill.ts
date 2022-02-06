@@ -1,13 +1,13 @@
 import type { Source } from './souceCode';
 import type { SceneBounds } from './SceneBounds';
 import type { Mat4 } from '../util/matrices';
-import type { GlyphRaster } from '../draw/rasterizeFont';
 import { iterateCode } from './iterateCode';
 import { applyTx } from '../util/applyTx';
 import { isVisibleInClipSpace } from '../util/isVisibleInClipSpace';
 import { pluck } from '../util/pluck';
 import type { ScrollFraction } from './ScrollFraction';
 import type { WorkLimiter } from '../util/workLimiter';
+import type { GlyphRaster } from './GlyphRaster';
 
 const fillMatrixSize = 5;
 

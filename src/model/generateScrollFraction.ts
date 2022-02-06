@@ -1,10 +1,10 @@
 import type { Source } from './souceCode';
 import type { SceneBounds } from './SceneBounds';
 import type { Mat4 } from '../util/matrices';
-import type { GlyphRaster } from '../draw/rasterizeFont';
 import type { ScrollFraction } from './ScrollFraction';
 import type { WorkLimiter } from '../util/workLimiter';
 import { scoreFill } from './scoreFill';
+import type { GlyphRaster } from './GlyphRaster';
 
 export async function generateScrollFraction(
     source: Source,

@@ -1,5 +1,4 @@
 import { rect2d, rect2dVerticesNum } from './rect';
-import type { GlyphRaster } from './rasterizeFont';
 import type { Source } from '../model/souceCode';
 import { iterateCode } from '../model/iterateCode';
 import type { ColorScheme } from '../model/colorSchemes';
@@ -11,6 +10,7 @@ import { isVisibleInClipSpace } from '../util/isVisibleInClipSpace';
 import type { SceneBounds } from '../model/SceneBounds';
 import type { WorkLimiter } from '../util/workLimiter';
 import type { ScrollFraction } from '../model/ScrollFraction';
+import type { GlyphRaster } from '../model/GlyphRaster';
 
 export type CodeSceneData = {
     // only x, y; z is left default = 0

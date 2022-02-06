@@ -1,23 +1,7 @@
 import { dpr } from '../util/dpr';
 import type { Source } from '../model/souceCode';
 import type { WorkLimiter } from '../util/workLimiter';
-
-export type GlyphRaster = {
-    glyphs: Map<string, GlyphMetrics>,
-    maxAscent: number,
-    // Actual size on tex to passed font size
-    sizeRatio: number,
-    // Not regarding letters frequency
-    avgW: number,
-}
-
-export type GlyphMetrics = {
-    baseline: number,
-    ascent: number,
-    descent: number,
-    x: number,
-    w: number,
-}
+import type { GlyphMetrics, GlyphRaster } from '../model/GlyphRaster';
 
 const fontSizeMultiplier = 2;
 const spaceV = 1.05;
@@ -27,7 +11,12 @@ const dsSourceId = 'sourceId';
 const dsFontSize = 'fontSize';
 let cachedRaster: GlyphRaster | undefined = undefined;
 
-export async function rasterizeFont(source: Source, canvasEl: HTMLCanvasElement, fontSize: number, workLimiter: WorkLimiter): Promise<GlyphRaster> {
+export async function rasterizeFont(
+    source: Source,
+    canvasEl: HTMLCanvasElement,
+    fontSize: number,
+    workLimiter: WorkLimiter,
+): Promise<GlyphRaster> {
     if (cachedRaster && canvasEl.dataset[dsSourceId] === source.name && canvasEl.dataset[dsFontSize] === String(fontSize)) {
         return cachedRaster;
     }
