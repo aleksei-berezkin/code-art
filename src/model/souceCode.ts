@@ -1,4 +1,5 @@
 import type { Lang } from './Lang';
+import type { WorkLimiter } from '../util/workLimiter';
 
 export const sourceDetails = {
     'React DOM min': {
@@ -29,9 +30,11 @@ export type Source = {
     text: string,
     linesOffsets: number[], // value = pos in text
     longestLineLength: number,
+    // Always includes space; never includes with code < 32
+    alphabet: string,
 }
 
-export async function getSource(name: SourceCodeName): Promise<Source> {
+export async function getSource(name: SourceCodeName, workLimiter: WorkLimiter): Promise<Source> {
     if (name in cache) {
         return cache.get(name)!;
     }
@@ -53,6 +56,7 @@ export async function getSource(name: SourceCodeName): Promise<Source> {
         text,
         linesOffsets,
         longestLineLength,
+        alphabet: await getAlphabet(text, workLimiter),
     };
     cache.set(name, source);
     return source;
@@ -69,4 +73,15 @@ function getLinesOffsets(text: string): number[] {
         }
     }
     return offsets;
+}
+
+async function getAlphabet(source: string, workLimiter: WorkLimiter) {
+    await workLimiter.next();
+    const alphabet = new Set(source);
+    await workLimiter.next();
+    for (let ch = 0; ch < 32; ch++) {
+        alphabet.delete(String.fromCharCode(ch));
+    }
+    alphabet.add(' ');
+    return [...alphabet].join('');
 }

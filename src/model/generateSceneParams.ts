@@ -16,6 +16,7 @@ import { generateAngles } from './generateAngles';
 import { getScrollParam } from './scrollParam';
 import type { WorkLimiter } from '../util/workLimiter';
 import type { GlyphRaster } from './GlyphRaster';
+import { fontFaces } from './fontFaces';
 
 export type SceneParams = {
     pixelSpace: PixelSpace,
@@ -24,7 +25,7 @@ export type SceneParams = {
     imgParams: ImgParams,
 };
 
-export async function generateSceneParams(source: Source, sizePx: Size, fontSize: number, glyphRaster: GlyphRaster, workLimiter: WorkLimiter): Promise<SceneParams> {
+export async function generateSceneParams(source: Source, sizePx: Size, fontFace: string, fontSize: number, glyphRaster: GlyphRaster, workLimiter: WorkLimiter): Promise<SceneParams> {
     const blurFactorPercentLog = 1.3 + Math.random();
 
     const angles = generateAngles(source.lang === 'js min')
@@ -61,6 +62,11 @@ export async function generateSceneParams(source: Source, sizePx: Size, fontSize
         },
         scroll: getScrollParam(source, scrollFraction),
         font: {
+            face: {
+                type: 'choices',
+                val: fontFace,
+                choices: fontFaces,
+            },
             size: {
                 type: 'slider',
                 min: 5,

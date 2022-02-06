@@ -30,6 +30,7 @@ export type ImgParams = {
         h: SliderVal,
     },
     font: {
+        face: ChoicesVal,
         size: SliderVal,
     },
     source: {
