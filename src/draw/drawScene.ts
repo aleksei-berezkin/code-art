@@ -19,7 +19,7 @@ import { calcExtensions } from '../model/Extensions';
 import { getAdjustedImgParams } from '../model/getAdjustedImgParams';
 import { createWorkLimiter, WorkLimiter } from '../util/workLimiter';
 import type { GlyphRaster } from '../model/GlyphRaster';
-import { defaultMonospace, fontFaces } from '../model/fontFaces';
+import { defaultMonospace, fontFacesForRandomScenes } from '../model/fontFaces';
 
 export async function drawRandomScene(codeCanvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement, setImgParams: (p: ImgParams) => void) {
     throttleFast(async function () {
@@ -28,7 +28,7 @@ export async function drawRandomScene(codeCanvasEl: HTMLCanvasElement, rasterCan
         const source = await getSource(sourceName, workLimiter);
     
         const sizePx = getSizePx(codeCanvasEl);
-        const fontFace = pickRandom(fontFaces);
+        const fontFace = pickRandom(fontFacesForRandomScenes);
         const fontSize = getFontSize(sizePx);
 
         await loadFont(fontFace, fontSize, source.alphabet);

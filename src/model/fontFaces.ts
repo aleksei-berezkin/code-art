@@ -13,3 +13,6 @@ export const fontFaces = [
     'Ubuntu Mono',
     defaultMonospace,
 ];
+
+export const fontFacesForRandomScenes = fontFaces
+    .filter(f => ![defaultMonospace].includes(f));

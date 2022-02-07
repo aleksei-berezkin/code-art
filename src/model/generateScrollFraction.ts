@@ -9,6 +9,7 @@ import type { GlyphRaster } from './GlyphRaster';
 export async function generateScrollFraction(
     source: Source,
     sceneBounds: SceneBounds,
+    angleY: number,
     txMat: Mat4,
     fontSize: number,
     glyphRaster: GlyphRaster,
@@ -17,7 +18,7 @@ export async function generateScrollFraction(
     if (source.lang === 'js min') {
         return {
             v: Math.random(),
-            h: 0,
+            h: angleY < 0 ? Math.random() * .5 : 0,
         };
     }
 

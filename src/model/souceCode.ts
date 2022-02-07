@@ -30,6 +30,7 @@ export type Source = {
     text: string,
     linesOffsets: number[], // value = pos in text
     longestLineLength: number,
+    avgLineLength: number,
     // Always includes space; never includes with code < 32
     alphabet: string,
 }
@@ -50,12 +51,14 @@ export async function getSource(name: SourceCodeName, workLimiter: WorkLimiter):
             return text.length - offset;
         })
         .reduce((a, b) => a > b ? a : b);
+    const avgLineLength = text.length / linesOffsets.length;
     const source = {
         name,
         lang: sourceDetails[name].lang,
         text,
         linesOffsets,
         longestLineLength,
+        avgLineLength,
         alphabet: await getAlphabet(text, workLimiter),
     };
     cache.set(name, source);
@@ -83,5 +86,5 @@ async function getAlphabet(source: string, workLimiter: WorkLimiter) {
         alphabet.delete(String.fromCharCode(ch));
     }
     alphabet.add(' ');
-    return [...alphabet].join('');
+    return [...alphabet].sort().join('');
 }

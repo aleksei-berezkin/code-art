@@ -25,7 +25,8 @@ export function* iterateCode(bounds: SceneBounds,
     const fontSizeRatio = glyphRaster.fontSize / fontSize;
 
     const requiredCharsReal = (bounds.xMax - bounds.xMin) / glyphRaster.avgW / fontSizeRatio;
-    const xMin = bounds.xMin - scrollFraction.h * glyphRaster.avgW /fontSizeRatio * (source.longestLineLength - requiredCharsReal);
+    const lineLength = source.lang === 'js min' ? source.avgLineLength : source.longestLineLength;
+    const xMin = bounds.xMin - scrollFraction.h * glyphRaster.avgW /fontSizeRatio * (lineLength - requiredCharsReal);
 
     let x = xMin;
     let y = bounds.yMin - fontSize * startLineScrolledOutFraction;

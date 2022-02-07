@@ -11,7 +11,7 @@ export const excessByLang: {[l in Lang]: ScrollFraction} = {
     },
     'js min': {
         v: .25,
-        h: .05,
+        h: .1,
     },
 };
 
