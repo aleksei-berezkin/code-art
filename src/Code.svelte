@@ -132,10 +132,18 @@
     function handleDownload() {
         if (!downloading) {
             downloading = true;
-            setTimeout(
-                () => downloading = false,
-                1000,
-            );
+            codeCanvasEl.toBlob(blob => {
+                const a = document.createElement('a');
+                const objUrl = URL.createObjectURL(blob);
+                a.href = objUrl;
+                a.download = 'CodeArt.png';
+                a.click();
+                setTimeout(
+                    () => downloading = false,
+                    1200,
+                );
+                setTimeout(() => URL.revokeObjectURL(objUrl), 5000);
+            });
         }
     }
 
