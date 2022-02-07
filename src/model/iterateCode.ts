@@ -22,48 +22,47 @@ export function* iterateCode(bounds: SceneBounds,
     const startLine = pluck(0, Math.floor(startLineReal), source.parseResult.lines.length - 1);
     // Negative means a line "before" startLine=0 visible
     const startLineScrolledOutFraction = startLineReal - startLine;
+    const yMin = bounds.yMin - fontSize * startLineScrolledOutFraction;
 
     const fontSizeRatio = glyphRaster.fontSize / fontSize;
 
     const requiredCharsReal = (bounds.xMax - bounds.xMin) / glyphRaster.avgW / fontSizeRatio;
     const lineLength = isMinified(source.spec.lang) ? source.parseResult.avgLineLength : source.parseResult.longestLineLength;
-    const xMin = bounds.xMin - scrollFraction.h * glyphRaster.avgW /fontSizeRatio * (lineLength - requiredCharsReal);
+    const xMin = bounds.xMin - scrollFraction.h * glyphRaster.avgW / fontSizeRatio * (lineLength - requiredCharsReal);
 
-    let x = xMin;
-    let y = bounds.yMin - fontSize * startLineScrolledOutFraction;
-    for (let pos = source.parseResult.lines[startLine].start; pos < source.text.length; pos++) {
-        let letter = source.text[pos];
-        if (letter === '\n') {
-            x = xMin;
-            y += fontSize;
-            if (y > bounds.yMax) {
+    for (let line = startLine; line < source.parseResult.lines.length; line++) {
+        const y = yMin + (line - startLine) * fontSize;
+        if (y > bounds.yMax) {
+            break;
+        }
+
+        const lineSpec = source.parseResult.lines[line];
+        let x = xMin;
+        for (let pos = lineSpec.start; pos < lineSpec.end; pos++) {
+            let letter = source.text[pos];
+            if (letter === '\t' || !letter) {
+                letter = ' ';
+            } else if (letter.charCodeAt(0) < 32) {
+                continue;
+            }
+
+            const metrics = glyphRaster.glyphs.get(letter)!;
+
+            if (letter !== ' ' && x + metrics.w >= bounds.xMin) {
+                const baseline = y + glyphRaster.maxAscent / fontSizeRatio;
+                yield {
+                    pos,
+                    letter,
+                    x,
+                    baseline,
+                };
+            }
+
+            x += metrics.w / fontSizeRatio;
+
+            if (x > bounds.xMax) {
                 break;
             }
-            continue;
         }
-
-        if (x > bounds.xMax) {
-            continue;
-        }
-
-        if (letter === '\t') {
-            letter = ' ';
-        } else if (letter.charCodeAt(0) < 32) {
-            continue;
-        }
-
-        const baseline = y + glyphRaster.maxAscent / fontSizeRatio;
-        const metrics = glyphRaster.glyphs.get(letter)!;
-
-        if (letter !== ' ') {
-            yield {
-                pos,
-                letter,
-                x,
-                baseline,
-            };
-        }
-
-        x += metrics.w / fontSizeRatio;
     }
 }
