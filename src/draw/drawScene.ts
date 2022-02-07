@@ -11,7 +11,7 @@ import { getSliderVal } from '../model/ImgParams';
 import { getTxMax } from '../model/getTxMax';
 import type { Size } from '../model/Size';
 import { delay } from '../util/delay';
-import { colorizeCode } from '../model/colorizeCode';
+import { parseCode } from '../parse/parseCode';
 import type { ColorSchemeName } from '../model/colorSchemes';
 import { throttle, throttleFast } from '../util/throttle';
 import { colorSchemes } from '../model/colorSchemes';
@@ -67,9 +67,9 @@ export async function drawScene(_imgParams: ImgParams, codeCanvasEl: HTMLCanvasE
 }
 
 async function _drawScene(source: Source, sceneParams: SceneParams, glyphRaster: GlyphRaster, codeCanvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement, workLimiter: WorkLimiter) {
-    const codeColorization = await colorizeCode(sourceDetails[sceneParams.imgParams.source.source.val as SourceCodeName].url);
+    const parseResult = await parseCode(sourceDetails[sceneParams.imgParams.source.source.val as SourceCodeName].url);
     const colorScheme = colorSchemes[sceneParams.imgParams.color.scheme.val as ColorSchemeName];
-    const targetTex = await drawCodeScene(source, colorScheme, codeColorization, sceneParams, glyphRaster, codeCanvasEl, rasterCanvasEl, workLimiter);
+    const targetTex = await drawCodeScene(source, colorScheme, parseResult, sceneParams, glyphRaster, codeCanvasEl, rasterCanvasEl, workLimiter);
     await delay();
     await drawEffectsScene(sceneParams, colorScheme.background, targetTex, codeCanvasEl);
 }

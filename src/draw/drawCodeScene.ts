@@ -10,17 +10,17 @@ import { rgbSize } from '../model/RGB';
 import type { SceneParams } from '../model/generateSceneParams';
 import { renderColorToTexture } from './renderColorToTexture';
 import type { ColorScheme } from '../model/colorSchemes';
-import type { CodeColorization } from '../model/highlightProtocol';
 import { getSceneBounds } from '../model/SceneBounds';
 import { getScrollFraction } from '../model/ScrollFraction';
 import type { WorkLimiter } from '../util/workLimiter';
 import type { GlyphRaster } from '../model/GlyphRaster';
+import type { ParseResult } from '../model/ParseResult';
 
 // Renders to 0 tex unit
 export async function drawCodeScene(
     source: Source,
     colorScheme: ColorScheme,
-    codeColorization: CodeColorization,
+    parseResult: ParseResult,
     sceneParams: SceneParams,
     glyphRaster: GlyphRaster,
     codeCanvasEl: HTMLCanvasElement,
@@ -39,7 +39,7 @@ export async function drawCodeScene(
         sceneParams.imgParams.font.size.val,
         source,
         colorScheme,
-        codeColorization,
+        parseResult,
         glyphRaster,
         workLimiter,
     );

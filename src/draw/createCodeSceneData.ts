@@ -3,7 +3,6 @@ import type { Source } from '../model/souceCode';
 import { iterateCode } from '../model/iterateCode';
 import type { ColorScheme } from '../model/colorSchemes';
 import { shortColorKeyToColorKey } from '../model/shortColorKeyToColorKey';
-import type { CodeColorization } from '../model/highlightProtocol';
 import type { Mat4 } from '../util/matrices';
 import { applyTx } from '../util/applyTx';
 import { isVisibleInClipSpace } from '../util/isVisibleInClipSpace';
@@ -11,6 +10,7 @@ import type { SceneBounds } from '../model/SceneBounds';
 import type { WorkLimiter } from '../util/workLimiter';
 import type { ScrollFraction } from '../model/ScrollFraction';
 import type { GlyphRaster } from '../model/GlyphRaster';
+import type { ParseResult } from '../model/ParseResult';
 
 export type CodeSceneData = {
     // only x, y; z is left default = 0
@@ -28,7 +28,7 @@ export async function createCodeSceneData(
     fontSize: number,
     source: Source,
     colorScheme: ColorScheme,
-    codeColorization: CodeColorization,
+    parseResult: ParseResult,
     glyphRaster: GlyphRaster,
     workLimiter: WorkLimiter,
 ): Promise<CodeSceneData> {
@@ -59,7 +59,7 @@ export async function createCodeSceneData(
             m.x + m.w, m.baseline + m.descent,
         ));
 
-        const color = colorScheme[shortColorKeyToColorKey[codeColorization[pos]]]
+        const color = colorScheme[shortColorKeyToColorKey[parseResult.colorization[pos]]]
             ?? colorScheme.default;
         colors.push(
             ...Array.from({length: rect2dVerticesNum})

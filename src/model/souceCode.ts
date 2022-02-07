@@ -18,6 +18,10 @@ export const sourceDetails = {
         lang: 'js' as Lang,
         url: 'https://raw.githubusercontent.com/vuejs/vue/52608302e9bca84fb9e9f0499e89acade78d3d07/src/core/vdom/patch.js',
     },
+    'npm.js': {
+        lang: 'js' as Lang,
+        url: 'https://raw.githubusercontent.com/npm/cli/6734ba36dd6e07a859ab4d6eb4f264d2c0022276/lib/npm.js',
+    },
 };
 
 export type SourceCodeName = keyof typeof sourceDetails;

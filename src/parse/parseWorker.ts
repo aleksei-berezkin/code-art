@@ -1,22 +1,23 @@
-import type { ShortColorKey } from './ShortColorKey';
+import type { ShortColorKey } from '../model/ShortColorKey';
 import type { Options, Token } from 'acorn';
-import type { CodeColorization, HighlightRequestData, HighlightResponseData } from './highlightProtocol';
+import type { ParseRequestData, ParseResponseData } from './parseProtocol';
 // @ts-ignore
 import * as acornLoose from 'acorn-loose';
 import * as acorn from 'acorn';
 import * as acornWalk from 'acorn-walk';
+import type { ParseResult } from '../model/ParseResult';
 
-self.onmessage = async function (msg: {data: HighlightRequestData}) {
+self.onmessage = async function (msg: {data: ParseRequestData}) {
     const text = await (await fetch(msg.data.url)).text();
-    const colorization = highlight(text);
-    const respData: HighlightResponseData = {
+    const parseResult = parse(text);
+    const respData: ParseResponseData = {
         url: msg.data.url,
-        colorization,
+        parseResult,
     };
     self.postMessage(respData);
 } 
 
-function highlight(text: string): CodeColorization {
+function parse(text: string): ParseResult {
     const colorKeys: ShortColorKey[] = [];
     function colorize(start: number, end: number, colorKey: ShortColorKey) {
         for (let i = start; i < end; i++) {
@@ -33,7 +34,7 @@ function highlight(text: string): CodeColorization {
             let color: ShortColorKey;
             if (acorn.tokTypes.num === token.type) {
                 color = 'n';
-            } else if (acorn.tokTypes.string === token.type) {
+            } else if ([acorn.tokTypes.string, acorn.tokTypes.template, acorn.tokTypes.backQuote].includes(token.type)) {
                 color = 's';
             } else if (acorn.tokTypes.name === token.type) {
                 color = 'N';
@@ -63,5 +64,7 @@ function highlight(text: string): CodeColorization {
         },
     );
 
-    return colorKeys;
+    return {
+        colorization: colorKeys,
+    };
 }
