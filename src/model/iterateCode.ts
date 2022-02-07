@@ -3,6 +3,7 @@ import type { SceneBounds } from './SceneBounds';
 import { pluck } from '../util/pluck';
 import type { ScrollFraction } from './ScrollFraction';
 import type { GlyphRaster } from './GlyphRaster';
+import { isMinified } from './Lang';
 
 type CodeLetter = {
     pos: number,
@@ -17,20 +18,20 @@ export function* iterateCode(bounds: SceneBounds,
                              source: Source,
                              glyphRaster: GlyphRaster): Generator<CodeLetter> {
     const requiredLinesReal = (bounds.yMax - bounds.yMin) / fontSize;
-    const startLineReal = (source.linesOffsets.length - requiredLinesReal) * scrollFraction.v;
-    const startLine = pluck(0, Math.floor(startLineReal), source.linesOffsets.length - 1);
+    const startLineReal = (source.parseResult.lines.length - requiredLinesReal) * scrollFraction.v;
+    const startLine = pluck(0, Math.floor(startLineReal), source.parseResult.lines.length - 1);
     // Negative means a line "before" startLine=0 visible
     const startLineScrolledOutFraction = startLineReal - startLine;
 
     const fontSizeRatio = glyphRaster.fontSize / fontSize;
 
     const requiredCharsReal = (bounds.xMax - bounds.xMin) / glyphRaster.avgW / fontSizeRatio;
-    const lineLength = source.lang === 'js min' ? source.avgLineLength : source.longestLineLength;
+    const lineLength = isMinified(source.spec.lang) ? source.parseResult.avgLineLength : source.parseResult.longestLineLength;
     const xMin = bounds.xMin - scrollFraction.h * glyphRaster.avgW /fontSizeRatio * (lineLength - requiredCharsReal);
 
     let x = xMin;
     let y = bounds.yMin - fontSize * startLineScrolledOutFraction;
-    for (let pos = source.linesOffsets[startLine]; pos < source.text.length; pos++) {
+    for (let pos = source.parseResult.lines[startLine].start; pos < source.text.length; pos++) {
         let letter = source.text[pos];
         if (letter === '\n') {
             x = xMin;

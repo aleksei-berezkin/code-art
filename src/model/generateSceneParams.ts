@@ -1,5 +1,5 @@
 import { pickRandom } from '../util/pickRandom';
-import { Source, sourceCodeNames } from './souceCode';
+import type { Source } from './souceCode';
 import type { ImgParams } from './ImgParams';
 import { degToRad } from '../util/degToRad';
 import { colorSchemeNames } from './colorSchemes';
@@ -17,6 +17,8 @@ import { getScrollParam } from './scrollParam';
 import type { WorkLimiter } from '../util/workLimiter';
 import type { GlyphRaster } from './GlyphRaster';
 import { fontFaces } from './fontFaces';
+import { isMinified } from './Lang';
+import { sourceSpecs } from './sourceSpecs';
 
 export type SceneParams = {
     pixelSpace: PixelSpace,
@@ -28,7 +30,7 @@ export type SceneParams = {
 export async function generateSceneParams(source: Source, sizePx: Size, fontFace: string, fontSize: number, glyphRaster: GlyphRaster, workLimiter: WorkLimiter): Promise<SceneParams> {
     const blurFactorPercentLog = 1.3 + Math.random();
 
-    const angles = generateAngles(source.lang === 'js min')
+    const angles = generateAngles(isMinified(source.spec.lang));
 
     const pixelSpace = makePixelSpace(sizePx);
     const txMat = getTxMax(pixelSpace, angles.x, angles.y, angles.z);
@@ -78,7 +80,7 @@ export async function generateSceneParams(source: Source, sizePx: Size, fontFace
             'source': {
                 type: 'choices',
                 val: source.name,
-                choices: sourceCodeNames,
+                choices: Object.keys(sourceSpecs),
             },
         },
         color: {

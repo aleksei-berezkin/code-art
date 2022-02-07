@@ -21,7 +21,7 @@ export async function rasterizeFont(
     workLimiter: WorkLimiter,
 ): Promise<GlyphRaster> {
     if (cachedRaster
-        && canvasEl.dataset[dsAlphabet] === source.alphabet
+        && canvasEl.dataset[dsAlphabet] === source.parseResult.alphabet
         && canvasEl.dataset[dsFontFace] === String(fontFace)
         && canvasEl.dataset[dsFontSize] === String(fontSize)
     ) {
@@ -37,7 +37,7 @@ export async function rasterizeFont(
     const cssFontStr = `${_fontSize}px ${fontFace === defaultMonospace ? 'monospace' : ("'" + fontFace + "'")}`;
     const xMin = _fontSize * (spaceH - 1);
     const xMax = canvasEl.width - 1.5 *  _fontSize;
-    canvasEl.height = estimateNeededCanvasHeight(ctx, xMin, xMax, cssFontStr, _fontSize, source.alphabet.length);
+    canvasEl.height = estimateNeededCanvasHeight(ctx, xMin, xMax, cssFontStr, _fontSize, source.parseResult.alphabet.length);
 
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvasEl.width, canvasEl.height);
@@ -50,7 +50,7 @@ export async function rasterizeFont(
     let baseline = _fontSize;
     const glyphs: Map<string, GlyphMetrics> = new Map();
 
-    for (const letter of source.alphabet) {
+    for (const letter of source.parseResult.alphabet) {
         await workLimiter.next();
         ctx.fillText(letter, x, baseline);
         const tm = ctx.measureText(letter);
@@ -80,7 +80,7 @@ export async function rasterizeFont(
         / _glyphs.length;
 
 
-    canvasEl.dataset[dsAlphabet] = source.alphabet;
+    canvasEl.dataset[dsAlphabet] = source.parseResult.alphabet;
     canvasEl.dataset[dsFontFace] = String(fontFace);
     canvasEl.dataset[dsFontSize] = String(fontSize);
 

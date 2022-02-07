@@ -4,19 +4,22 @@ import type { ImgParams } from './ImgParams';
 import type { Source } from './souceCode';
 import { pluck } from '../util/pluck';
 
+const minVH = {
+    v: .25,
+    h: .1,
+};
+
 export const excessByLang: {[l in Lang]: ScrollFraction} = {
     js: {
         v: .05,
         h: .5,
     },
-    'js min': {
-        v: .25,
-        h: .1,
-    },
+    'js min': minVH,
+    'js min line': minVH,
 };
 
 export function getScrollParam(source: Source, scrollFraction: ScrollFraction): ImgParams['scroll'] {
-    const excess = excessByLang[source.lang];
+    const excess = excessByLang[source.spec.lang];
     const vMin = -excess.v;
     const vMax = 1 + excess.v;
     const vVal = pluck(vMin, scrollFraction.v, vMax);

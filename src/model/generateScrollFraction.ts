@@ -5,6 +5,7 @@ import type { ScrollFraction } from './ScrollFraction';
 import type { WorkLimiter } from '../util/workLimiter';
 import { scoreFill } from './scoreFill';
 import type { GlyphRaster } from './GlyphRaster';
+import { isMinified } from './Lang';
 
 export async function generateScrollFraction(
     source: Source,
@@ -15,7 +16,7 @@ export async function generateScrollFraction(
     glyphRaster: GlyphRaster,
     workLimiter: WorkLimiter,
 ): Promise<ScrollFraction> {
-    if (source.lang === 'js min') {
+    if (isMinified(source.spec.lang)) {
         return {
             v: Math.random(),
             h: angleY < 0 ? Math.random() * .5 : 0,

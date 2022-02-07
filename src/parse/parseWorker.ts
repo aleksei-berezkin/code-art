@@ -1,15 +1,16 @@
 import type { ShortColorKey } from '../model/ShortColorKey';
-import type { Options, Token } from 'acorn';
 import type { ParseRequestData, ParseResponseData } from './parseProtocol';
+import type { ParseResult } from '../model/ParseResult';
+
+import type { Options, Token } from 'acorn';
 // @ts-ignore
 import * as acornLoose from 'acorn-loose';
 import * as acorn from 'acorn';
 import * as acornWalk from 'acorn-walk';
-import type { ParseResult } from '../model/ParseResult';
 
 self.onmessage = async function (msg: {data: ParseRequestData}) {
     const text = await (await fetch(msg.data.url)).text();
-    const parseResult = parse(text);
+    const parseResult = parse(text, msg.data.softWraps);
     const respData: ParseResponseData = {
         url: msg.data.url,
         parseResult,
@@ -17,7 +18,8 @@ self.onmessage = async function (msg: {data: ParseRequestData}) {
     self.postMessage(respData);
 } 
 
-function parse(text: string): ParseResult {
+function parse(text: string, softWraps: boolean): ParseResult {
+    console.log('TODO: soft wraps', softWraps);
     const colorKeys: ShortColorKey[] = [];
     function colorize(start: number, end: number, colorKey: ShortColorKey) {
         for (let i = start; i < end; i++) {
@@ -64,7 +66,47 @@ function parse(text: string): ParseResult {
         },
     );
 
+    const lines = getLines(text);
+    const longestLineLength = lines
+        .map(l => l.end - l.start)
+        .reduce((a, b) => a > b ? a : b);
+    const avgLineLength = text.length / lines.length;
+
     return {
         colorization: colorKeys,
+        lines,
+        longestLineLength,
+        avgLineLength,
+        alphabet: getAlphabet(text),
     };
+}
+
+function getLines(text: string): ParseResult['lines'] {
+    const lines: ParseResult['lines'] = [];
+    let lastNewLineIndex = -1;
+    for ( ; ; ) {
+        const newlineIndex = text.indexOf('\n', lastNewLineIndex + 1);
+        if (newlineIndex !== -1) {
+            lines.push({
+                start: lastNewLineIndex + 1,
+                end: newlineIndex,
+            });
+            lastNewLineIndex = newlineIndex;
+        } else {
+            lines.push({
+                start: lastNewLineIndex + 1,
+                end: text.length,
+            });
+            return lines;
+        }
+    }
+}
+
+function getAlphabet(source: string) {
+    const alphabet = new Set(source);
+    for (let ch = 0; ch < 32; ch++) {
+        alphabet.delete(String.fromCharCode(ch));
+    }
+    alphabet.add(' ');
+    return [...alphabet].sort().join('');
 }

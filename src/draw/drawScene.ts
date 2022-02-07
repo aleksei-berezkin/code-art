@@ -1,5 +1,5 @@
 import { pickRandom } from '../util/pickRandom';
-import { getSource, Source, SourceCodeName, sourceCodeNames, sourceDetails } from '../model/souceCode';
+import { getSource, Source } from '../model/souceCode';
 import { rasterizeFont } from './rasterizeFont';
 import { generateSceneParams, SceneParams } from '../model/generateSceneParams';
 import { dpr } from '../util/dpr';
@@ -20,19 +20,20 @@ import { getAdjustedImgParams } from '../model/getAdjustedImgParams';
 import { createWorkLimiter, WorkLimiter } from '../util/workLimiter';
 import type { GlyphRaster } from '../model/GlyphRaster';
 import { defaultMonospace, fontFacesForRandomScenes } from '../model/fontFaces';
+import { sourceSpecs } from '../model/sourceSpecs';
 
 export async function drawRandomScene(codeCanvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement, setImgParams: (p: ImgParams) => void) {
     throttleFast(async function () {
-        const sourceName = pickRandom(sourceCodeNames);
-        const workLimiter = createWorkLimiter();
-        const source = await getSource(sourceName, workLimiter);
+        const sourceName = pickRandom(Object.keys(sourceSpecs));
+        const source = await getSource(sourceName);
     
         const sizePx = getSizePx(codeCanvasEl);
         const fontFace = pickRandom(fontFacesForRandomScenes);
         const fontSize = getFontSize(sizePx);
 
-        await loadFont(fontFace, fontSize, source.alphabet);
+        await loadFont(fontFace, fontSize, source.parseResult.alphabet);
 
+        const workLimiter = createWorkLimiter();
         const glyphRaster = await rasterizeFont(source, rasterCanvasEl, fontFace, fontSize, workLimiter);
     
         const sceneParams = await generateSceneParams(source, getSizePx(codeCanvasEl), fontFace, fontSize, glyphRaster, workLimiter);
@@ -44,13 +45,13 @@ export async function drawRandomScene(codeCanvasEl: HTMLCanvasElement, rasterCan
 
 export async function drawScene(_imgParams: ImgParams, codeCanvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement, setImgParams: (p: ImgParams) => void) {
     throttle(async function () {
-        const workLimiter = createWorkLimiter();
-        const source = await getSource(_imgParams.source['source'].val as SourceCodeName, workLimiter);
+        const source = await getSource(_imgParams.source['source'].val);
         const imgParams = getAdjustedImgParams(source, _imgParams);
 
         const fontFace = imgParams.font.face.val;
         const fontSize = getSliderVal(imgParams.font.size);
-        await loadFont(fontFace, fontSize, source.alphabet);
+        await loadFont(fontFace, fontSize, source.parseResult.alphabet);
+        const workLimiter = createWorkLimiter();
         const glyphRaster = await rasterizeFont(source, rasterCanvasEl, fontFace, fontSize, workLimiter);
     
         const pixelSpace = makePixelSpace(getSizePx(codeCanvasEl));
@@ -67,7 +68,8 @@ export async function drawScene(_imgParams: ImgParams, codeCanvasEl: HTMLCanvasE
 }
 
 async function _drawScene(source: Source, sceneParams: SceneParams, glyphRaster: GlyphRaster, codeCanvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement, workLimiter: WorkLimiter) {
-    const parseResult = await parseCode(sourceDetails[sceneParams.imgParams.source.source.val as SourceCodeName].url);
+    const sourceCodeDetails = sourceSpecs[sceneParams.imgParams.source.source.val];
+    const parseResult = await parseCode(sourceCodeDetails.url, sourceCodeDetails.lang === 'js min line');
     const colorScheme = colorSchemes[sceneParams.imgParams.color.scheme.val as ColorSchemeName];
     const targetTex = await drawCodeScene(source, colorScheme, parseResult, sceneParams, glyphRaster, codeCanvasEl, rasterCanvasEl, workLimiter);
     await delay();
