@@ -13,8 +13,9 @@ import { dpr } from '../util/dpr';
 import type { SceneParams } from '../model/generateSceneParams';
 import { renderColorToTexture, renderToCanvas } from './renderColorToTexture';
 import { getOptics } from '../model/Optics';
+import { drawTriangles } from './drawTriangles';
 
-const maxKernel = 21;
+const maxKernel = 29;
 
 export async function drawEffectsScene(
     sceneParams: SceneParams,
@@ -26,7 +27,7 @@ export async function drawEffectsScene(
 
     const { imgParams } = sceneParams;
     const glowRadius = getSliderVal(imgParams.font.size) * getSliderVal(imgParams.glow.radius) / 2;
-    const glowKSize = ceilToOdd(glowRadius / 2 * dpr, maxKernel);
+    const glowKSize = ceilToOdd(glowRadius * 1.6 * dpr, maxKernel);
     const blurKSize = ceilToOdd(3 * imgParams.fade.blur.val * dpr, maxKernel);
     const loopSize = getLoopSize(glowKSize, blurKSize, maxKernel);
 
@@ -100,7 +101,7 @@ export async function drawEffectsScene(
 
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
-    gl.drawArrays(gl.TRIANGLES, 0, gridVertices.length / vertexSize2d);
+    await drawTriangles(gridVertices.length / vertexSize2d, gl);
 
     gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, targetTex);
@@ -109,5 +110,6 @@ export async function drawEffectsScene(
 
     renderToCanvas(gl);
 
-    gl.drawArrays(gl.TRIANGLES, 0, gridVertices.length / vertexSize2d);
+    await drawTriangles(gridVertices.length / vertexSize2d, gl);
+    // gl.drawArrays(gl.TRIANGLES, 0, gridVertices.length / vertexSize2d);
 }

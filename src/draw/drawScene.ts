@@ -22,8 +22,15 @@ import type { GlyphRaster } from '../model/GlyphRaster';
 import { defaultMonospace, fontFacesForRandomScenes } from '../model/fontFaces';
 import { sourceSpecs } from '../model/sourceSpecs';
 
-export async function drawRandomScene(codeCanvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement, setImgParams: (p: ImgParams) => void) {
+export async function drawRandomScene(
+    codeCanvasEl: HTMLCanvasElement,
+    rasterCanvasEl: HTMLCanvasElement,
+    onStart: () => void,
+    onEnd: (p: ImgParams) => void,
+) {
     throttleFast(async function () {
+        onStart();
+
         const sourceName = pickRandom(Object.keys(sourceSpecs));
         const source = await getSource(sourceName);
     
@@ -39,7 +46,7 @@ export async function drawRandomScene(codeCanvasEl: HTMLCanvasElement, rasterCan
         const sceneParams = await generateSceneParams(source, getSizePixelSpace(codeCanvasEl), fontFace, fontSize, glyphRaster, workLimiter);
         await _drawScene(source, sceneParams, glyphRaster, codeCanvasEl, rasterCanvasEl, workLimiter);
     
-        setImgParams(sceneParams.imgParams);
+        onEnd(sceneParams.imgParams);
     })
 }
 

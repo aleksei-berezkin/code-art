@@ -1,7 +1,6 @@
 type Cb = () => Promise<void>;
 
 export function throttle(cb: Cb) {
-
     _throttle(cb, 200);
 }
 
@@ -19,7 +18,7 @@ function _throttle(cb: Cb, firstDelay: number) {
     }
 }
 
-const nextDelay = 50;
+const nextDelay = 500;
 async function task() {
     if (!nextCb) {
         state = 'idle';

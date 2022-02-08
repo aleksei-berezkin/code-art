@@ -20,20 +20,24 @@
     }
 
     .code-canvas {
-        animation-duration: 2s;
-        animation-fill-mode: forwards;
-        animation-name: code-loading-bg;
         aspect-ratio: 3/2;
         background-color: #eee;
         width: 100%;
     }
 
-    @keyframes code-loading-bg {
+    .code-canvas.progress {
+        animation-duration: 2s;
+        animation-fill-mode: forwards;
+        animation-name: progress-animation;
+    }
+
+    /* TODO not the best */
+    @keyframes progress-animation {
         from {
-            background-color: #ddd;
+            filter: grayscale(0) opacity(1);
         }
         to {
-            background-color: #333;
+            filter: grayscale(50%) opacity(.5);
         }
     }
 
@@ -81,7 +85,7 @@
 <canvas class='rasterize-font-canvas' bind:this={rasterCanvasEl} width='2048'></canvas>
 <section class='section-main'>
     <div class='code-wr'>
-        <canvas class='code-canvas' bind:this={codeCanvasEl}></canvas>
+        <canvas class={`code-canvas ${progress ? 'progress' : ''}`} bind:this={codeCanvasEl}></canvas>
         <button class='round-btn left' on:click={() => menuOpen = !menuOpen}>
             <Icon pic={menuOpen ? 'close' : 'menu'}/>
         </button>
@@ -108,6 +112,8 @@
     let codeCanvasEl: HTMLCanvasElement;
     let rasterCanvasEl: HTMLCanvasElement;
 
+    let progress = false;
+
     let imgParams: ImgParams | undefined = undefined;
     let menuOpen = false;
 
@@ -125,7 +131,15 @@
 
     async function generateScene() {
         setWH();
-        await drawRandomScene(codeCanvasEl, rasterCanvasEl, p => imgParams = p);
+        await drawRandomScene(
+            codeCanvasEl,
+            rasterCanvasEl,
+            () => progress = true,
+            p => {
+                progress = false;
+                imgParams = p;
+            },
+        );
     }
 
     let downloading = false;
