@@ -10,7 +10,7 @@ import * as acornWalk from 'acorn-walk';
 
 self.onmessage = async function (msg: {data: ParseRequestData}) {
     const text = await (await fetch(msg.data.url)).text();
-    const parseResult = parse(text, msg.data.softWraps);
+    const parseResult = parse(text, msg.data.insertWraps);
     const respData: ParseResponseData = {
         url: msg.data.url,
         parseResult,
@@ -18,8 +18,7 @@ self.onmessage = async function (msg: {data: ParseRequestData}) {
     self.postMessage(respData);
 } 
 
-function parse(text: string, softWraps: boolean): ParseResult {
-    console.log('TODO: soft wraps', softWraps);
+function parse(text: string, insertWraps: boolean): ParseResult {
     const colorKeys: ShortColorKey[] = [];
     function colorize(start: number, end: number, colorKey: ShortColorKey) {
         for (let i = start; i < end; i++) {
@@ -68,7 +67,7 @@ function parse(text: string, softWraps: boolean): ParseResult {
 
     const lines = getLines(text);
     const longestLineLength = lines
-        .map(l => l.end - l.start)
+        .map(([start, end]) => end - start)
         .reduce((a, b) => a > b ? a : b);
     const avgLineLength = text.length / lines.length;
 
@@ -87,16 +86,10 @@ function getLines(text: string): ParseResult['lines'] {
     for ( ; ; ) {
         const newlineIndex = text.indexOf('\n', lastNewLineIndex + 1);
         if (newlineIndex !== -1) {
-            lines.push({
-                start: lastNewLineIndex + 1,
-                end: newlineIndex,
-            });
+            lines.push([lastNewLineIndex + 1, newlineIndex]);
             lastNewLineIndex = newlineIndex;
         } else {
-            lines.push({
-                start: lastNewLineIndex + 1,
-                end: text.length,
-            });
+            lines.push([lastNewLineIndex + 1, text.length]);
             return lines;
         }
     }

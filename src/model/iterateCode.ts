@@ -36,9 +36,9 @@ export function* iterateCode(bounds: SceneBounds,
             break;
         }
 
-        const lineSpec = source.parseResult.lines[line];
+        const [lineStart, lineEnd] = source.parseResult.lines[line];
         let x = xMin;
-        for (let pos = lineSpec.start; pos < lineSpec.end; pos++) {
+        for (let pos = lineStart; pos < lineEnd; pos++) {
             let letter = source.text[pos];
             if (letter === '\t' || !letter) {
                 letter = ' ';
