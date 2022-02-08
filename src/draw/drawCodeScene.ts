@@ -15,6 +15,7 @@ import { getScrollFraction } from '../model/ScrollFraction';
 import type { WorkLimiter } from '../util/workLimiter';
 import type { GlyphRaster } from '../model/GlyphRaster';
 import type { ParseResult } from '../model/ParseResult';
+import { dpr } from '../util/dpr';
 
 // Renders to 0 tex unit
 export async function drawCodeScene(
@@ -57,21 +58,13 @@ export async function drawCodeScene(
 
     gl.useProgram(program);
 
-    gl.uniform1i(
-        gl.getUniformLocation(program, 'u_letters'),
-        1,
-    );
+    gl.uniform1i(gl.getUniformLocation(program, 'u_letters'), 1);
 
-    gl.uniformMatrix4fv(
-        gl.getUniformLocation(program, 'u_tx'),
-        false,
-        sceneParams.txMat,
-    );
+    gl.uniform1f(gl.getUniformLocation(program, 'u_lettersTexRatio'), glyphRaster.fontSizeRatio / dpr);
 
-    gl.uniform3fv(
-        gl.getUniformLocation(program, 'u_bg'),
-        colorScheme.background,
-    );
+    gl.uniformMatrix4fv(gl.getUniformLocation(program, 'u_tx'), false, sceneParams.txMat);
+
+    gl.uniform3fv(gl.getUniformLocation(program, 'u_bg'), colorScheme.background);
 
     const targetTex = createEmptyTexture(0, {w: codeCanvasEl.width, h: codeCanvasEl.height}, gl)
     renderColorToTexture(targetTex, gl);

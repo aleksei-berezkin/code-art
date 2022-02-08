@@ -17,19 +17,20 @@ export function* iterateCode(bounds: SceneBounds,
                              fontSize: number,
                              source: Source,
                              glyphRaster: GlyphRaster): Generator<CodeLetter> {
-    const requiredLinesReal = (bounds.yMax - bounds.yMin) / fontSize;
+    const lineHeight = Math.max(fontSize, (glyphRaster.maxAscent + glyphRaster.maxDescent) / glyphRaster.fontSizeRatio);
+    const requiredLinesReal = (bounds.yMax - bounds.yMin) / lineHeight;
     const startLineReal = (source.parseResult.lines.length - requiredLinesReal) * scrollFraction.v;
     const startLine = pluck(0, Math.floor(startLineReal), source.parseResult.lines.length - 1);
     // Negative means a line "before" startLine=0 visible
     const startLineScrolledOutFraction = startLineReal - startLine;
-    const yMin = bounds.yMin - fontSize * startLineScrolledOutFraction;
+    const yMin = bounds.yMin - lineHeight * startLineScrolledOutFraction;
 
     const requiredCharsReal = (bounds.xMax - bounds.xMin) / glyphRaster.avgW / glyphRaster.fontSizeRatio;
     const lineLength = isMinified(source.spec.lang) ? source.parseResult.avgLineLength : source.parseResult.longestLineLength;
     const xMin = bounds.xMin - scrollFraction.h * glyphRaster.avgW / glyphRaster.fontSizeRatio * (lineLength - requiredCharsReal);
 
     for (let line = startLine; line < source.parseResult.lines.length; line++) {
-        const y = yMin + (line - startLine) * fontSize;
+        const y = yMin + (line - startLine) * lineHeight;
         if (y > bounds.yMax) {
             break;
         }

@@ -11,6 +11,7 @@ import type { WorkLimiter } from '../util/workLimiter';
 import type { ScrollFraction } from '../model/ScrollFraction';
 import type { GlyphRaster } from '../model/GlyphRaster';
 import type { ParseResult } from '../model/ParseResult';
+import { dpr } from '../util/dpr';
 
 export type CodeSceneData = {
     // only x, y; z is left default = 0
@@ -42,10 +43,13 @@ export async function createCodeSceneData(
         const {pos, letter, x, baseline} = codeLetter;
         const m = glyphRaster.glyphs.get(letter)!;
 
+        const ascent = Math.min(m.ascent + dpr, glyphRaster.maxAscent);
+        const descent = Math.min(m.descent + dpr, glyphRaster.maxDescent);
+
         const x1 = x;
-        const y1 = baseline - m.ascent / glyphRaster.fontSizeRatio;
+        const y1 = baseline - ascent / glyphRaster.fontSizeRatio;
         const x2 = x + m.w / glyphRaster.fontSizeRatio;
-        const y2 = baseline + m.descent / glyphRaster.fontSizeRatio;
+        const y2 = baseline + descent / glyphRaster.fontSizeRatio;
 
         if (!isVisible(txMat, x1, y1, x2, y2)) {
             continue;
@@ -54,8 +58,8 @@ export async function createCodeSceneData(
         vertices.push(...rect2d(x1, y1, x2, y2));
 
         glyphTexPosition.push(...rect2d(
-            m.x, m.baseline - m.ascent,
-            m.x + m.w, m.baseline + m.descent,
+            m.x, m.baseline - ascent,
+            m.x + m.w, m.baseline + descent,
         ));
 
         const color = colorScheme[shortColorKeyToColorKey[parseResult.colorization[pos]]]

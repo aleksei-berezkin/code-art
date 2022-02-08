@@ -5,7 +5,7 @@ import type { GlyphMetrics, GlyphRaster } from '../model/GlyphRaster';
 import { defaultMonospace } from '../model/fontFaces';
 
 const fontSizeMultiplier = 2;
-const spaceV = 1.05;
+const spaceV = 1.15;
 const spaceH = 1.05;
 
 const dsAlphabet = 'alphabet';
@@ -75,6 +75,8 @@ export async function rasterizeFont(
     const _glyphs = [...glyphs.values()];
     const maxAscent = _glyphs
         .reduce((max, r) => r.ascent > max ? r.ascent : max, 0);
+    const maxDescent = _glyphs
+        .reduce((max, r) => r.descent > max ? r.descent : max, 0);
     const avgW = _glyphs
         .reduce((s, g) => s + g.w, 0)
         / _glyphs.length;
@@ -88,6 +90,7 @@ export async function rasterizeFont(
         fontSizeRatio: _fontSize / fontSize,
         glyphs,
         maxAscent,
+        maxDescent,
         avgW,
     };
 

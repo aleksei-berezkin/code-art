@@ -2,6 +2,7 @@ export type GlyphRaster = {
     glyphs: Map<string, GlyphMetrics>,
     fontSizeRatio: number,
     maxAscent: number,
+    maxDescent: number,
     // Not regarding letters frequency
     avgW: number,
 }
