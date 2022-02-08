@@ -29,8 +29,10 @@ function parse(text: string, insertWraps: boolean): ParseResult {
     const strPositions = new Set<number>();
 
     function addStrPositions(start: number, end: number) {
-        for (let i = start; i < end; i++) {
-            strPositions.add(i);
+        if (insertWraps) {
+            for (let i = start; i < end; i++) {
+                strPositions.add(i);
+            }
         }
     }
 
@@ -116,14 +118,14 @@ function getOriginalLines(text: string): Lines {
     }
 }
 
-const targetLineLen = 500;
+const targetLineLen = 400;
 
 function insertWrapsToLongLines(text: string, strPositions: Set<number>, lines: Lines): Lines {
     return lines
         .flatMap(([start, end]) => [...splitLongLine(text, strPositions, start, end)]);
 }
 
-const charsToSplitAfter = new Set(['(', '[', '{', ':', '=', '+', '-', '/', '+', ',', ';']);
+const charsToSplitAfter = new Set(['(', '[', '{', ':', ',', ';']);
 
 function* splitLongLine(text: string, strPositions: Set<number>, start: number, endExclusive: number): Generator<Line> {
     if (start === endExclusive) {

@@ -6,6 +6,7 @@ export const fontFaces = [
     'Cutive Mono',
     'B612 Mono',
     'Inconsolata',
+    'JetBrains Mono',
     'Noto Sans Mono',
     'Nova Mono',
     'Syne Mono',
