@@ -3,7 +3,7 @@ import vertexShaderSource from '../shader/codeVertex.shader';
 import fragmentShaderSource from '../shader/codeFragment.shader';
 import { createCodeSceneData } from './createCodeSceneData';
 import { vertexSize2d } from './rect';
-import type { Source } from '../model/souceCode';
+import type { Source } from '../model/Source';
 import { uploadArrayToAttribute } from './uploadArrayToAttribute';
 import { createEmptyTexture, uploadTexture } from './uploadTexture';
 import { rgbSize } from '../model/RGB';

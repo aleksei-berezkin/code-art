@@ -1,6 +1,6 @@
 import type { ImgParams } from './ImgParams';
 import { getScrollFraction } from './ScrollFraction';
-import type { Source } from './souceCode';
+import type { Source } from './Source';
 import { getScrollParam } from './scrollParam';
 
 export function getAdjustedImgParams(source: Source, imgParams: ImgParams) {

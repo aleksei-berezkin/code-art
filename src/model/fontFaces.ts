@@ -16,4 +16,4 @@ export const fontFaces = [
 ];
 
 export const fontFacesForRandomScenes = fontFaces
-    .filter(f => ![defaultMonospace].includes(f));
+    .filter(f => f !== defaultMonospace);

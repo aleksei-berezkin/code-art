@@ -1,5 +1,3 @@
-import type { Lang } from './Lang';
-import type { WorkLimiter } from '../util/workLimiter';
 import { parseCode } from '../parse/parseCode';
 import type { ParseResult } from './ParseResult';
 import { SourceSpec, sourceSpecs } from './sourceSpecs';

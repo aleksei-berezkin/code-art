@@ -1,5 +1,5 @@
 import { rect2d, rect2dVerticesNum } from './rect';
-import type { Source } from '../model/souceCode';
+import type { Source } from '../model/Source';
 import { iterateCode } from '../model/iterateCode';
 import type { ColorScheme } from '../model/colorSchemes';
 import { shortColorKeyToColorKey } from '../model/shortColorKeyToColorKey';

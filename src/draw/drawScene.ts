@@ -1,5 +1,5 @@
 import { pickRandom } from '../util/pickRandom';
-import { getSource, Source } from '../model/souceCode';
+import { getSource, Source } from '../model/Source';
 import { rasterizeFont } from './rasterizeFont';
 import { generateSceneParams, SceneParams } from '../model/generateSceneParams';
 import { dpr } from '../util/dpr';
@@ -27,16 +27,16 @@ export async function drawRandomScene(codeCanvasEl: HTMLCanvasElement, rasterCan
         const sourceName = pickRandom(Object.keys(sourceSpecs));
         const source = await getSource(sourceName);
     
-        const sizePx = getSizePx(codeCanvasEl);
+        const sizePixelSpace = getSizePixelSpace(codeCanvasEl);
         const fontFace = pickRandom(fontFacesForRandomScenes);
-        const fontSize = getFontSize(sizePx);
+        const fontSize = getFontSize(sizePixelSpace);
 
         await loadFont(fontFace, fontSize, source.parseResult.alphabet);
 
         const workLimiter = createWorkLimiter();
         const glyphRaster = await rasterizeFont(source, rasterCanvasEl, fontFace, fontSize, workLimiter);
     
-        const sceneParams = await generateSceneParams(source, getSizePx(codeCanvasEl), fontFace, fontSize, glyphRaster, workLimiter);
+        const sceneParams = await generateSceneParams(source, getSizePixelSpace(codeCanvasEl), fontFace, fontSize, glyphRaster, workLimiter);
         await _drawScene(source, sceneParams, glyphRaster, codeCanvasEl, rasterCanvasEl, workLimiter);
     
         setImgParams(sceneParams.imgParams);
@@ -54,7 +54,7 @@ export async function drawScene(_imgParams: ImgParams, codeCanvasEl: HTMLCanvasE
         const workLimiter = createWorkLimiter();
         const glyphRaster = await rasterizeFont(source, rasterCanvasEl, fontFace, fontSize, workLimiter);
     
-        const pixelSpace = makePixelSpace(getSizePx(codeCanvasEl));
+        const pixelSpace = makePixelSpace(getSizePixelSpace(codeCanvasEl));
         const xAngle = getSliderVal(imgParams.angle.x);
         const yAngle = getSliderVal(imgParams.angle.y);
         const zAngle = getSliderVal(imgParams.angle.z);
@@ -76,7 +76,7 @@ async function _drawScene(source: Source, sceneParams: SceneParams, glyphRaster:
     await drawEffectsScene(sceneParams, colorScheme.background, targetTex, codeCanvasEl);
 }
 
-function getSizePx(codeCanvasEl: HTMLCanvasElement): Size {
+function getSizePixelSpace(codeCanvasEl: HTMLCanvasElement): Size {
     return {
         w: codeCanvasEl.width / dpr,
         h: codeCanvasEl.height / dpr,

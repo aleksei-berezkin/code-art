@@ -31,7 +31,7 @@ export const sourceSpecs: {[name: string]: SourceSpec} = {
         lang: 'js',
         url: 'https://raw.githubusercontent.com/webpack/webpack/6941c519e901629a6dfcd736ac191771cd3ac03e/lib/cache/PackFileCacheStrategy.js',
     },
-    'vue: patch.js': {
+    'Vue: patch.js': {
         lang: 'js',
         url: 'https://raw.githubusercontent.com/vuejs/vue/52608302e9bca84fb9e9f0499e89acade78d3d07/src/core/vdom/patch.js',
     },

@@ -1,5 +1,5 @@
 import { pickRandom } from '../util/pickRandom';
-import type { Source } from './souceCode';
+import type { Source } from './Source';
 import type { ImgParams } from './ImgParams';
 import { degToRad } from '../util/degToRad';
 import { colorSchemeNames } from './colorSchemes';

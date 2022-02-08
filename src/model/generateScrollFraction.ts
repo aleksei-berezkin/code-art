@@ -1,4 +1,4 @@
-import type { Source } from './souceCode';
+import type { Source } from './Source';
 import type { SceneBounds } from './SceneBounds';
 import type { Mat4 } from '../util/matrices';
 import type { ScrollFraction } from './ScrollFraction';

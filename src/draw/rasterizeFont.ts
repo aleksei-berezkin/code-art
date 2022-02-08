@@ -1,5 +1,5 @@
 import { dpr } from '../util/dpr';
-import type { Source } from '../model/souceCode';
+import type { Source } from '../model/Source';
 import type { WorkLimiter } from '../util/workLimiter';
 import type { GlyphMetrics, GlyphRaster } from '../model/GlyphRaster';
 import { defaultMonospace } from '../model/fontFaces';

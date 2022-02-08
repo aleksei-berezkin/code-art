@@ -1,7 +1,7 @@
 import type { ScrollFraction } from './ScrollFraction';
 import type { Lang } from './Lang';
 import type { ImgParams } from './ImgParams';
-import type { Source } from './souceCode';
+import type { Source } from './Source';
 import { pluck } from '../util/pluck';
 
 const minVH = {
@@ -9,7 +9,7 @@ const minVH = {
     h: .1,
 };
 
-export const excessByLang: {[l in Lang]: ScrollFraction} = {
+const excessByLang: {[l in Lang]: ScrollFraction} = {
     js: {
         v: .05,
         h: .5,
