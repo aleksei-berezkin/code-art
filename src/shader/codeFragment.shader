@@ -25,7 +25,6 @@ void main() {
     }
     texValue /= 9.0;
 
-    // TODO one-pixel blur for anti-aliasing? 
     outColor = vec4(
         texValue.rgb * v_color + u_bg * (vec3(1) - texValue.rgb),
         1
