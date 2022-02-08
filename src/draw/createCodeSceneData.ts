@@ -35,7 +35,6 @@ export async function createCodeSceneData(
     const vertices = [];
     const glyphTexPosition = [];
     const colors = [];
-    const fontSizeRatio = glyphRaster.fontSize / fontSize;
 
     for (const codeLetter of iterateCode(bounds, scrollFraction, fontSize, source, glyphRaster)) {
         await workLimiter.next();
@@ -44,9 +43,9 @@ export async function createCodeSceneData(
         const m = glyphRaster.glyphs.get(letter)!;
 
         const x1 = x;
-        const y1 = baseline - m.ascent / fontSizeRatio;
-        const x2 = x + m.w / fontSizeRatio;
-        const y2 = baseline + m.descent / fontSizeRatio;
+        const y1 = baseline - m.ascent / glyphRaster.fontSizeRatio;
+        const x2 = x + m.w / glyphRaster.fontSizeRatio;
+        const y2 = baseline + m.descent / glyphRaster.fontSizeRatio;
 
         if (!isVisible(txMat, x1, y1, x2, y2)) {
             continue;

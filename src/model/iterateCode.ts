@@ -24,11 +24,9 @@ export function* iterateCode(bounds: SceneBounds,
     const startLineScrolledOutFraction = startLineReal - startLine;
     const yMin = bounds.yMin - fontSize * startLineScrolledOutFraction;
 
-    const fontSizeRatio = glyphRaster.fontSize / fontSize;
-
-    const requiredCharsReal = (bounds.xMax - bounds.xMin) / glyphRaster.avgW / fontSizeRatio;
+    const requiredCharsReal = (bounds.xMax - bounds.xMin) / glyphRaster.avgW / glyphRaster.fontSizeRatio;
     const lineLength = isMinified(source.spec.lang) ? source.parseResult.avgLineLength : source.parseResult.longestLineLength;
-    const xMin = bounds.xMin - scrollFraction.h * glyphRaster.avgW / fontSizeRatio * (lineLength - requiredCharsReal);
+    const xMin = bounds.xMin - scrollFraction.h * glyphRaster.avgW / glyphRaster.fontSizeRatio * (lineLength - requiredCharsReal);
 
     for (let line = startLine; line < source.parseResult.lines.length; line++) {
         const y = yMin + (line - startLine) * fontSize;
@@ -49,7 +47,7 @@ export function* iterateCode(bounds: SceneBounds,
             const metrics = glyphRaster.glyphs.get(letter)!;
 
             if (letter !== ' ' && x + metrics.w >= bounds.xMin) {
-                const baseline = y + glyphRaster.maxAscent / fontSizeRatio;
+                const baseline = y + glyphRaster.maxAscent / glyphRaster.fontSizeRatio;
                 yield {
                     pos,
                     letter,
@@ -58,7 +56,7 @@ export function* iterateCode(bounds: SceneBounds,
                 };
             }
 
-            x += metrics.w / fontSizeRatio;
+            x += metrics.w / glyphRaster.fontSizeRatio;
 
             if (x > bounds.xMax) {
                 break;

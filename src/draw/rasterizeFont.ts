@@ -85,7 +85,7 @@ export async function rasterizeFont(
     canvasEl.dataset[dsFontSize] = String(fontSize);
 
     cachedRaster =  {
-        fontSize: _fontSize,
+        fontSizeRatio: _fontSize / fontSize,
         glyphs,
         maxAscent,
         avgW,
