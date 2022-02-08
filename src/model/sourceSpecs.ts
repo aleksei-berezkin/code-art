@@ -14,10 +14,10 @@ export const sourceSpecs: {[name: string]: SourceSpec} = {
         lang: 'js min' as Lang,
         url: 'https://unpkg.com/lodash@4.17.21/lodash.min.js',
     },
-    // 'Underscore min': {
-    //     lang: 'js min line' as Lang,
-    //     url: 'https://unpkg.com/underscore@1.13.2/underscore-min.js',
-    // },
+    'Underscore min': {
+        lang: 'js min line' as Lang,
+        url: 'https://unpkg.com/underscore@1.13.2/underscore-min.js',
+    },
     'webpack: PackFileCacheStrategy': {
         lang: 'js' as Lang,
         url: 'https://raw.githubusercontent.com/webpack/webpack/6941c519e901629a6dfcd736ac191771cd3ac03e/lib/cache/PackFileCacheStrategy.js',

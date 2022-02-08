@@ -1,6 +1,6 @@
 import type { ShortColorKey } from '../model/ShortColorKey';
 import type { ParseRequestData, ParseResponseData } from './parseProtocol';
-import type { ParseResult } from '../model/ParseResult';
+import type { Line, Lines, ParseResult } from '../model/ParseResult';
 
 import type { Options, Token } from 'acorn';
 // @ts-ignore
@@ -26,6 +26,14 @@ function parse(text: string, insertWraps: boolean): ParseResult {
         }
     }
 
+    const strPositions = new Set<number>();
+
+    function addStrPositions(start: number, end: number) {
+        for (let i = start; i < end; i++) {
+            strPositions.add(i);
+        }
+    }
+
     const options: Options = {
         ecmaVersion: 'latest',
         onComment(isBlock, text, start, end) {
@@ -37,6 +45,7 @@ function parse(text: string, insertWraps: boolean): ParseResult {
                 color = 'n';
             } else if ([acorn.tokTypes.string, acorn.tokTypes.template, acorn.tokTypes.backQuote].includes(token.type)) {
                 color = 's';
+                addStrPositions(token.start, token.end);
             } else if (acorn.tokTypes.name === token.type) {
                 color = 'N';
             } else if (['class', 'const', 'false', 'function', 'in', 'let', 'new', 'null', 'of', 'this', 'true', 'undefined', 'var']
@@ -62,10 +71,13 @@ function parse(text: string, insertWraps: boolean): ParseResult {
                     colorize(node.property.start, node.property.end, 'm');
                 }
             },
+            TemplateLiteral(node: any) {
+                addStrPositions(node.start, node.end);
+            },
         },
     );
 
-    const lines = getLines(text);
+    const lines = getLines(text, strPositions, insertWraps);
     const longestLineLength = lines
         .map(([start, end]) => end - start)
         .reduce((a, b) => a > b ? a : b);
@@ -80,7 +92,16 @@ function parse(text: string, insertWraps: boolean): ParseResult {
     };
 }
 
-function getLines(text: string): ParseResult['lines'] {
+function getLines(text: string, strPositions: Set<number>, insertWraps: boolean): Lines {
+    const origLines = getOriginalLines(text);
+    if (!insertWraps) {
+        return origLines;
+    }
+
+    return insertWrapsToLongLines(text, strPositions, origLines);
+}
+
+function getOriginalLines(text: string): Lines {
     const lines: ParseResult['lines'] = [];
     let lastNewLineIndex = -1;
     for ( ; ; ) {
@@ -93,6 +114,36 @@ function getLines(text: string): ParseResult['lines'] {
             return lines;
         }
     }
+}
+
+const targetLineLen = 500;
+
+function insertWrapsToLongLines(text: string, strPositions: Set<number>, lines: Lines): Lines {
+    return lines
+        .flatMap(([start, end]) => [...splitLongLine(text, strPositions, start, end)]);
+}
+
+const charsToSplitAfter = new Set(['(', '[', '{', ':', '=', '+', '-', '/', '+', ',', ';']);
+
+function* splitLongLine(text: string, strPositions: Set<number>, start: number, endExclusive: number): Generator<Line> {
+    if (start === endExclusive) {
+        return;
+    }
+
+    if (endExclusive - start <= targetLineLen) {
+        yield [start, endExclusive];
+        return;
+    }
+
+    for (let pos = start + targetLineLen - 1; pos < endExclusive - 1; pos++) {
+        if (!strPositions.has(pos) && charsToSplitAfter.has(text[pos])) {
+            yield [start, pos + 1];
+            yield* splitLongLine(text, strPositions, pos + 1, endExclusive);
+            return;
+        }
+    }
+
+    yield [start, endExclusive];
 }
 
 function getAlphabet(source: string) {
