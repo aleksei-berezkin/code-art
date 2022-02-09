@@ -8,7 +8,7 @@
         color: #333;
         font-family: Roboto, sans-serif;
         margin: 0;
-        padding: 8px;
+        padding: 0;
 
         --bord-r-std: 8px;
         --btn-shadow: 0 1px 2px 0 rgb(60 64 67 / 30%), 0 2px 6px 2px rgb(60 64 67 / 15%);
@@ -18,14 +18,6 @@
         --menu-shadow: 0 2px 4px -1px rgb(0 0 0 / 20%), 0 4px 5px 0 rgb(0 0 0 / 14%), 0 1px 10px 0 rgb(0 0 0 / 12%);
         --pad-std: 16px;
     }
-
-    main {
-        margin: 0;
-    }
-
-    footer {
-        text-align: center;
-    }
 </style>
 
 <main>
@@ -33,7 +25,3 @@
         <Route path='/' component={ Code } />
     </Router>
 </main>
-
-<footer>
-    <a href='https://github.com/aleksei-berezkin/code-art/'>GitHub</a>
-</footer>

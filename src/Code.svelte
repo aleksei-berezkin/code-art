@@ -10,34 +10,76 @@
     .section-main {
         align-items: center;
         display: flex;
+        margin-bottom: 1rem;
+        margin-top: 1rem;
         flex-direction: column;
     }
 
     .code-wr {
         max-width: 1280px;
         position: relative;
-        width: 90%;
+        width: 90vw;
     }
 
     .code-canvas {
         aspect-ratio: 3/2;
-        background-color: #eee;
+        background-color: #707688;
         width: 100%;
     }
 
-    .code-canvas.progress {
-        animation-duration: 2s;
-        animation-fill-mode: forwards;
-        animation-name: progress-animation;
+    .progress-wr {
+        align-items: center;
+        display: flex;
+        height: 100%;
+        justify-content: center;
+        left: 0;
+        position: absolute;
+        top: 0;
+        width: 100%;
     }
 
-    /* TODO not the best */
-    @keyframes progress-animation {
-        from {
-            filter: grayscale(0) opacity(1);
+    .progress-svg {
+        --s: calc(20px + 15vw);
+        --max-s: 120px;
+
+        height: var(--s);
+        max-height: var(--max-s);
+        max-width: var(--max-s);
+        stroke: #fff8;
+        width: var(--s);
+    }
+
+    .progress-circle {
+        animation: arc-anim 1.7s ease-in-out infinite, rotation-anim 1.7s linear infinite;
+        animation-delay: -.9s;
+        filter: drop-shadow(0 0 calc(min(1px + .1vw, 2px)) #fff9);
+        box-shadow: var(--btn-shadow);
+    }
+
+    /*
+     * l = 2 * pi * 20 = 125.66
+     */
+    @keyframes arc-anim {
+        0% {
+            stroke-dashoffset: 0;
+            stroke-dasharray: .5, 125.66;
         }
-        to {
-            filter: grayscale(50%) opacity(.5);
+        50% {
+            stroke-dashoffset: -18;
+            stroke-dasharray: 100, 125.66;
+        }
+        100% {
+            stroke-dashoffset: -125.66;
+            stroke-dasharray: 100, 125.66;
+        }
+    }
+
+    @keyframes rotation-anim {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
         }
     }
 
@@ -82,10 +124,10 @@
 
 </style>
 
-<canvas class='rasterize-font-canvas' bind:this={rasterCanvasEl} width='2048'></canvas>
 <section class='section-main'>
+    <canvas class='rasterize-font-canvas' bind:this={rasterCanvasEl} width='2048'></canvas>
     <div class='code-wr'>
-        <canvas class={`code-canvas ${progress ? 'progress' : ''}`} bind:this={codeCanvasEl}></canvas>
+        <canvas class='code-canvas' bind:this={codeCanvasEl}></canvas>
         <button class='round-btn left' on:click={() => menuOpen = !menuOpen}>
             <Icon pic={menuOpen ? 'close' : 'menu'}/>
         </button>
@@ -95,6 +137,13 @@
         <button class='round-btn right' on:click={handleDownload}>
             <Icon pic={downloading ? 'pending' : 'download'}/>
         </button>
+        {#if progress}
+            <div class='progress-wr'>
+                <svg class='progress-svg' viewBox='-26 -26 52 52' xmlns='http://www.w3.org/2000/svg'>
+                    <circle class='progress-circle' fill='none' cx='0' cy='0' r='20' stroke-width='4' xmlns='http://www.w3.org/2000/svg'/>
+                </svg>
+            </div>
+        {/if}
         {#if imgParams}
             <ImgParamsMenu imgParams={imgParams} menuOpen={menuOpen} paramsUpdated={onParamsUpdate} clickedOutside={onClickedOutsideMenu}/>
         {/if}
@@ -108,6 +157,7 @@
     import { onMount } from 'svelte';
     import Icon from './Icon.svelte';
     import { drawRandomScene, drawScene } from './draw/drawScene';
+    import { setThrottleListeners, throttle, throttleFast } from './util/throttle';
 
     let codeCanvasEl: HTMLCanvasElement;
     let rasterCanvasEl: HTMLCanvasElement;
@@ -120,7 +170,13 @@
     let genRotateDeg = 0;
 
     // In Safari sizes may be not ready on mount, that's why raf
-    onMount(() => requestAnimationFrame(async () => await generateScene()));
+    onMount(() => {
+        setThrottleListeners(
+            () => progress = true,
+            () => progress = false,
+        );
+        requestAnimationFrame(async () => await generateScene());
+    });
 
     async function handleGenerateClick() {
         if (imgParams) {
@@ -130,16 +186,14 @@
     }
 
     async function generateScene() {
-        setWH();
-        await drawRandomScene(
-            codeCanvasEl,
-            rasterCanvasEl,
-            () => progress = true,
-            p => {
-                progress = false;
-                imgParams = p;
-            },
-        );
+        throttleFast(async () => {
+            setWH();
+            await drawRandomScene(
+                codeCanvasEl,
+                rasterCanvasEl,
+                p => imgParams = p,
+            );
+        })
     }
 
     let downloading = false;
@@ -162,11 +216,16 @@
     }
 
     async function onParamsUpdate() {
-        if (!imgParams) {
-            return;
-        }
-
-        await drawScene(imgParams, codeCanvasEl, rasterCanvasEl, p => imgParams = p);
+        throttle(async () => {
+            if (imgParams) {
+                await drawScene(
+                    imgParams,
+                    codeCanvasEl,
+                    rasterCanvasEl,
+                    p => imgParams = p,
+                );
+            }
+        })
     }
 
     function onClickedOutsideMenu() {
