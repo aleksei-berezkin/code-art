@@ -1,14 +1,21 @@
 <!--suppress CssNonIntegerLengthInPixels, CssUnusedSymbol -->
 <style>
     .ic {
-        fill: #000000d0;
+        fill: #000d;
         stroke: none;
         transition: transform var(--ic-tx) ease-out;
     }
 
     .ic.std {
         height: var(--ic-size-std);
-        width: var(--ic-size-std);
+    }
+
+    .ic.sm {
+        height: var(--ic-size-sm);
+    }
+
+    .ic:not(.inl) {
+        vertical-align: bottom;
     }
 
     .ic.inl.arrow-down {
@@ -22,10 +29,11 @@
 </style>
 
 <svg xmlns='http://www.w3.org/2000/svg'
-     class={`ic ${size} ${pic ?? ''} ${scaleTo0 ? 'scale-to-0' : '' }`}
-     viewBox={size === 'inl' ? inlineViewBoxes[pic] : '0 0 24 24'}
+     class={`ic ${pic} ${size} ${scaleTo0 ? 'scale-to-0' : '' }`}
+     viewBox={getViewBox()}
      style={ rotateDeg ? `transform: rotate(${rotateDeg}deg)` : undefined}
      bind:this={svgEl}>
+    <title>{p}</title>
     {#if p === 'arrow-down'}
         <path d='M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6-1.41-1.41z'/>
     {/if}
@@ -50,20 +58,49 @@
     {#if p === 'reload'}
         <path d='M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z'/>
     {/if}
+    {#if p === 'github'}
+        <path d='M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2 0 1.9 1.2 1.9 1.2 1 1.8 2.8 1.3 3.5 1 0-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.2.5-2.3 1.3-3.1-.2-.4-.6-1.6 0-3.2 0 0 1-.3 3.4 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.6.2 2.8 0 3.2.9.8 1.3 1.9 1.3 3.2 0 4.6-2.8 5.6-5.5 5.9.5.4.9 1 .9 2.2v3.3c0 .3.1.7.8.6A12 12 0 0 0 12 .3'/>
+    {/if}
+    {#if p === 'dev'}
+<!--        https://worldvectorlogo.com/ru/logo/devto-->
+        <path d='M120.12 208.29c-3.88-2.9-7.77-4.35-11.65-4.35H91.03v104.47h17.45c3.88 0 7.77-1.45 11.65-4.35s5.82-7.25 5.82-13.06v-69.65c-.01-5.8-1.96-10.16-5.83-13.06zM404.1 32H43.9C19.7 32 .06 51.59 0 75.8v360.4C.06 460.41 19.7 480 43.9 480h360.2c24.21 0 43.84-19.59 43.9-43.8V75.8c-.06-24.21-19.7-43.8-43.9-43.8zM154.2 291.19c0 18.81-11.61 47.31-48.36 47.25h-46.4V172.98h47.38c35.44 0 47.36 28.46 47.37 47.28zm100.68-88.66H201.6v38.42h32.57v29.57H201.6v38.41h53.29v29.57h-62.18c-11.16.29-20.44-8.53-20.72-19.69V193.7c-.27-11.15 8.56-20.41 19.71-20.69h63.19zm103.64 115.29c-13.2 30.75-36.85 24.63-47.44 0l-38.53-144.8h32.57l29.71 113.72 29.57-113.72h32.58z'/>
+    {/if}
+    {#if p === 'linked-in'}
+        <path d='M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z'/>
+    {/if}
+    {#if p === 'facebook'}
+        <path d='M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2m13 2h-2.5A3.5 3.5 0 0 0 12 8.5V11h-2v3h2v7h3v-7h3v-3h-3V9a1 1 0 0 1 1-1h2V5z'/>
+    {/if}
+    {#if p === 'twitter'}
+        <path d='M22.46 6c-.77.35-1.6.58-2.46.69.88-.53 1.56-1.37 1.88-2.38-.83.5-1.75.85-2.72 1.05C18.37 4.5 17.26 4 16 4c-2.35 0-4.27 1.92-4.27 4.29 0 .34.04.67.11.98C8.28 9.09 5.11 7.38 3 4.79c-.37.63-.58 1.37-.58 2.15 0 1.49.75 2.81 1.91 3.56-.71 0-1.37-.2-1.95-.5v.03c0 2.08 1.48 3.82 3.44 4.21a4.22 4.22 0 0 1-1.93.07 4.28 4.28 0 0 0 4 2.98 8.521 8.521 0 0 1-5.33 1.84c-.34 0-.68-.02-1.02-.06C3.44 20.29 5.7 21 8.12 21 16 21 20.33 14.46 20.33 8.79c0-.19 0-.37-.01-.56.84-.6 1.56-1.36 2.14-2.23z'/>
+    {/if}
 </svg>
 
 <script lang='ts'>
     import { parseMs } from './util/parseMs';
+    import type { IconSize } from './IconSize';
 
-    type Pic = 'arrow-down' | 'close' | 'download' | 'downloading' | 'menu' | 'pending' | 'reload' | undefined;
+    type Pic = 'arrow-down' | 'close' | 'download' | 'downloading' | 'menu' | 'pending' | 'reload' | 'github' | 'dev' | 'linked-in' | 'facebook' | 'twitter' | undefined;
 
     export let pic: Pic = undefined;
-    export let size: 'std' | 'inl' = 'std';
+    export let size: IconSize = 'std';
     export let rotateDeg: number = 0;
+
+    function getViewBox() {
+        return (
+            size === 'inl'
+                ? inlineViewBoxes
+                : stdViewBoxes
+        )[pic] ?? '0 0 24 24';
+    }
 
     // Crop svg to content: https://svgcrop.com/
     const inlineViewBoxes = {
         'arrow-down': '6 8.59 12 7.41',
+    };
+
+    const stdViewBoxes = {
+        'dev': '0 32 448 448',
     };
 
     let svgEl: HTMLElement;

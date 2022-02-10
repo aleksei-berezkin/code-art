@@ -8,7 +8,7 @@
         left: var(--pad-std);
         margin: 0;
         opacity: 0;
-        padding: var(--pad-std);
+        padding-top: var(--pad-std);
         position: absolute;
         transform: scale(0);
         transform-origin: top left;
@@ -26,7 +26,16 @@
         opacity: 1;
     }
 
+    .group {
+        padding-left: var(--pad-std);
+        padding-right: var(--pad-std);
+    }
+
     .group:not(:last-child) {
+        padding-bottom: var(--pad-gr);
+    }
+
+    .group:last-child {
         padding-bottom: var(--pad-gr);
     }
 
@@ -112,12 +121,34 @@
         padding-top: calc(var(--pad-gr) * .3);
         width: calc(var(--input-w) + var(--label-w) + var(--label-p));
     }
+
+    .footer-group {
+        align-items: center;
+        color: #333a;
+        display: flex;
+        flex-direction: column;
+        font-size: .9em;
+        letter-spacing: .04em;
+        padding-bottom: var(--pad-gr);
+    }
+
+    .footer-credits {
+        color: inherit;
+        margin-top: calc(var(--pad-gr) * .25);
+        text-decoration: none;
+        transition: color var(--t-link);
+    }
+
+    .footer-credits:hover {
+        color: #222;
+    }
 </style>
 
-<menu class={`menu-root ${menuOpen ? 'open' : ''}`} bind:this={menuRootEl}>
+<aside class={`menu-root ${menuOpen ? 'open' : ''}`} aria-label='Image params' bind:this={menuRootEl}>
+    <div>
     {#each Object.entries(imgParams) as [g, ps]}
-        <div class='group'>
-            <button class='group-button' aria-label={`Toggle group: ${g}`} data-g={g} on:click={handleToggleGroup}>
+        <div class='group' role='region' aria-label={`Controls group: ${g}`}>
+            <button class='group-button' aria-label={`Toggle group visibility: ${g}`} data-g={g} on:click={handleToggleGroup}>
                 <Icon pic='arrow-down' size='inl' rotateDeg={openGroups.includes(g) ? -180 : 0}/>
                 <span class='group-button-txt'>{g}</span>
             </button>
@@ -126,10 +157,10 @@
                 {#each Object.entries(ps) as [k, p]}
                     {#if p.type === 'slider'}
                         <div class='slider-wr'>
-                            <label class='slider-label' for={toId(k)}>{k}</label>
+                            <label class='slider-label' for={toId(g, k)}>{k}</label>
                             <div class='slider-min'>{getSliderLabel(p, 'min')}</div>
                             <!--suppress XmlDuplicatedId -->
-                            <input class='slider-slider' id={toId(k)}
+                            <input class='slider-slider' id={toId(g, k)}
                                    data-g={g} data-k={k}
                                    type='range' min='{p.min}' max='{p.max}' step='any'
                                    value='{p.val}'
@@ -142,9 +173,9 @@
             
                     {#if p.type === 'choices'}
                         <div class='choices-wr'>
-                            <label class='choices-label' for={toId(k)}>{k}</label>
+                            <label class='choices-label' for={toId(g, k)}>{k}</label>
                             <!--suppress XmlDuplicatedId -->
-                            <select class='choices-select' id={toId(k)} data-g={g} data-k={k} on:change={handleChoiceChange}>
+                            <select class='choices-select' id={toId(g, k)} data-g={g} data-k={k} on:change={handleChoiceChange}>
                                 {#each p.choices as choice}
                                     {#if p.val === choice}
                                         <option value={choice} selected>{choice}</option>
@@ -158,10 +189,10 @@
             
                     {#if p.type === 'color'}
                         <div class='choices-wr'>
-                            <label for={toId(k)}>{k}</label>
+                            <label for={toId(g, k)}>{k}</label>
                             <div class='input-color-wr'>
                                 <!--suppress XmlDuplicatedId -->
-                                <input id={toId(k)} data-g={g} data-k={k} type='color' class='input-color' value='{p.val}' on:change={handleColorChange}/>
+                                <input id={toId(g, k)} data-g={g} data-k={k} type='color' class='input-color' value='{p.val}' on:change={handleColorChange}/>
                             </div>
                         </div>
                     {/if}
@@ -169,21 +200,28 @@
             </div>
         </div>
     {/each}
-</menu>
+    </div>
+    <div class='footer-group'>
+        <Contacts size='sm' col='light'/>
+        <a href='/about' class='footer-credits' use:link>about</a>
+    </div>
+</aside>
 
 <script lang='ts'>
-    import { getSliderLabel, getSliderVal, ImgParams, ParamGroup } from './model/ImgParams';
+    import { link } from 'svelte-routing';
+    import { getSliderLabel, ImgParams, ParamGroup } from './model/ImgParams';
     import { afterUpdate, onDestroy } from 'svelte';
     import Icon from './Icon.svelte';
     import { getFromSelfOrParentDataset } from './util/getFromSelfOrParentDataset';
+    import Contacts from './Contacts.svelte';
 
     export let imgParams: ImgParams;
     export let menuOpen: boolean;
     export let paramsUpdated: (imgParams: ImgParams) => void;
     export let clickedOutside: () => void;
 
-    function toId(k: string) {
-        return 'code-scene-control-' + k.replace(/\s/g, '-');
+    function toId(g: string, k: string) {
+        return `img-param__${[g, k].map(s => s.replace(/\s/g, '_')).join('__')}`;
     }
 
     let openGroups: ParamGroup[] = [];

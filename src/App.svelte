@@ -1,12 +1,14 @@
 <script lang='ts'>
     import { Router, Route } from 'svelte-routing';
     import Code from './Code.svelte';
+    import About from './About.svelte';
 </script>
 
 <style>
     :global(body) {
         color: #333;
         font-family: Roboto, sans-serif;
+        font-size: 16px;
         margin: 0;
         padding: 0;
 
@@ -14,14 +16,17 @@
         --btn-shadow: 0 1px 2px 0 rgb(60 64 67 / 30%), 0 2px 6px 2px rgb(60 64 67 / 15%);
         --btn-size: 48px;
         --ic-size-std: 32px;
+        --ic-size-sm: 20px;
         --ic-tx: 200ms;
         --menu-shadow: 0 2px 4px -1px rgb(0 0 0 / 20%), 0 4px 5px 0 rgb(0 0 0 / 14%), 0 1px 10px 0 rgb(0 0 0 / 12%);
         --pad-std: 16px;
+        --t-link: 300ms;
     }
 </style>
 
 <main>
     <Router url=''>
         <Route path='/' component={ Code } />
+        <Route path='/about' component={ About } />
     </Router>
 </main>

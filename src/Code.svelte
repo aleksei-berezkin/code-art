@@ -39,14 +39,14 @@
     }
 
     .progress-svg {
-        --s: calc(20px + 15vw);
+        --h: calc(20px + 15vw);
         --max-s: 120px;
 
-        height: var(--s);
+        height: var(--h);
         max-height: var(--max-s);
         max-width: var(--max-s);
         stroke: #fff8;
-        width: var(--s);
+        width: var(--h);
     }
 
     .progress-circle {
