@@ -15,12 +15,20 @@
         --bord-r-std: 8px;
         --btn-shadow: 0 1px 2px 0 rgb(60 64 67 / 30%), 0 2px 6px 2px rgb(60 64 67 / 15%);
         --btn-size: 48px;
-        --ic-size-std: 32px;
-        --ic-size-sm: 20px;
         --ic-tx: 200ms;
+        --link-tx: 300ms;
         --menu-shadow: 0 2px 4px -1px rgb(0 0 0 / 20%), 0 4px 5px 0 rgb(0 0 0 / 14%), 0 1px 10px 0 rgb(0 0 0 / 12%);
         --pad-std: 16px;
-        --t-link: 300ms;
+    }
+
+    :global(button) {
+        background: unset;
+        border: unset;
+        color: inherit;
+        cursor: pointer;
+        font: unset;
+        margin: 0;
+        padding: 0;
     }
 </style>
 

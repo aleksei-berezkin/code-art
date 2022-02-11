@@ -7,7 +7,6 @@
         box-shadow: var(--menu-shadow);
         left: var(--pad-std);
         margin: 0;
-        opacity: 0;
         padding-top: var(--pad-std);
         position: absolute;
         transform: scale(0);
@@ -37,15 +36,6 @@
 
     .group:last-child {
         padding-bottom: var(--pad-gr);
-    }
-
-    .group-button {
-        background: none;
-        border: none;
-        cursor: pointer;
-        font: inherit;
-        margin: 0;
-        padding: 0;
     }
 
     .group-button:active {
@@ -127,19 +117,18 @@
         color: #333a;
         display: flex;
         flex-direction: column;
-        font-size: .9em;
-        letter-spacing: .04em;
         padding-bottom: var(--pad-gr);
     }
 
-    .footer-credits {
+    .footer-about {
         color: inherit;
+        font-size: .9em;
+        letter-spacing: .04em;
         margin-top: calc(var(--pad-gr) * .25);
-        text-decoration: none;
-        transition: color var(--t-link);
+        transition: color var(--link-tx);
     }
 
-    .footer-credits:hover {
+    .footer-about:hover {
         color: #222;
     }
 </style>
@@ -149,7 +138,7 @@
     {#each Object.entries(imgParams) as [g, ps]}
         <div class='group' role='region' aria-label={`Controls group: ${g}`}>
             <button class='group-button' aria-label={`Toggle group visibility: ${g}`} data-g={g} on:click={handleToggleGroup}>
-                <Icon pic='arrow-down' size='inl' rotateDeg={openGroups.includes(g) ? -180 : 0}/>
+                <Icon pic='arrow-down' size='sm' rotateDeg={openGroups.includes(g) ? -180 : 0}/>
                 <span class='group-button-txt'>{g}</span>
             </button>
 
@@ -203,22 +192,23 @@
     </div>
     <div class='footer-group'>
         <Contacts size='sm' col='light'/>
-        <a href='/about' class='footer-credits' use:link>about</a>
+        <button class='footer-about' on:click={clickedAbout}>about</button>
     </div>
 </aside>
 
 <script lang='ts'>
-    import { link } from 'svelte-routing';
     import { getSliderLabel, ImgParams, ParamGroup } from './model/ImgParams';
-    import { afterUpdate, onDestroy } from 'svelte';
+    import { afterUpdate, onDestroy, onMount } from 'svelte';
     import Icon from './Icon.svelte';
     import { getFromSelfOrParentDataset } from './util/getFromSelfOrParentDataset';
     import Contacts from './Contacts.svelte';
+    import { createCloseBehavior } from './util/createCloseBehavior';
 
     export let imgParams: ImgParams;
     export let menuOpen: boolean;
-    export let paramsUpdated: (imgParams: ImgParams) => void;
-    export let clickedOutside: () => void;
+    export let paramsUpdated: (p: ImgParams) => void;
+    export let closeMenu: () => void;
+    export let clickedAbout: () => void;
 
     function toId(g: string, k: string) {
         return `img-param__${[g, k].map(s => s.replace(/\s/g, '_')).join('__')}`;
@@ -236,39 +226,17 @@
     }
 
     let menuRootEl: HTMLElement;
-    let outsideClickListener: ((e: MouseEvent) => void) | undefined = undefined;
+    const closeBehavior = createCloseBehavior();
 
-    afterUpdate(async () => {
-        if (!menuOpen) {
-            removeOutsideClickListener();
-            return;
+    afterUpdate(() => {
+        if (menuOpen && !closeBehavior.isAttached()) {
+            closeBehavior.attachDeferred(menuRootEl, closeMenu);
+        } else if (!menuOpen) {
+            closeBehavior.detach();
         }
-
-        // Event is still processed, so postpone
-        setTimeout(() => {
-            if (outsideClickListener) {
-                window.removeEventListener('click', outsideClickListener);
-            }
-    
-            outsideClickListener = function (e: MouseEvent) {
-                if ((e.target as Node | null)?.nodeType && menuRootEl.contains(e.target as Node)) {
-                    return;
-                }
-    
-                clickedOutside();
-            }
-    
-            window.addEventListener('click', outsideClickListener);
-        });
     });
 
-    onDestroy(removeOutsideClickListener);
-
-    function removeOutsideClickListener() {
-        if (outsideClickListener) {
-            window.removeEventListener('click', outsideClickListener);
-        }
-    }
+    onDestroy(closeBehavior.detach);
 
     function handleSliderChange(e: Event) {
         const inputEl = (e.target as HTMLInputElement);

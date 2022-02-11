@@ -86,15 +86,11 @@
     .round-btn {
         align-items: center;
         background: #ffffffc0;
-        border: none;
         border-radius: 50%;
         box-shadow: var(--btn-shadow);
-        cursor: pointer;
         display: flex;
         justify-content: center;
         height: var(--btn-size);
-        margin: 0;
-        padding: 0;
         position: absolute;
         transition: background-color 250ms;
         top: var(--pad-std);
@@ -128,8 +124,8 @@
     <canvas class='rasterize-font-canvas' bind:this={rasterCanvasEl} width='2048'></canvas>
     <div class='code-wr'>
         <canvas class='code-canvas' bind:this={codeCanvasEl}></canvas>
-        <button class='round-btn left' on:click={() => menuOpen = !menuOpen}>
-            <Icon pic={menuOpen ? 'close' : 'menu'}/>
+        <button class='round-btn left' on:click={handleMenuClick}>
+            <Icon pic={(openDialog === 'menu') ? 'close' : 'menu'}/>
         </button>
         <button class='round-btn second-to-right' on:click={handleGenerateClick}>
             <Icon pic='reload' rotateDeg={genRotateDeg}/>
@@ -145,7 +141,15 @@
             </div>
         {/if}
         {#if imgParams}
-            <ImgParamsMenu imgParams={imgParams} menuOpen={menuOpen} paramsUpdated={onParamsUpdate} clickedOutside={onClickedOutsideMenu}/>
+            <ImgParamsMenu imgParams={imgParams}
+                           menuOpen={openDialog === 'menu'}
+                           paramsUpdated={onParamsUpdate}
+                           closeMenu={closeDialog}
+                           clickedAbout={onClickedAbout}
+            />
+        {/if}
+        {#if openDialog === 'about'}
+            <About closeDialog={closeDialog}/>
         {/if}
     </div>
 </section>
@@ -158,6 +162,7 @@
     import Icon from './Icon.svelte';
     import { drawRandomScene, drawScene } from './draw/drawScene';
     import { setThrottleListeners, throttle, throttleFast } from './util/throttle';
+    import About from './About.svelte';
 
     let codeCanvasEl: HTMLCanvasElement;
     let rasterCanvasEl: HTMLCanvasElement;
@@ -165,7 +170,7 @@
     let progress = false;
 
     let imgParams: ImgParams | undefined = undefined;
-    let menuOpen = false;
+    let openDialog: 'menu' | 'about' | undefined = undefined;
 
     let genRotateDeg = 0;
 
@@ -177,6 +182,14 @@
         );
         requestAnimationFrame(async () => await generateScene());
     });
+
+    function handleMenuClick() {
+        if (!openDialog) {
+            openDialog = 'menu';
+        } else {
+            openDialog = undefined;
+        }
+    }
 
     async function handleGenerateClick() {
         if (imgParams) {
@@ -228,9 +241,15 @@
         })
     }
 
-    function onClickedOutsideMenu() {
-        menuOpen = false;
+    function onClickedAbout() {
+        openDialog = 'about';
     }
+
+    function closeDialog() {
+        // console.log(new Error())
+        openDialog = undefined;
+    }
+
 
     function setWH() {
         const canvasRect = codeCanvasEl.getBoundingClientRect();

@@ -7,7 +7,7 @@
         display: block;
         opacity: .5;
         text-decoration: none;
-        transition: opacity var(--t-link);
+        transition: opacity var(--link-tx);
     }
 
     .link:not(:last-child) {
@@ -22,7 +22,7 @@
 <section role='contentinfo' class='contacts'>
     {#each Object.entries(contacts) as [pic, url]}
         <a href={url} target='_blank' class='link'>
-            <Icon pic={pic} size={size} col='dark'/>
+            <Icon pic={pic} size={size}/>
         </a>
     {/each}
 </section>

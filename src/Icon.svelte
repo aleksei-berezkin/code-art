@@ -1,24 +1,43 @@
 <!--suppress CssNonIntegerLengthInPixels, CssUnusedSymbol -->
 <style>
     .ic {
+        --ic-h-sm: 20px;
+        --ic-f-md: 1.2;
+        --ic-f-lg: 1.6;
+
         fill: #000d;
         stroke: none;
         transition: transform var(--ic-tx) ease-out;
-    }
-
-    .ic.std {
-        height: var(--ic-size-std);
-    }
-
-    .ic.sm {
-        height: var(--ic-size-sm);
-    }
-
-    .ic:not(.inl) {
         vertical-align: bottom;
     }
 
-    .ic.inl.arrow-down {
+    .ic.arrow-down {
+        --ic-h-sm: 7.41px;
+        vertical-align: baseline;
+    }
+
+    .ic.sm {
+        height: var(--ic-h-sm);
+    }
+
+    .ic.md {
+        height: calc(var(--ic-h-sm) * var(--ic-f-md));
+    }
+
+    .ic.lg {
+        height: calc(var(--ic-h-sm) * var(--ic-f-lg));
+    }
+
+
+    .ic:not(.arrow-down) {
+        vertical-align: bottom;
+    }
+
+    .ic.arrow-down {
+        vertical-align: baseline;
+    }
+
+    .ic.sm.arrow-down {
         height: 7.41px;
         width: 12px;
     }
@@ -30,7 +49,7 @@
 
 <svg xmlns='http://www.w3.org/2000/svg'
      class={`ic ${pic} ${size} ${scaleTo0 ? 'scale-to-0' : '' }`}
-     viewBox={getViewBox()}
+     viewBox={viewBoxes[pic] ?? '0 0 24 24'}
      style={ rotateDeg ? `transform: rotate(${rotateDeg}deg)` : undefined}
      bind:this={svgEl}>
     <title>{p}</title>
@@ -83,24 +102,13 @@
     type Pic = 'arrow-down' | 'close' | 'download' | 'downloading' | 'menu' | 'pending' | 'reload' | 'github' | 'dev' | 'linked-in' | 'facebook' | 'twitter' | undefined;
 
     export let pic: Pic = undefined;
-    export let size: IconSize = 'std';
+    export let size: IconSize = 'lg';
     export let rotateDeg: number = 0;
 
-    function getViewBox() {
-        return (
-            size === 'inl'
-                ? inlineViewBoxes
-                : stdViewBoxes
-        )[pic] ?? '0 0 24 24';
-    }
-
-    // Crop svg to content: https://svgcrop.com/
-    const inlineViewBoxes = {
+    const viewBoxes = {
+        // Crop svg to content: https://svgcrop.com/
         'arrow-down': '6 8.59 12 7.41',
-    };
-
-    const stdViewBoxes = {
-        'dev': '0 32 448 448',
+        dev: '0 32 448 448',
     };
 
     let svgEl: HTMLElement;

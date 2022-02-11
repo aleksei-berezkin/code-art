@@ -1,1 +1,1 @@
-export type IconSize = 'std' | 'sm' | 'inl';
+export type IconSize = 'lg' | 'md' | 'sm';
