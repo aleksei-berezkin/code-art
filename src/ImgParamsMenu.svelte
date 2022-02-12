@@ -114,14 +114,13 @@
 
     .footer-group {
         align-items: center;
-        color: #333a;
         display: flex;
         flex-direction: column;
         padding-bottom: var(--pad-gr);
     }
 
     .footer-about {
-        color: inherit;
+        color: var(--link-c);
         font-size: .9em;
         letter-spacing: .04em;
         margin-top: calc(var(--pad-gr) * .25);
@@ -129,7 +128,7 @@
     }
 
     .footer-about:hover {
-        color: #222;
+        color: var(--link-c-h);
     }
 </style>
 
@@ -191,7 +190,7 @@
     {/each}
     </div>
     <div class='footer-group'>
-        <Contacts size='sm' col='light'/>
+        <Contacts size='sm' color='light'/>
         <button class='footer-about' on:click={clickedAbout}>about</button>
     </div>
 </aside>

@@ -10,20 +10,23 @@
     .section-main {
         align-items: center;
         display: flex;
-        margin-bottom: 1rem;
-        margin-top: 1rem;
         flex-direction: column;
+        height: 100%;
+        margin: 0;
+        width: 100%;
     }
 
     .code-wr {
+        height: 100%;
+        /* TODO Optimize paint */
         max-width: 1280px;
         position: relative;
-        width: 90vw;
+        width: 100%;
     }
 
     .code-canvas {
-        aspect-ratio: 3/2;
         background-color: #707688;
+        height: 100%;
         width: 100%;
     }
 
@@ -88,6 +91,7 @@
         background: #ffffffc0;
         border-radius: 50%;
         box-shadow: var(--btn-shadow);
+        color: #000d;
         display: flex;
         justify-content: center;
         height: var(--btn-size);
@@ -144,12 +148,12 @@
             <ImgParamsMenu imgParams={imgParams}
                            menuOpen={openDialog === 'menu'}
                            paramsUpdated={onParamsUpdate}
-                           closeMenu={closeDialog}
+                           closeMenu={closeMenu}
                            clickedAbout={onClickedAbout}
             />
         {/if}
         {#if openDialog === 'about'}
-            <About closeDialog={closeDialog}/>
+            <About closeDialog={closeAbout}/>
         {/if}
     </div>
 </section>
@@ -184,10 +188,10 @@
     });
 
     function handleMenuClick() {
-        if (!openDialog) {
-            openDialog = 'menu';
-        } else {
+        if (openDialog === 'menu') {
             openDialog = undefined;
+        } else {
+            openDialog = 'menu';
         }
     }
 
@@ -245,9 +249,16 @@
         openDialog = 'about';
     }
 
-    function closeDialog() {
-        // console.log(new Error())
-        openDialog = undefined;
+    function closeMenu() {
+        if (openDialog === 'menu') {
+            openDialog = undefined;
+        }
+    }
+
+    function closeAbout() {
+        if (openDialog === 'about') {
+            openDialog = undefined;
+        }
     }
 
 
