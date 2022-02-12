@@ -1,8 +1,4 @@
-export function _rect2d(x1: number, y1: number, x2: number, y2: number) {
-    return [x1, y1,      x2, y1,      x2, y2,      x1, y1,      x2, y2,      x1, y2];
-}
-
-export function rect2d(a: Float32Array, i: number, x1: number, y1: number, x2: number, y2: number) {
+export function setRect2d(a: Float32Array, i: number, x1: number, y1: number, x2: number, y2: number) {
     a[i] = x1;
     a[i + 1] = y1;
 

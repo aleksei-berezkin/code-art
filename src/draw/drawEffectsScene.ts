@@ -14,6 +14,8 @@ import type { SceneParams } from '../model/generateSceneParams';
 import { renderColorToTexture, renderToCanvas } from './renderColorToTexture';
 import { getOptics } from '../model/Optics';
 import { drawTriangles } from './drawTriangles';
+import type { WorkLimiter } from '../util/workLimiter';
+import { delay } from '../util/delay';
 
 const maxKernel = 29;
 
@@ -22,8 +24,9 @@ export async function drawEffectsScene(
     bgColor: RGB,
     inputTexture: WebGLTexture,
     codeCanvasEl: HTMLCanvasElement,
+    workLimiter: WorkLimiter,
 ) {
-    const gl = codeCanvasEl.getContext('webgl2', {preserveDrawingBuffer: true})!;
+    const gl = codeCanvasEl.getContext('webgl2')!;
 
     const { imgParams } = sceneParams;
     const glowRadius = getSliderVal(imgParams.font.size) * getSliderVal(imgParams.glow.radius) / 2;
@@ -36,8 +39,8 @@ export async function drawEffectsScene(
 
     const program = await createProgram(vertexShaderSource, fragmentShaderSourceProcessed, gl);
 
-    const gridVertices = createEffectsGrid(sceneParams.pixelSpace, sceneParams.extensions, imgParams.font.size.val);
-    uploadArrayToAttribute('a_position', new Float32Array(gridVertices), rect2dVertexSize, program, gl);
+    const gridVertices = await createEffectsGrid(sceneParams.pixelSpace, sceneParams.extensions, imgParams.font.size.val, workLimiter);
+    uploadArrayToAttribute('a_position', gridVertices, rect2dVertexSize, program, gl);
 
     gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, inputTexture);
@@ -99,6 +102,7 @@ export async function drawEffectsScene(
     const targetTex = createEmptyTexture(0, {w: codeCanvasEl.width, h: codeCanvasEl.height}, gl)
     renderColorToTexture(targetTex, gl);
 
+    await workLimiter.next();
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
     await drawTriangles(gridVertices.length / rect2dVertexSize, gl);
@@ -108,8 +112,8 @@ export async function drawEffectsScene(
 
     gl.uniform1i(gl.getUniformLocation(program, 'u_mode'), 1);
 
+    await workLimiter.next();
     renderToCanvas(gl);
 
     await drawTriangles(gridVertices.length / rect2dVertexSize, gl);
-    // gl.drawArrays(gl.TRIANGLES, 0, gridVertices.length / vertexSize2d);
 }

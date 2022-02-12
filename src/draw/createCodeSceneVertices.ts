@@ -1,4 +1,4 @@
-import { rect2d, rect2dVerticesNum, rect2dVertexSize } from './rect';
+import { setRect2d, rect2dVerticesNum, rect2dVertexSize } from './rect';
 import type { Source } from '../model/Source';
 import { iterateCode } from '../model/iterateCode';
 import type { ColorScheme } from '../model/colorSchemes';
@@ -26,7 +26,7 @@ export type CodeSceneVertices = {
 
 const verticesInArray = 100 * rect2dVerticesNum;
 
-export async function* createCodeAttrArrays(
+export async function* createCodeSceneVertices(
     bounds: SceneBounds,
     txMat: Mat4,
     scrollFraction: ScrollFraction,
@@ -37,11 +37,11 @@ export async function* createCodeAttrArrays(
     glyphRaster: GlyphRaster,
     workLimiter: WorkLimiter,
 ): AsyncGenerator<CodeSceneVertices> {
+    // Same object reused
     const v: CodeSceneVertices = {
         position: new Float32Array(verticesInArray * rect2dVertexSize),
         glyphTexPosition: new Float32Array(verticesInArray * rect2dVertexSize),
         color: new Float32Array(verticesInArray * rgbSize),
-
         verticesNum: 0,
     };
 
@@ -63,9 +63,9 @@ export async function* createCodeAttrArrays(
             continue;
         }
 
-        rect2d(v.position, v.verticesNum * rect2dVertexSize, x1, y1, x2, y2);
+        setRect2d(v.position, v.verticesNum * rect2dVertexSize, x1, y1, x2, y2);
 
-        rect2d(v.glyphTexPosition, v.verticesNum * rect2dVertexSize,
+        setRect2d(v.glyphTexPosition, v.verticesNum * rect2dVertexSize,
             m.x, m.baseline - ascent,
             m.x + m.w, m.baseline + descent,
         );

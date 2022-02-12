@@ -1,7 +1,7 @@
 import { createProgram } from './createProgram';
 import vertexShaderSource from '../shader/codeVertex.shader';
 import fragmentShaderSource from '../shader/codeFragment.shader';
-import { createCodeAttrArrays } from './createCodeAttrArrays';
+import { createCodeSceneVertices } from './createCodeSceneVertices';
 import { rect2dVertexSize } from './rect';
 import type { Source } from '../model/Source';
 import { createUploadToAttribute } from './uploadArrayToAttribute';
@@ -59,7 +59,7 @@ export async function drawCodeScene(
     const uploadToGlyphTexPosition = createUploadToAttribute('a_glyphTexPosition', rect2dVertexSize, program, gl);
     const uploadToColor = createUploadToAttribute('a_color', rgbSize, program, gl);
 
-    for await (const vertices of createCodeAttrArrays(
+    for await (const vertices of createCodeSceneVertices(
         getSceneBounds(sceneParams.pixelSpace, sceneParams.extensions),
         sceneParams.txMat,
         getScrollFraction(sceneParams.imgParams),

@@ -77,7 +77,7 @@ async function _drawScene(source: Source, sceneParams: SceneParams, glyphRaster:
     const colorScheme = colorSchemes[sceneParams.imgParams.color.scheme.val as ColorSchemeName];
     const targetTex = await drawCodeScene(source, colorScheme, parseResult, sceneParams, glyphRaster, codeCanvasEl, rasterCanvasEl, workLimiter);
     await delay();
-    await drawEffectsScene(sceneParams, colorScheme.background, targetTex, codeCanvasEl);
+    await drawEffectsScene(sceneParams, colorScheme.background, targetTex, codeCanvasEl, workLimiter);
 }
 
 function getSizePixelSpace(codeCanvasEl: HTMLCanvasElement): Size {
