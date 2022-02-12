@@ -1,10 +1,10 @@
 import { createProgram } from './createProgram';
 import vertexShaderSource from '../shader/codeVertex.shader';
 import fragmentShaderSource from '../shader/codeFragment.shader';
-import { createCodeSceneData } from './createCodeSceneData';
-import { vertexSize2d } from './rect';
+import { createCodeAttrArrays } from './createCodeAttrArrays';
+import { rect2dVertexSize } from './rect';
 import type { Source } from '../model/Source';
-import { uploadArrayToAttribute } from './uploadArrayToAttribute';
+import { createUploadToAttribute } from './uploadArrayToAttribute';
 import { createEmptyTexture, uploadTexture } from './uploadTexture';
 import { rgbSize } from '../model/RGB';
 import type { SceneParams } from '../model/generateSceneParams';
@@ -33,26 +33,7 @@ export async function drawCodeScene(
         throw new Error('webgl2 not supported');
     }
 
-    const sceneData = await createCodeSceneData(
-        getSceneBounds(sceneParams.pixelSpace, sceneParams.extensions),
-        sceneParams.txMat,
-        getScrollFraction(sceneParams.imgParams),
-        sceneParams.imgParams.font.size.val,
-        source,
-        colorScheme,
-        parseResult,
-        glyphRaster,
-        workLimiter,
-    );
-
     const program = await createProgram(vertexShaderSource, fragmentShaderSource, gl);
-
-    const verticesArray = new Float32Array(sceneData.vertices);
-    uploadArrayToAttribute('a_position', verticesArray, vertexSize2d, program, gl);
-
-    uploadArrayToAttribute('a_glyphTexPosition', new Float32Array(sceneData.glyphTexPosition), vertexSize2d, program, gl);
-
-    uploadArrayToAttribute('a_color', new Float32Array(sceneData.colors), rgbSize, program, gl);
 
     uploadTexture(1, rasterCanvasEl, gl);
 
@@ -74,7 +55,27 @@ export async function drawCodeScene(
     gl.clearColor(...colorScheme.background, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
-    gl.drawArrays(gl.TRIANGLES, 0, sceneData.vertices.length / vertexSize2d);
+    const uploadToPosition = createUploadToAttribute('a_position', rect2dVertexSize, program, gl);
+    const uploadToGlyphTexPosition = createUploadToAttribute('a_glyphTexPosition', rect2dVertexSize, program, gl);
+    const uploadToColor = createUploadToAttribute('a_color', rgbSize, program, gl);
+
+    for await (const vertices of createCodeAttrArrays(
+        getSceneBounds(sceneParams.pixelSpace, sceneParams.extensions),
+        sceneParams.txMat,
+        getScrollFraction(sceneParams.imgParams),
+        sceneParams.imgParams.font.size.val,
+        source,
+        colorScheme,
+        parseResult,
+        glyphRaster,
+        workLimiter,
+    )) {
+        uploadToPosition(vertices.position);
+        uploadToGlyphTexPosition(vertices.glyphTexPosition);
+        uploadToColor(vertices.color);
+        gl.drawArrays(gl.TRIANGLES, 0, vertices.verticesNum);
+    }
+
 
     return targetTex;
 }

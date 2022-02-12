@@ -1,7 +1,7 @@
 import vertexShaderSource from '../shader/effectsVertex.shader';
 import fragmentShaderSource from '../shader/effectsFragment.shader';
 import { createProgram } from './createProgram';
-import { vertexSize2d } from './rect';
+import { rect2dVertexSize } from './rect';
 import { uploadArrayToAttribute } from './uploadArrayToAttribute';
 import { createEmptyTexture } from './uploadTexture';
 import { createEffectsGrid } from './createEffectsGrid';
@@ -37,7 +37,7 @@ export async function drawEffectsScene(
     const program = await createProgram(vertexShaderSource, fragmentShaderSourceProcessed, gl);
 
     const gridVertices = createEffectsGrid(sceneParams.pixelSpace, sceneParams.extensions, imgParams.font.size.val);
-    uploadArrayToAttribute('a_position', new Float32Array(gridVertices), vertexSize2d, program, gl);
+    uploadArrayToAttribute('a_position', new Float32Array(gridVertices), rect2dVertexSize, program, gl);
 
     gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, inputTexture);
@@ -101,7 +101,7 @@ export async function drawEffectsScene(
 
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
-    await drawTriangles(gridVertices.length / vertexSize2d, gl);
+    await drawTriangles(gridVertices.length / rect2dVertexSize, gl);
 
     gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, targetTex);
@@ -110,6 +110,6 @@ export async function drawEffectsScene(
 
     renderToCanvas(gl);
 
-    await drawTriangles(gridVertices.length / vertexSize2d, gl);
+    await drawTriangles(gridVertices.length / rect2dVertexSize, gl);
     // gl.drawArrays(gl.TRIANGLES, 0, gridVertices.length / vertexSize2d);
 }

@@ -19,7 +19,7 @@
     .code-wr {
         height: 100%;
         /* TODO Optimize paint */
-        max-width: 1280px;
+        /*max-width: 1280px;*/
         position: relative;
         width: 100%;
     }

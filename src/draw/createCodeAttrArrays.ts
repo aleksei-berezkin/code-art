@@ -1,4 +1,4 @@
-import { rect2d, rect2dVerticesNum } from './rect';
+import { rect2d, rect2dVerticesNum, rect2dVertexSize } from './rect';
 import type { Source } from '../model/Source';
 import { iterateCode } from '../model/iterateCode';
 import type { ColorScheme } from '../model/colorSchemes';
@@ -12,17 +12,21 @@ import type { ScrollFraction } from '../model/ScrollFraction';
 import type { GlyphRaster } from '../model/GlyphRaster';
 import type { ParseResult } from '../model/ParseResult';
 import { dpr } from '../util/dpr';
+import { RGB, rgbSize } from '../model/RGB';
 
-export type CodeSceneData = {
-    // only x, y; z is left default = 0
-    vertices: number[],
-    // only x, y
-    glyphTexPosition: number[],
+export type CodeSceneVertices = {
+    // only (x, y); z is always = 0
+    position: Float32Array,
+    // only (x, y)
+    glyphTexPosition: Float32Array,
     // RGB
-    colors: number[],
+    color: Float32Array,
+    verticesNum: number,
 }
 
-export async function createCodeSceneData(
+const verticesInArray = 100 * rect2dVerticesNum;
+
+export async function* createCodeAttrArrays(
     bounds: SceneBounds,
     txMat: Mat4,
     scrollFraction: ScrollFraction,
@@ -32,10 +36,14 @@ export async function createCodeSceneData(
     parseResult: ParseResult,
     glyphRaster: GlyphRaster,
     workLimiter: WorkLimiter,
-): Promise<CodeSceneData> {
-    const vertices = [];
-    const glyphTexPosition = [];
-    const colors = [];
+): AsyncGenerator<CodeSceneVertices> {
+    const v: CodeSceneVertices = {
+        position: new Float32Array(verticesInArray * rect2dVertexSize),
+        glyphTexPosition: new Float32Array(verticesInArray * rect2dVertexSize),
+        color: new Float32Array(verticesInArray * rgbSize),
+
+        verticesNum: 0,
+    };
 
     for (const codeLetter of iterateCode(bounds, scrollFraction, fontSize, source, glyphRaster)) {
         await workLimiter.next();
@@ -55,23 +63,27 @@ export async function createCodeSceneData(
             continue;
         }
 
-        vertices.push(...rect2d(x1, y1, x2, y2));
+        rect2d(v.position, v.verticesNum * rect2dVertexSize, x1, y1, x2, y2);
 
-        glyphTexPosition.push(...rect2d(
+        rect2d(v.glyphTexPosition, v.verticesNum * rect2dVertexSize,
             m.x, m.baseline - ascent,
             m.x + m.w, m.baseline + descent,
-        ));
-
-        const color = colorScheme[shortColorKeyToColorKey[parseResult.colorization[pos]]]
-            ?? colorScheme.default;
-        colors.push(
-            ...Array.from({length: rect2dVerticesNum})
-                .flatMap(() => color)
         );
 
+        const _color = colorScheme[shortColorKeyToColorKey[parseResult.colorization[pos]]]
+            ?? colorScheme.default;
+        setColor(v.color, v.verticesNum * rgbSize, _color);
+
+        v.verticesNum += rect2dVerticesNum;
+        if (v.verticesNum === verticesInArray) {
+            yield v;
+            v.verticesNum = 0;
+        }
     }
 
-    return {vertices, glyphTexPosition, colors};
+    if (v.verticesNum) {
+        yield v;
+    }
 }
 
 function isVisible(txMat: Mat4, x1: number, y1: number, x2: number, y2: number) {
@@ -80,4 +92,10 @@ function isVisible(txMat: Mat4, x1: number, y1: number, x2: number, y2: number) 
             const [_x, _y] = applyTx(txMat, x, y);
             return isVisibleInClipSpace(_x, _y);
         });
+}
+
+function setColor(a: Float32Array, from: number, color: RGB) {
+    for (let i = 0; i < rect2dVerticesNum; i++) {
+        a.set(color, from + i * rgbSize);
+    }
 }

@@ -1,4 +1,4 @@
-import { rect2d } from './rect';
+import { _rect2d } from './rect';
 import type { PixelSpace } from '../model/PixelSpace';
 import { getSceneBounds } from '../model/SceneBounds';
 import type { Extensions } from '../model/Extensions';
@@ -14,7 +14,7 @@ export function createEffectsGrid(pixelSpace: PixelSpace,
     const step = fontSize * cellSizeMultiplier;
     for (let x = bounds.xMin; x <= bounds.xMax + step; x += step) {
         for (let y = bounds.yMin; y <= bounds.yMax + step; y += step) {
-            vertices.push(...rect2d(x, y, x + step, y + step));
+            vertices.push(..._rect2d(x, y, x + step, y + step));
         }
     }
     return vertices;
