@@ -1,11 +1,10 @@
 <script lang='ts'>
-    import { Router, Route } from 'svelte-routing';
     import Code from './Code.svelte';
-    import About from './About.svelte';
 </script>
 
 <style>
     :global(html) {
+        background-color: #333;
         color: #333;
         font-family: Roboto, sans-serif;
         font-size: 16px;
@@ -21,7 +20,7 @@
         --pad-std: 16px;
     }
 
-    :global(html, body, main) {
+    :global(html, body) {
         height: 100%;
         margin: 0;
         padding: 0;
@@ -50,9 +49,4 @@
     }
 </style>
 
-<main>
-    <Router url=''>
-        <Route path='/' component={ Code } />
-        <Route path='/about' component={ About } />
-    </Router>
-</main>
+<Code/>

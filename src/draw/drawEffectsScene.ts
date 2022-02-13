@@ -15,7 +15,7 @@ import { getOptics } from '../model/Optics';
 import { drawTriangles } from './drawTriangles';
 import type { WorkLimiter } from '../util/workLimiter';
 
-const maxKernel = 23;
+const maxKernel = 25;
 
 export async function drawEffectsScene(
     sceneParams: SceneParams,

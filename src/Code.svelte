@@ -1,13 +1,5 @@
 <style>
-    .rasterize-font-canvas {
-        left: 0;
-        position: absolute;
-        transform: translateY(-150%);
-        top: 0;
-        width: 2048px;
-    }
-
-    .section-main {
+    main {
         align-items: center;
         display: flex;
         flex-direction: column;
@@ -16,10 +8,16 @@
         width: 100%;
     }
 
+    .rasterize-font-canvas {
+        left: 0;
+        position: absolute;
+        transform: translateY(-150%);
+        top: 0;
+        width: 2048px;
+    }
+
     .code-wr {
         height: 100%;
-        /* TODO Optimize paint */
-        /*max-width: 1280px;*/
         position: relative;
         width: 100%;
     }
@@ -30,26 +28,15 @@
         width: 100%;
     }
 
-    .progress-wr {
-        align-items: center;
-        display: flex;
-        height: 100%;
-        justify-content: center;
-        left: 0;
-        position: absolute;
-        top: 0;
-        width: 100%;
-    }
-
     .progress-svg {
-        --h: calc(20px + 15vw);
-        --max-s: 120px;
+        --s: calc(min(120px, 200px + 15vw));
 
-        height: var(--h);
-        max-height: var(--max-s);
-        max-width: var(--max-s);
+        height: var(--s);
+        left: calc(50vw - var(--s) * .5);
+        position: absolute;
+        top: calc(50vh - var(--s) * .5);
         stroke: #fff8;
-        width: var(--h);
+        width: var(--s);
     }
 
     .progress-circle {
@@ -124,7 +111,7 @@
 
 </style>
 
-<section class='section-main'>
+<main>
     <canvas class='rasterize-font-canvas' bind:this={rasterCanvasEl} width='2048'></canvas>
     <div class='code-wr'>
         <canvas class='code-canvas' bind:this={codeCanvasEl}></canvas>
@@ -137,26 +124,24 @@
         <button class='round-btn right' on:click={handleDownload}>
             <Icon pic={downloading ? 'pending' : 'download'}/>
         </button>
-        {#if progress}
-            <div class='progress-wr'>
-                <svg class='progress-svg' viewBox='-26 -26 52 52' xmlns='http://www.w3.org/2000/svg'>
-                    <circle class='progress-circle' fill='none' cx='0' cy='0' r='20' stroke-width='4' xmlns='http://www.w3.org/2000/svg'/>
-                </svg>
-            </div>
-        {/if}
-        {#if imgParams}
-            <ImgParamsMenu imgParams={imgParams}
-                           menuOpen={openDialog === 'menu'}
-                           paramsUpdated={onParamsUpdate}
-                           closeMenu={closeMenu}
-                           clickedAbout={onClickedAbout}
-            />
-        {/if}
-        {#if openDialog === 'about'}
-            <About closeDialog={closeAbout}/>
-        {/if}
     </div>
-</section>
+    {#if progress}
+        <svg class='progress-svg' viewBox='-26 -26 52 52' xmlns='http://www.w3.org/2000/svg'>
+            <circle class='progress-circle' fill='none' cx='0' cy='0' r='20' stroke-width='4' xmlns='http://www.w3.org/2000/svg'/>
+        </svg>
+    {/if}
+    {#if imgParams}
+        <ImgParamsMenu imgParams={imgParams}
+                       menuOpen={openDialog === 'menu'}
+                       paramsUpdated={onParamsUpdate}
+                       closeMenu={closeMenu}
+                       clickedAbout={onClickedAbout}
+        />
+    {/if}
+    {#if openDialog === 'about'}
+        <About closeDialog={closeAbout}/>
+    {/if}
+</main>
     
 <script lang='ts'>
     import { ImgParams } from './model/ImgParams';
