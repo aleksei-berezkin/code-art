@@ -8,16 +8,14 @@ import { createEffectsGrid } from './createEffectsGrid';
 import { hexToRgb, RGB } from '../model/RGB';
 import { getSliderVal } from '../model/ImgParams';
 import { ceilToOdd } from '../util/ceilToOdd';
-import { getLoopSize } from './getLoopSize';
 import { dpr } from '../util/dpr';
 import type { SceneParams } from '../model/generateSceneParams';
 import { renderColorToTexture, renderToCanvas } from './renderColorToTexture';
 import { getOptics } from '../model/Optics';
 import { drawTriangles } from './drawTriangles';
 import type { WorkLimiter } from '../util/workLimiter';
-import { delay } from '../util/delay';
 
-const maxKernel = 29;
+const maxKernel = 23;
 
 export async function drawEffectsScene(
     sceneParams: SceneParams,
@@ -30,9 +28,9 @@ export async function drawEffectsScene(
 
     const { imgParams } = sceneParams;
     const glowRadius = getSliderVal(imgParams.font.size) * getSliderVal(imgParams.glow.radius) / 2;
-    const glowKSize = ceilToOdd(glowRadius * 1.6 * dpr, maxKernel);
-    const blurKSize = ceilToOdd(3 * imgParams.fade.blur.val * dpr, maxKernel);
-    const loopSize = getLoopSize(glowKSize, blurKSize, maxKernel);
+    const glowKSize = ceilToOdd(glowRadius * .65 * dpr, maxKernel);
+    const blurKSize = ceilToOdd(2.65 * imgParams.fade.blur.val * dpr, maxKernel);
+    const loopSize = Math.max(glowKSize, blurKSize);
 
     const fragmentShaderSourceProcessed = fragmentShaderSource
         .replaceAll('_LOOP_SZ_', String(loopSize))
