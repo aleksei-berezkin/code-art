@@ -10,5 +10,32 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400&family=Anonymous+Pro&family=B612+Mono&family=Courier+Prime&family=Cutive+Mono&family=Inconsolata&family=JetBrains+Mono&family=Noto+Sans+Mono&family=Nova+Mono&family=Share+Tech+Mono&family=Syne+Mono&family=Ubuntu+Mono&display=swap" rel="stylesheet">
 </head>
 <body>
+    <script>
+        try {
+            var a = eval(
+                '(async () => {\n' +
+                'let a = [];\n' +
+                'for await (const x of gen()) {\n' +
+                '  a = [...a, x];\n' +
+                '}\n' +
+                'async function* gen() {\n' +
+                '  yield Promise.resolve(3);\n' +
+                '  yield 5;\n' +
+                '}\n' +
+                'return a;})();'
+            );
+            if (!('finally' in a)) {
+                displayStub();
+            }
+        } catch(e) {
+            debugger;
+            displayStub();
+        }
+        function displayStub() {
+            // TODO
+            window.isStub = true;
+            document.write('<p>Cannot display Code Art</p>')
+        }
+    </script>
 </body>
 </html>
