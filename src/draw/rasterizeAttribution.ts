@@ -3,8 +3,8 @@ import { dpr } from '../util/dpr';
 const pad = {
     aboveAscent: .4,
     belowBaseline: .6,
-    left: .6,
-    right: .6,
+    left: .55,
+    right: .55,
 }
 
 export async function rasterizeAttribution(text: string, fontSize: number, canvasEl: HTMLCanvasElement) {
