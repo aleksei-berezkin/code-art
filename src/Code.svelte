@@ -8,12 +8,11 @@
         width: 100%;
     }
 
-    .rasterize-font-canvas {
+    .alphabet-canvas, .attribution-canvas {
         left: 0;
         position: absolute;
         transform: translateY(-150%);
         top: 0;
-        width: 2048px;
     }
 
     .code-wr {
@@ -112,7 +111,8 @@
 </style>
 
 <main>
-    <canvas class='rasterize-font-canvas' bind:this={rasterCanvasEl} width='2048'></canvas>
+    <canvas class='alphabet-canvas' bind:this={alphabetCanvasEl} width='2048'></canvas>
+    <canvas class='attribution-canvas' bind:this={attributionCanvasEl}></canvas>
     <div class='code-wr'>
         <canvas class='code-canvas' bind:this={codeCanvasEl}></canvas>
         <button class='round-btn left' on:click={handleMenuClick}>
@@ -154,7 +154,8 @@
     import About from './About.svelte';
 
     let codeCanvasEl: HTMLCanvasElement;
-    let rasterCanvasEl: HTMLCanvasElement;
+    let alphabetCanvasEl: HTMLCanvasElement;
+    let attributionCanvasEl: HTMLCanvasElement;
 
     let progress = false;
 
@@ -192,7 +193,8 @@
             setWH();
             await drawRandomScene(
                 codeCanvasEl,
-                rasterCanvasEl,
+                alphabetCanvasEl,
+                attributionCanvasEl,
                 p => imgParams = p,
             );
         })
@@ -223,7 +225,8 @@
                 await drawScene(
                     imgParams,
                     codeCanvasEl,
-                    rasterCanvasEl,
+                    alphabetCanvasEl,
+                    attributionCanvasEl,
                     p => imgParams = p,
                 );
             }

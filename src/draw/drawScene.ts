@@ -1,6 +1,6 @@
 import { pickRandom } from '../util/pickRandom';
 import { getSource, Source } from '../model/Source';
-import { rasterizeFont } from './rasterizeFont';
+import { rasterizeAlphabet } from './rasterizeAlphabet';
 import { generateSceneParams, SceneParams } from '../model/generateSceneParams';
 import { dpr } from '../util/dpr';
 import type { ImgParams } from '../model/ImgParams';
@@ -17,13 +17,16 @@ import { colorSchemes } from '../model/colorSchemes';
 import { calcExtensions } from '../model/Extensions';
 import { getAdjustedImgParams } from '../model/getAdjustedImgParams';
 import { createWorkLimiter, WorkLimiter } from '../util/workLimiter';
-import type { GlyphRaster } from '../model/GlyphRaster';
-import { defaultMonospace, fontFacesForRandomScenes } from '../model/fontFaces';
+import type { AlphabetRaster } from '../model/AlphabetRaster';
+import { fontFacesForRandomScenes } from '../model/fontFaces';
 import { sourceSpecs } from '../model/sourceSpecs';
+import { rasterizeAttribution } from './rasterizeAttribution';
+import { drawAttributionScene } from './drawAttributionScene';
 
 export async function drawRandomScene(
     codeCanvasEl: HTMLCanvasElement,
-    rasterCanvasEl: HTMLCanvasElement,
+    alphabetCanvasEl: HTMLCanvasElement,
+    attributionCanvasEl: HTMLCanvasElement,
     setParams: (p: ImgParams) => void,
 ) {
     const sourceName = pickRandom(Object.keys(sourceSpecs));
@@ -33,13 +36,11 @@ export async function drawRandomScene(
     const fontFace = pickRandom(fontFacesForRandomScenes);
     const fontSize = getFontSize(sizePixelSpace);
 
-    await loadFont(fontFace, fontSize, source.parseResult.alphabet);
-
     const workLimiter = createWorkLimiter();
-    const glyphRaster = await rasterizeFont(source, rasterCanvasEl, fontFace, fontSize, workLimiter);
+    const alphabetRaster = await rasterizeAlphabet(source, alphabetCanvasEl, fontFace, fontSize, workLimiter);
 
-    const sceneParams = await generateSceneParams(source, getSizePixelSpace(codeCanvasEl), fontFace, fontSize, glyphRaster, workLimiter);
-    await _drawScene(source, sceneParams, glyphRaster, codeCanvasEl, rasterCanvasEl, workLimiter);
+    const sceneParams = await generateSceneParams(source, getSizePixelSpace(codeCanvasEl), fontFace, fontSize, alphabetRaster, workLimiter);
+    await _drawScene(source, sceneParams, alphabetRaster, codeCanvasEl, alphabetCanvasEl, attributionCanvasEl, workLimiter);
 
     setParams(sceneParams.imgParams);
 }
@@ -47,7 +48,8 @@ export async function drawRandomScene(
 export async function drawScene(
     _imgParams: ImgParams,
     codeCanvasEl: HTMLCanvasElement,
-    rasterCanvasEl: HTMLCanvasElement,
+    alphabetCanvasEl: HTMLCanvasElement,
+    attributionCanvasEl: HTMLCanvasElement,
     setParams: (p: ImgParams) => void,
 ) {
     const source = await getSource(_imgParams.source['source'].val);
@@ -55,9 +57,8 @@ export async function drawScene(
 
     const fontFace = imgParams.font.face.val;
     const fontSize = getSliderVal(imgParams.font.size);
-    await loadFont(fontFace, fontSize, source.parseResult.alphabet);
     const workLimiter = createWorkLimiter();
-    const glyphRaster = await rasterizeFont(source, rasterCanvasEl, fontFace, fontSize, workLimiter);
+    const alphabetRaster = await rasterizeAlphabet(source, alphabetCanvasEl, fontFace, fontSize, workLimiter);
 
     const pixelSpace = makePixelSpace(getSizePixelSpace(codeCanvasEl));
     const xAngle = getSliderVal(imgParams.angle.x);
@@ -66,18 +67,20 @@ export async function drawScene(
     const txMat = getTxMax(pixelSpace, xAngle, yAngle, zAngle);
     const extensions = await calcExtensions(pixelSpace, xAngle, yAngle, zAngle, txMat, workLimiter);
     await delay();
-    await _drawScene(source, {pixelSpace, extensions, imgParams, txMat}, glyphRaster, codeCanvasEl, rasterCanvasEl, workLimiter);
+    await _drawScene(source, {pixelSpace, extensions, imgParams, txMat}, alphabetRaster, codeCanvasEl, alphabetCanvasEl, attributionCanvasEl, workLimiter);
 
     setParams(imgParams);
 }
 
-async function _drawScene(source: Source, sceneParams: SceneParams, glyphRaster: GlyphRaster, codeCanvasEl: HTMLCanvasElement, rasterCanvasEl: HTMLCanvasElement, workLimiter: WorkLimiter) {
+async function _drawScene(source: Source, sceneParams: SceneParams, alphabetRaster: AlphabetRaster, codeCanvasEl: HTMLCanvasElement, alphabetCanvasEl: HTMLCanvasElement, attributionCanvasEl: HTMLCanvasElement, workLimiter: WorkLimiter) {
     const sourceCodeDetails = sourceSpecs[sceneParams.imgParams.source.source.val];
     const parseResult = await parseCode(sourceCodeDetails.url, sourceCodeDetails.lang === 'js min line');
     const colorScheme = colorSchemes[sceneParams.imgParams.color.scheme.val as ColorSchemeName];
-    const targetTex = await drawCodeScene(source, colorScheme, parseResult, sceneParams, glyphRaster, codeCanvasEl, rasterCanvasEl, workLimiter);
+    const codeTex = await drawCodeScene(source, colorScheme, parseResult, sceneParams, alphabetRaster, codeCanvasEl, alphabetCanvasEl, workLimiter);
     await delay();
-    await drawEffectsScene(sceneParams, colorScheme.background, targetTex, codeCanvasEl, workLimiter);
+    const targetTex = await drawEffectsScene(sceneParams, colorScheme.background, codeTex, codeCanvasEl, workLimiter);
+    await rasterizeAttribution(source.spec.credit, sceneParams.imgParams.font.size.val, attributionCanvasEl);
+    await drawAttributionScene(sceneParams, targetTex, colorScheme, codeCanvasEl, attributionCanvasEl);
 }
 
 function getSizePixelSpace(codeCanvasEl: HTMLCanvasElement): Size {
@@ -89,12 +92,4 @@ function getSizePixelSpace(codeCanvasEl: HTMLCanvasElement): Size {
 
 function getFontSize(sizePx: Size) {
     return Math.min(36, 18 + sizePx.w / 1280 * 18);
-}
-
-async function loadFont(fontFace: string, fontSize: number, alphabet: string) {
-    if (fontFace === defaultMonospace) {
-        return;
-    }
-
-    await document.fonts.load(`${fontSize}px '${fontFace}'`, alphabet);
 }

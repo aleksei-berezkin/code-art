@@ -7,7 +7,7 @@ import { isVisibleInClipSpace } from '../util/isVisibleInClipSpace';
 import { pluck } from '../util/pluck';
 import type { ScrollFraction } from './ScrollFraction';
 import type { WorkLimiter } from '../util/workLimiter';
-import type { GlyphRaster } from './GlyphRaster';
+import type { AlphabetRaster } from './AlphabetRaster';
 
 const fillMatrixSize = 5;
 
@@ -17,11 +17,11 @@ export async function scoreFill(
     txMat: Mat4,
     scrollFraction: ScrollFraction,
     fontSize: number,
-    glyphRaster: GlyphRaster,
+    alphabetRaster: AlphabetRaster,
     workLimiter: WorkLimiter,
 ) {
     const fillMatrix: number[] = new Array(fillMatrixSize**2).fill(0);
-    for (const c of iterateCode(sceneBounds, scrollFraction, fontSize, source, glyphRaster)) {
+    for (const c of iterateCode(sceneBounds, scrollFraction, fontSize, source, alphabetRaster)) {
         await workLimiter.next();
         const [x, y, w] = applyTx(txMat, c.x, c.baseline);
         if (isVisibleInClipSpace(x, y)) {

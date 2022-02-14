@@ -9,7 +9,7 @@ import { isVisibleInClipSpace } from '../util/isVisibleInClipSpace';
 import type { SceneBounds } from '../model/SceneBounds';
 import type { WorkLimiter } from '../util/workLimiter';
 import type { ScrollFraction } from '../model/ScrollFraction';
-import type { GlyphRaster } from '../model/GlyphRaster';
+import type { AlphabetRaster } from '../model/AlphabetRaster';
 import type { ParseResult } from '../model/ParseResult';
 import { dpr } from '../util/dpr';
 import { RGB, rgbSize } from '../model/RGB';
@@ -34,7 +34,7 @@ export async function* createCodeSceneVertices(
     source: Source,
     colorScheme: ColorScheme,
     parseResult: ParseResult,
-    glyphRaster: GlyphRaster,
+    alphabetRaster: AlphabetRaster,
     workLimiter: WorkLimiter,
 ): AsyncGenerator<CodeSceneVertices> {
     // Same object reused
@@ -45,19 +45,19 @@ export async function* createCodeSceneVertices(
         verticesNum: 0,
     };
 
-    for (const codeLetter of iterateCode(bounds, scrollFraction, fontSize, source, glyphRaster)) {
+    for (const codeLetter of iterateCode(bounds, scrollFraction, fontSize, source, alphabetRaster)) {
         await workLimiter.next();
 
         const {pos, letter, x, baseline} = codeLetter;
-        const m = glyphRaster.glyphs.get(letter)!;
+        const m = alphabetRaster.glyphs.get(letter)!;
 
-        const ascent = Math.min(m.ascent + dpr, glyphRaster.maxAscent);
-        const descent = Math.min(m.descent + dpr, glyphRaster.maxDescent);
+        const ascent = Math.min(m.ascent + dpr, alphabetRaster.maxAscent);
+        const descent = Math.min(m.descent + dpr, alphabetRaster.maxDescent);
 
         const x1 = x;
-        const y1 = baseline - ascent / glyphRaster.fontSizeRatio;
-        const x2 = x + m.w / glyphRaster.fontSizeRatio;
-        const y2 = baseline + descent / glyphRaster.fontSizeRatio;
+        const y1 = baseline - ascent / alphabetRaster.fontSizeRatio;
+        const x2 = x + m.w / alphabetRaster.fontSizeRatio;
+        const y2 = baseline + descent / alphabetRaster.fontSizeRatio;
 
         if (!isVisible(txMat, x1, y1, x2, y2)) {
             continue;

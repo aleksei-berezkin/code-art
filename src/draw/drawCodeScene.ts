@@ -13,7 +13,7 @@ import type { ColorScheme } from '../model/colorSchemes';
 import { getSceneBounds } from '../model/SceneBounds';
 import { getScrollFraction } from '../model/ScrollFraction';
 import type { WorkLimiter } from '../util/workLimiter';
-import type { GlyphRaster } from '../model/GlyphRaster';
+import type { AlphabetRaster } from '../model/AlphabetRaster';
 import type { ParseResult } from '../model/ParseResult';
 import { dpr } from '../util/dpr';
 
@@ -23,9 +23,9 @@ export async function drawCodeScene(
     colorScheme: ColorScheme,
     parseResult: ParseResult,
     sceneParams: SceneParams,
-    glyphRaster: GlyphRaster,
+    alphabetRaster: AlphabetRaster,
     codeCanvasEl: HTMLCanvasElement,
-    rasterCanvasEl: HTMLCanvasElement,
+    alphabetCanvasEl: HTMLCanvasElement,
     workLimiter: WorkLimiter,
 ) {
     const gl = codeCanvasEl.getContext('webgl2', {preserveDrawingBuffer: true});
@@ -35,13 +35,13 @@ export async function drawCodeScene(
 
     const program = await createProgram(vertexShaderSource, fragmentShaderSource, gl);
 
-    uploadTexture(1, rasterCanvasEl, gl);
+    uploadTexture(1, alphabetCanvasEl, gl);
 
     gl.useProgram(program);
 
     gl.uniform1i(gl.getUniformLocation(program, 'u_letters'), 1);
 
-    gl.uniform1f(gl.getUniformLocation(program, 'u_lettersTexRatio'), glyphRaster.fontSizeRatio / dpr);
+    gl.uniform1f(gl.getUniformLocation(program, 'u_lettersTexRatio'), alphabetRaster.fontSizeRatio / dpr);
 
     gl.uniformMatrix4fv(gl.getUniformLocation(program, 'u_tx'), false, sceneParams.txMat);
 
@@ -67,7 +67,7 @@ export async function drawCodeScene(
         source,
         colorScheme,
         parseResult,
-        glyphRaster,
+        alphabetRaster,
         workLimiter,
     )) {
         uploadToPosition(vertices.position);

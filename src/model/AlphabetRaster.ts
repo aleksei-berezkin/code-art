@@ -1,4 +1,4 @@
-export type GlyphRaster = {
+export type AlphabetRaster = {
     glyphs: Map<string, GlyphMetrics>,
     fontSizeRatio: number,
     maxAscent: number,
@@ -6,6 +6,7 @@ export type GlyphRaster = {
     // Not regarding letters frequency
     avgW: number,
 }
+
 export type GlyphMetrics = {
     baseline: number,
     ascent: number,

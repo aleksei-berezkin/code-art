@@ -97,21 +97,26 @@ export async function drawEffectsScene(
 
     gl.uniform1i(gl.getUniformLocation(program, 'u_mode'), 0);
 
-    const targetTex = createEmptyTexture(0, {w: codeCanvasEl.width, h: codeCanvasEl.height}, gl)
-    renderColorToTexture(targetTex, gl);
+    const glowTex = createEmptyTexture(0, {w: codeCanvasEl.width, h: codeCanvasEl.height}, gl)
+    renderColorToTexture(glowTex, gl);
 
     await workLimiter.next();
-    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
     await drawTriangles(gridVertices.length / rect2dVertexSize, gl);
 
+    // Blur mode
+
     gl.activeTexture(gl.TEXTURE1);
-    gl.bindTexture(gl.TEXTURE_2D, targetTex);
+    gl.bindTexture(gl.TEXTURE_2D, glowTex);
+
+    const targetTex = createEmptyTexture(0, {w: codeCanvasEl.width, h: codeCanvasEl.height}, gl)
+    renderColorToTexture(targetTex, gl);
 
     gl.uniform1i(gl.getUniformLocation(program, 'u_mode'), 1);
 
     await workLimiter.next();
-    renderToCanvas(gl);
 
     await drawTriangles(gridVertices.length / rect2dVertexSize, gl);
+
+    return targetTex;
 }

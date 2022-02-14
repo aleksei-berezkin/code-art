@@ -4,7 +4,7 @@ import type { Mat4 } from '../util/matrices';
 import type { ScrollFraction } from './ScrollFraction';
 import type { WorkLimiter } from '../util/workLimiter';
 import { scoreFill } from './scoreFill';
-import type { GlyphRaster } from './GlyphRaster';
+import type { AlphabetRaster } from './AlphabetRaster';
 import { isMinified } from './Lang';
 
 export async function generateScrollFraction(
@@ -13,7 +13,7 @@ export async function generateScrollFraction(
     angleY: number,
     txMat: Mat4,
     fontSize: number,
-    glyphRaster: GlyphRaster,
+    alphabetRaster: AlphabetRaster,
     workLimiter: WorkLimiter,
 ): Promise<ScrollFraction> {
     if (isMinified(source.spec.lang)) {
@@ -32,7 +32,7 @@ export async function generateScrollFraction(
                     };
                     return {
                         scrollFraction,
-                        score: await scoreFill(source, sceneBounds, txMat, scrollFraction, fontSize, glyphRaster, workLimiter),
+                        score: await scoreFill(source, sceneBounds, txMat, scrollFraction, fontSize, alphabetRaster, workLimiter),
                     }
                 })
         ))

@@ -1,7 +1,7 @@
 import { dpr } from '../util/dpr';
 import type { Source } from '../model/Source';
 import type { WorkLimiter } from '../util/workLimiter';
-import type { GlyphMetrics, GlyphRaster } from '../model/GlyphRaster';
+import type { GlyphMetrics, AlphabetRaster } from '../model/AlphabetRaster';
 import { defaultMonospace } from '../model/fontFaces';
 
 const fontSizeMultiplier = 2;
@@ -11,15 +11,15 @@ const spaceH = 1.05;
 const dsAlphabet = 'alphabet';
 const dsFontFace = 'fontFace';
 const dsFontSize = 'fontSize';
-let cachedRaster: GlyphRaster | undefined = undefined;
+let cachedRaster: AlphabetRaster | undefined = undefined;
 
-export async function rasterizeFont(
+export async function rasterizeAlphabet(
     source: Source,
     canvasEl: HTMLCanvasElement,
     fontFace: string,
     fontSize: number,
     workLimiter: WorkLimiter,
-): Promise<GlyphRaster> {
+): Promise<AlphabetRaster> {
     if (cachedRaster
         && canvasEl.dataset[dsAlphabet] === source.parseResult.alphabet
         && canvasEl.dataset[dsFontFace] === String(fontFace)
@@ -28,6 +28,8 @@ export async function rasterizeFont(
         return cachedRaster;
     }
 
+    await loadFont(fontFace, fontSize, source.parseResult.alphabet);
+    
     const ctx = canvasEl.getContext('2d');
     if (!ctx) {
         throw new Error('No 2d context');
@@ -105,4 +107,12 @@ function estimateNeededCanvasHeight(ctx: CanvasRenderingContext2D, xMin: number,
     const glyphsPerLine = Math.floor((xMax - xMin) / width / spaceH);
     const linesEstimate = Math.ceil(alphabetSize / glyphsPerLine) + 1.5;
     return Math.ceil(linesEstimate * fontSize * spaceV);
+}
+
+async function loadFont(fontFace: string, fontSize: number, alphabet: string) {
+    if (fontFace === defaultMonospace) {
+        return;
+    }
+
+    await document.fonts.load(`${fontSize}px '${fontFace}'`, alphabet);
 }

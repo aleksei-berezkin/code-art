@@ -9,7 +9,7 @@ type CachedProgram = {
 }
 
 const cachedPrograms: CachedProgram[] = [];
-const maxCachedPrograms = 2;
+const maxCachedPrograms = 3;
 
 export async function createProgram(vertexShaderSource: string, fragmentShaderSource: string, gl: WebGL2RenderingContext) {
     const cachedIndex = cachedPrograms.findIndex(p => p.vertexShaderSource === vertexShaderSource && p.fragmentShaderSource === fragmentShaderSource);
