@@ -36,11 +36,6 @@ void main() {
     // -1..+1 -> 0..1
     v_texCoords = (gl_Position.xy + 1.0) / 2.0;
 
-    if (u_mode == MODE_BLUR) {
-        // Input texture and target canvas have different y direction
-        gl_Position.y = -gl_Position.y;
-    }
-
     if (u_mode == MODE_GLOW) {
         // x: -u_glowRadius..+u_glowRadius -> -.5..+.5
         // y: -u_glowRadius..+u_glowRadius -> +.5..-.5

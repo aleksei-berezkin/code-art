@@ -41,7 +41,7 @@ export async function drawAttributionScene(
     gl.uniform1i(gl.getUniformLocation(prog, 'u_attr'), 1);
 
     gl.uniform2fv(gl.getUniformLocation(prog, 'u_mainSizePx'), [codeCanvasEl.width, codeCanvasEl.height]);
-    gl.uniform2fv(gl.getUniformLocation(prog, 'u_attrFromPx'), [codeCanvasEl.width - attributionCanvasEl.width, attributionCanvasEl.height]);
+    gl.uniform2fv(gl.getUniformLocation(prog, 'u_attrFromPx'), [codeCanvasEl.width - attributionCanvasEl.width, codeCanvasEl.height - attributionCanvasEl.height]);
     gl.uniform2fv(gl.getUniformLocation(prog, 'u_attrSizePx'), [attributionCanvasEl.width, attributionCanvasEl.height]);
     gl.uniform2fv(gl.getUniformLocation(prog, 'u_blurRadiiPx'), [blurRadius, blurRadius]);
     gl.uniform3fv(gl.getUniformLocation(prog, 'u_bg'), colorScheme.background);
