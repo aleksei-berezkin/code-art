@@ -33,18 +33,16 @@ void main() {
             for (int j = 0; j < _K_SIZE_; j++) {
                 int x = i - (_K_SIZE_ / 2);
                 int y = j - (_K_SIZE_ / 2);
-                if (x * x + y * y <= (_K_SIZE_ / 2) * (_K_SIZE_ / 2)) {
-                    vec2 deltaPx = vec2(x, y) / float(_K_SIZE_ / 2) * u_blurRadiiPx;
-                    blur += texture(u_attr, v_attrPosTx + onePixel * deltaPx).xyz;
-                    w += 1.0;
-                }
+                vec2 deltaPx = vec2(x, y) / float(_K_SIZE_ / 2) * u_blurRadiiPx;
+                blur += texture(u_attr, v_attrPosTx + onePixel * deltaPx).xyz;
+                w += 1.0;
             }
         }
 
         blur /= w;
-        vec3 blurInverse = pluck(0.0, 1.0 - pluck(0.0, blur, .1) * 6.5 + u_bg * 2.5, 1.0);
+        vec3 blurInverse = pluck(0.0, 1.0 - pluck(0.0, blur, .1) * 6.0 + u_bg * 2.5, 1.0);
 
-        outColor = main * vec4(blurInverse, 1.0) + attr * .85;
+        outColor = main * vec4(blurInverse, 1.0) + attr * .75;
     } else {
         outColor = main;
     }
