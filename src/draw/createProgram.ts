@@ -29,6 +29,7 @@ export async function createProgram(vertexShaderSource: string, fragmentShaderSo
 
     const program = gl.createProgram();
     if (!program) {
+        window.showStub();
         throw new Error('Cannot create program');
     }
 
@@ -81,6 +82,7 @@ export async function createProgram(vertexShaderSource: string, fragmentShaderSo
 function createShader(source: string, type: GLenum, gl: WebGL2RenderingContext) {
     const shader = gl.createShader(type);
     if (!shader) {
+        window.showStub();
         throw new Error('Cannot create shader');
     }
 

@@ -30,6 +30,7 @@ export async function drawCodeScene(
 ) {
     const gl = codeCanvasEl.getContext('webgl2', {preserveDrawingBuffer: true});
     if (!gl) {
+        window.showStub();
         throw new Error('webgl2 not supported');
     }
 

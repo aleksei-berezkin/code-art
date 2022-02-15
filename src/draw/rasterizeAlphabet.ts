@@ -32,6 +32,7 @@ export async function rasterizeAlphabet(
     
     const ctx = canvasEl.getContext('2d');
     if (!ctx) {
+        window.showStub();
         throw new Error('No 2d context');
     }
 
