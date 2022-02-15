@@ -1,8 +1,8 @@
 import { degToRad } from '../util/degToRad';
 
 export function generateAngles(isMin: boolean): {x: number, y: number, z: number} {
-    const x = randomSign() * randomAngle(3, isMin ? 13 : 11);
-    const y = (isMin ? randomSign() : -1) * randomAngle(4, isMin ? 15 : 13);
+    const x = randomSign() * randomAngleDeg(3, isMin ? 13 : 11);
+    const y = (isMin ? randomSign() : -1) * randomAngleDeg(4, isMin ? 15 : 13);
 
     const xAbs = Math.abs(x);
     const yAbs = Math.abs(y);
@@ -10,12 +10,16 @@ export function generateAngles(isMin: boolean): {x: number, y: number, z: number
         return generateAngles(isMin);
     }
 
-    const z = isMin ? randomSign() * randomAngle(1.5, 3.5) : 0;
-    return {x, y, z};
+    const z = isMin ? randomSign() * randomAngleDeg(1.5, 3.5) : 0;
+    return {
+        x: degToRad(x),
+        y: degToRad(y),
+        z: degToRad(z),
+    };
 }
 
-function randomAngle(degMin: number, degMax: number) {
-    return degToRad(degMin) + Math.random() * degToRad(degMax - degMin);
+function randomAngleDeg(degMin: number, degMax: number) {
+    return degMin + Math.random() * (degMax - degMin);
 }
 
 function randomSign() {

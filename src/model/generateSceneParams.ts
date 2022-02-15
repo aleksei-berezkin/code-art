@@ -19,6 +19,7 @@ import type { AlphabetRaster } from './AlphabetRaster';
 import { fontFaces } from './fontFaces';
 import { isMinified } from './Lang';
 import { sourceSpecs } from './sourceSpecs';
+import type { ScrollFraction } from './ScrollFraction';
 
 export type SceneParams = {
     pixelSpace: PixelSpace,
@@ -30,13 +31,25 @@ export type SceneParams = {
 export async function generateSceneParams(source: Source, sizePx: Size, fontFace: string, fontSize: number, alphabetRaster: AlphabetRaster, workLimiter: WorkLimiter): Promise<SceneParams> {
     const blurFactorPercentLog = 1.3 + Math.random();
 
-    const angles = generateAngles(isMinified(source.spec.lang));
+    let angles: ReturnType<typeof generateAngles>;
+    let pixelSpace: PixelSpace;
+    let txMat: Mat4;
+    let extensions: Extensions;
+    let scrollFraction: ScrollFraction;
+    for ( ; ; ) {
+        await workLimiter.next();
 
-    const pixelSpace = makePixelSpace(sizePx);
-    const txMat = getTxMax(pixelSpace, angles.x, angles.y, angles.z);
-    const extensions = await calcExtensions(pixelSpace, angles.x, angles.y, angles.z, txMat, workLimiter);
-    await delay();
-    const scrollFraction = await generateScrollFraction(source, getSceneBounds(pixelSpace, extensions), angles.y, txMat, fontSize, alphabetRaster, workLimiter);
+        angles = generateAngles(isMinified(source.spec.lang));
+        pixelSpace = makePixelSpace(sizePx);
+        txMat = getTxMax(pixelSpace, angles.x, angles.y, angles.z);
+        extensions = await calcExtensions(pixelSpace, angles.x, angles.y, angles.z, txMat, workLimiter);
+        const _scrollFraction = await generateScrollFraction(source, getSceneBounds(pixelSpace, extensions), angles.y, txMat, fontSize, alphabetRaster, workLimiter);
+        if (_scrollFraction) {
+            scrollFraction = _scrollFraction;
+            break;
+        }
+    }
+    
 
     const imgParams: ImgParams = {
         angle: {

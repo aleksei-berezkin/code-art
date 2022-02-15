@@ -15,20 +15,17 @@ export async function generateScrollFraction(
     fontSize: number,
     alphabetRaster: AlphabetRaster,
     workLimiter: WorkLimiter,
-): Promise<ScrollFraction> {
-    if (isMinified(source.spec.lang)) {
-        return {
-            v: Math.random(),
-            h: angleY < 0 ? Math.random() * .5 : 0,
-        };
-    }
+): Promise<ScrollFraction | undefined> {
+    const isMin = isMinified(source.spec.lang);
 
-    return (await Promise.all(
-            Array.from({length: 15})
+    const {scrollFraction, score} = (await Promise.all(
+            Array.from({length: isMin ? 5 : 15})
                 .map(async () => {
                     const scrollFraction = {
                         v: Math.random(),
-                        h: -Math.random() * .15,
+                        h: isMinified(source.spec.lang)
+                            ? Math.random() * .5
+                            : -Math.random() * .15,
                     };
                     return {
                         scrollFraction,
@@ -36,6 +33,12 @@ export async function generateScrollFraction(
                     }
                 })
         ))
-        .reduce((a, b) => a.score > b.score ? a : b)
-        .scrollFraction;
+        .reduce((a, b) => a.score > b.score ? a : b);
+
+    if (score < -100) {
+        // Bad angles
+        return undefined;
+    }
+
+    return scrollFraction;
 }

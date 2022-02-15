@@ -19,7 +19,10 @@ export function* iterateCode(bounds: SceneBounds,
                              alphabetRaster: AlphabetRaster): Generator<CodeLetter> {
     const lineHeight = Math.max(fontSize, (alphabetRaster.maxAscent + alphabetRaster.maxDescent) / alphabetRaster.fontSizeRatio);
     const requiredLinesReal = (bounds.yMax - bounds.yMin) / lineHeight;
-    const startLineReal = (source.parseResult.lines.length - requiredLinesReal) * scrollFraction.v;
+    const scrollOutLines = source.parseResult.lines.length - requiredLinesReal;
+    const startLineReal = scrollOutLines > 0
+        ? scrollOutLines * scrollFraction.v
+        : scrollOutLines * (1 - scrollFraction.v);
     const startLine = pluck(0, Math.floor(startLineReal), source.parseResult.lines.length - 1);
     // Negative means a line "before" startLine=0 visible
     const startLineScrolledOutFraction = startLineReal - startLine;
