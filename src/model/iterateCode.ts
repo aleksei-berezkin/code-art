@@ -1,6 +1,5 @@
 import type { Source } from './Source';
 import type { SceneBounds } from './SceneBounds';
-import { pluck } from '../util/pluck';
 import type { ScrollFraction } from './ScrollFraction';
 import type { AlphabetRaster } from './AlphabetRaster';
 import { isMinified } from './Lang';
@@ -16,24 +15,21 @@ export function* iterateCode(bounds: SceneBounds,
                              scrollFraction: ScrollFraction,
                              fontSize: number,
                              source: Source,
-                             alphabetRaster: AlphabetRaster): Generator<CodeLetter> {
+                             alphabetRaster: AlphabetRaster,
+ ): Generator<CodeLetter> {
     const lineHeight = Math.max(fontSize, (alphabetRaster.maxAscent + alphabetRaster.maxDescent) / alphabetRaster.fontSizeRatio);
-    const requiredLinesReal = (bounds.yMax - bounds.yMin) / lineHeight;
-    const scrollOutLines = source.parseResult.lines.length - requiredLinesReal;
-    const startLineReal = scrollOutLines > 0
-        ? scrollOutLines * scrollFraction.v
-        : scrollOutLines * (1 - scrollFraction.v);
-    const startLine = pluck(0, Math.floor(startLineReal), source.parseResult.lines.length - 1);
-    // Negative means a line "before" startLine=0 visible
-    const startLineScrolledOutFraction = startLineReal - startLine;
-    const yMin = bounds.yMin - lineHeight * startLineScrolledOutFraction;
+    const viewportLinesNumber = (bounds.yMax - bounds.yMin) / lineHeight;
+    const yMin = bounds.yMin - scrollFraction.v * fontSize * (source.parseResult.lines.length - viewportLinesNumber);
 
-    const requiredCharsReal = (bounds.xMax - bounds.xMin) / alphabetRaster.avgW / alphabetRaster.fontSizeRatio;
+    const viewportLineLength = (bounds.xMax - bounds.xMin) / alphabetRaster.avgW / alphabetRaster.fontSizeRatio;
     const lineLength = isMinified(source.spec.lang) ? source.parseResult.avgLineLength : source.parseResult.longestLineLength;
-    const xMin = bounds.xMin - scrollFraction.h * alphabetRaster.avgW / alphabetRaster.fontSizeRatio * (lineLength - requiredCharsReal);
+    const xMin = bounds.xMin - scrollFraction.h * alphabetRaster.avgW / alphabetRaster.fontSizeRatio * (lineLength - viewportLineLength);
 
-    for (let line = startLine; line < source.parseResult.lines.length; line++) {
-        const y = yMin + (line - startLine) * lineHeight;
+    for (let line = 0; line < source.parseResult.lines.length; line++) {
+        const y = yMin + line * lineHeight;
+        if (y + lineHeight < bounds.yMin) {
+            continue;
+        }
         if (y > bounds.yMax) {
             break;
         }
