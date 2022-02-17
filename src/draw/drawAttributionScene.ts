@@ -9,6 +9,8 @@ import type { ColorScheme } from '../model/colorSchemes';
 import { dpr } from '../util/dpr';
 import { ceilToOdd } from '../util/ceilToOdd';
 import { delay } from '../util/delay';
+import type { AttributionPos } from '../model/attributionPos';
+import { noAttribution } from '../model/attributionPos';
 
 export async function drawAttributionScene(
     sceneParams: SceneParams,
@@ -41,7 +43,15 @@ export async function drawAttributionScene(
     gl.uniform1i(gl.getUniformLocation(prog, 'u_attr'), 1);
 
     gl.uniform2fv(gl.getUniformLocation(prog, 'u_mainSizePx'), [codeCanvasEl.width, codeCanvasEl.height]);
-    gl.uniform2fv(gl.getUniformLocation(prog, 'u_attrFromPx'), [codeCanvasEl.width - attributionCanvasEl.width, codeCanvasEl.height - attributionCanvasEl.height]);
+    const attrPos = sceneParams.imgParams['output image'].attribution.val as AttributionPos;
+    gl.uniform2fv(gl.getUniformLocation(prog, 'u_attrFromPx'),
+        attrPos === 'top left' ? [0, 0]
+            : attrPos === 'top right' ? [codeCanvasEl.width - attributionCanvasEl.width, 0]
+            : attrPos === 'bottom left' ? [0, codeCanvasEl.height - attributionCanvasEl.height]
+            : attrPos === 'bottom right' ? [codeCanvasEl.width - attributionCanvasEl.width, codeCanvasEl.height - attributionCanvasEl.height]
+            : attrPos === noAttribution ? [codeCanvasEl.width + 100, codeCanvasEl.height + 100]
+            : undefined as never
+    );
     gl.uniform2fv(gl.getUniformLocation(prog, 'u_attrSizePx'), [attributionCanvasEl.width, attributionCanvasEl.height]);
     gl.uniform2fv(gl.getUniformLocation(prog, 'u_blurRadiiPx'), [blurRadius, blurRadius]);
     gl.uniform3fv(gl.getUniformLocation(prog, 'u_bg'), colorScheme.background);

@@ -100,7 +100,7 @@ export async function generateSceneParams(source: Source, sizePx: Size, fontFace
             },
             attribution: {
                 type: 'choices',
-                val: attributionPos[1],
+                val: attributionPos[3],
                 choices: attributionPos,
             },
         },
