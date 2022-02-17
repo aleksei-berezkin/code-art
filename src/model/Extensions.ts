@@ -57,7 +57,7 @@ type Side = 'top' | 'right' | 'bottom' | 'left';
 const allSides: Side[] = ['top', 'right', 'bottom', 'left'];
 
 const maxIterations = 800;
-const samplesNum = 80;
+const samplesNum = 90;
 const enlargeFactor = .05;
 
 async function enlargeExtensionsBySimulation(pixelSpace: PixelSpace, extensionsWritable: Extensions, txMat: Mat4, workLimiter: WorkLimiter) {

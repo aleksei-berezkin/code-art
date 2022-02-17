@@ -10,16 +10,14 @@ import type { Mat4 } from '../util/matrices';
 import type { Size } from './Size';
 import { getSceneBounds } from './SceneBounds';
 import { calcExtensions, Extensions } from './Extensions';
-import { delay } from '../util/delay';
-import { generateScrollFraction } from './generateScrollFraction';
+import { generateScrollFractions } from './generateScrollFractions';
 import { generateAngles } from './generateAngles';
-import { getScrollParam } from './scrollParam';
 import type { WorkLimiter } from '../util/workLimiter';
 import type { AlphabetRaster } from './AlphabetRaster';
 import { fontFaces } from './fontFaces';
 import { isMinified } from './Lang';
 import { sourceSpecs } from './sourceSpecs';
-import type { ScrollFraction } from './ScrollFraction';
+import { scoreFill } from './scoreFill';
 
 export type SceneParams = {
     pixelSpace: PixelSpace,
@@ -31,25 +29,24 @@ export type SceneParams = {
 export async function generateSceneParams(source: Source, sizePx: Size, fontFace: string, fontSize: number, alphabetRaster: AlphabetRaster, workLimiter: WorkLimiter): Promise<SceneParams> {
     const blurFactorPercentLog = 1.3 + Math.random();
 
-    let angles: ReturnType<typeof generateAngles>;
-    let pixelSpace: PixelSpace;
-    let txMat: Mat4;
-    let extensions: Extensions;
-    let scrollFraction: ScrollFraction;
-    for ( ; ; ) {
-        await workLimiter.next();
+    const samplesCount = isMinified(source.spec.lang) ? 3 : 6;
+    const {angles, pixelSpace, txMat, extensions, scrollFraction, score} = (await Promise.all(Array.from({length: samplesCount})
+        .map(async () => {
+            await workLimiter.next();
 
-        angles = generateAngles(isMinified(source.spec.lang));
-        pixelSpace = makePixelSpace(sizePx);
-        txMat = getTxMax(pixelSpace, angles.x, angles.y, angles.z);
-        extensions = await calcExtensions(pixelSpace, angles.x, angles.y, angles.z, txMat, workLimiter);
-        const _scrollFraction = await generateScrollFraction(source, getSceneBounds(pixelSpace, extensions), angles.y, txMat, fontSize, alphabetRaster, workLimiter);
-        if (_scrollFraction) {
-            scrollFraction = _scrollFraction;
-            break;
-        }
-    }
-    
+            const angles = generateAngles(isMinified(source.spec.lang));
+            const pixelSpace = makePixelSpace(sizePx);
+            const txMat = getTxMax(pixelSpace, angles.x, angles.y, angles.z);
+            const extensions = await calcExtensions(pixelSpace, angles.x, angles.y, angles.z, txMat, workLimiter);
+            const scrollFractions = generateScrollFractions(source);
+
+            return await Promise.all(scrollFractions.map(async (scrollFraction) => {
+                const score = await scoreFill(source, getSceneBounds(pixelSpace, extensions), txMat, scrollFraction, fontSize, alphabetRaster, workLimiter);
+                return {angles, pixelSpace, txMat, extensions, scrollFraction, score}
+            }));
+        })))
+        .flatMap(p => p)
+        .reduce((p, q) => p.score > q.score ? p : q);
 
     const imgParams: ImgParams = {
         angle: {
@@ -75,7 +72,23 @@ export async function generateSceneParams(source: Source, sizePx: Size, fontFace
                 unit: 'rad',
             },
         },
-        scroll: getScrollParam(source, scrollFraction),
+        scroll: {
+            v: {
+                type: 'slider',
+                min: 0,
+                val: scrollFraction.v * 100,
+                max: 100,
+                unit: '%',
+            },
+            h: {
+                type: 'slider',
+                min: 0,
+                val: scrollFraction.h * 100,
+                max: 100,
+                unit: '%',
+            },
+
+        },
         font: {
             face: {
                 type: 'choices',

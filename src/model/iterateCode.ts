@@ -12,18 +12,22 @@ type CodeLetter = {
 }
 
 export function* iterateCode(bounds: SceneBounds,
-                             scrollFraction: ScrollFraction,
+                             _scrollFraction: ScrollFraction,
                              fontSize: number,
                              source: Source,
                              alphabetRaster: AlphabetRaster,
- ): Generator<CodeLetter> {
+): Generator<CodeLetter> {
     const lineHeight = Math.max(fontSize, (alphabetRaster.maxAscent + alphabetRaster.maxDescent) / alphabetRaster.fontSizeRatio);
-    const viewportLinesNumber = (bounds.yMax - bounds.yMin) / lineHeight;
-    const yMin = bounds.yMin - scrollFraction.v * fontSize * (source.parseResult.lines.length - viewportLinesNumber);
+    const charWidth = alphabetRaster.avgW / alphabetRaster.fontSizeRatio;
 
-    const viewportLineLength = (bounds.xMax - bounds.xMin) / alphabetRaster.avgW / alphabetRaster.fontSizeRatio;
+    const scrollFraction = amplifyScroll(_scrollFraction, source, bounds, lineHeight, charWidth);
+
+    const viewportLinesNumber = (bounds.yMax - bounds.yMin) / lineHeight;
+    const yMin = bounds.yMin - scrollFraction.v * fontSize * Math.max(viewportLinesNumber * .1, source.parseResult.lines.length - viewportLinesNumber);
+
+    const viewportLineLength = (bounds.xMax - bounds.xMin) / charWidth;
     const lineLength = isMinified(source.spec.lang) ? source.parseResult.avgLineLength : source.parseResult.longestLineLength;
-    const xMin = bounds.xMin - scrollFraction.h * alphabetRaster.avgW / alphabetRaster.fontSizeRatio * (lineLength - viewportLineLength);
+    const xMin = bounds.xMin - scrollFraction.h * charWidth * Math.max(viewportLineLength * .1, lineLength - viewportLineLength);
 
     for (let line = 0; line < source.parseResult.lines.length; line++) {
         const y = yMin + line * lineHeight;
@@ -63,4 +67,25 @@ export function* iterateCode(bounds: SceneBounds,
             }
         }
     }
+}
+
+// Like 0..1 => -0.2..+1.2 to include edges
+function amplifyScroll(scrollFraction: ScrollFraction, source: Source, bounds: SceneBounds, lineHeight: number, charWidth: number) {
+    const [v, h] = (function* () {
+        for (const [visiblePx, itemPx, totalItemsNum, inputScrollFraction, extraMul] of [
+            [
+                bounds.yMax - bounds.yMin, lineHeight, source.parseResult.lines.length, scrollFraction.v, .4,
+            ],
+            [
+                bounds.xMax - bounds.xMin, charWidth, isMinified(source.spec.lang) ? source.parseResult.avgLineLength : source.parseResult.longestLineLength, scrollFraction.h, .7,
+            ],
+        ]) {
+            const visibleItems = visiblePx / itemPx;
+            const extraItems = visibleItems * extraMul;
+            const oneItemScrollAmount = 1 / totalItemsNum;
+            const extraScrollFraction = extraItems * oneItemScrollAmount;
+            yield -extraScrollFraction + (1 + 2 * extraScrollFraction) * inputScrollFraction;
+        }
+    })();
+    return {v, h};
 }

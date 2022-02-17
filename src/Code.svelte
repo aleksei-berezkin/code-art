@@ -227,7 +227,6 @@
                     codeCanvasEl,
                     alphabetCanvasEl,
                     attributionCanvasEl,
-                    p => imgParams = p,
                 );
             }
         })

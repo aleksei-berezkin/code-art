@@ -15,7 +15,6 @@ import { parseCode } from '../parse/parseCode';
 import type { ColorSchemeName } from '../model/colorSchemes';
 import { colorSchemes } from '../model/colorSchemes';
 import { calcExtensions } from '../model/Extensions';
-import { getAdjustedImgParams } from '../model/getAdjustedImgParams';
 import { createWorkLimiter, WorkLimiter } from '../util/workLimiter';
 import type { AlphabetRaster } from '../model/AlphabetRaster';
 import { fontFacesForRandomScenes } from '../model/fontFaces';
@@ -46,14 +45,12 @@ export async function drawRandomScene(
 }
 
 export async function drawScene(
-    _imgParams: ImgParams,
+    imgParams: ImgParams,
     codeCanvasEl: HTMLCanvasElement,
     alphabetCanvasEl: HTMLCanvasElement,
     attributionCanvasEl: HTMLCanvasElement,
-    setParams: (p: ImgParams) => void,
 ) {
-    const source = await getSource(_imgParams.source['source'].val);
-    const imgParams = getAdjustedImgParams(source, _imgParams);
+    const source = await getSource(imgParams.source['source'].val);
 
     const fontFace = imgParams.font.face.val;
     const fontSize = getSliderVal(imgParams.font.size);
@@ -68,8 +65,6 @@ export async function drawScene(
     const extensions = await calcExtensions(pixelSpace, xAngle, yAngle, zAngle, txMat, workLimiter);
     await delay();
     await _drawScene(source, {pixelSpace, extensions, imgParams, txMat}, alphabetRaster, codeCanvasEl, alphabetCanvasEl, attributionCanvasEl, workLimiter);
-
-    setParams(imgParams);
 }
 
 async function _drawScene(source: Source, sceneParams: SceneParams, alphabetRaster: AlphabetRaster, codeCanvasEl: HTMLCanvasElement, alphabetCanvasEl: HTMLCanvasElement, attributionCanvasEl: HTMLCanvasElement, workLimiter: WorkLimiter) {
