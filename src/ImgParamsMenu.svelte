@@ -202,6 +202,8 @@
     import { getFromSelfOrParentDataset } from './util/getFromSelfOrParentDataset';
     import Contacts from './Contacts.svelte';
     import { createCloseBehavior } from './util/createCloseBehavior';
+    import { noAttribution } from './model/attributionPos';
+    import { sourceSpecs } from './model/sourceSpecs';
 
     export let imgParams: ImgParams;
     export let menuOpen: boolean;
@@ -249,6 +251,12 @@
         const selectEl = (e.target as HTMLSelectElement);
         const g = selectEl.dataset.g;
         const k = selectEl.dataset.k;
+        if (g === 'output image' && k === 'attribution'
+            && imgParams[g][k].choices[selectEl.selectedIndex] === noAttribution) {
+            alert('Please make sure you give your own attribution for '
+                + sourceSpecs[imgParams.source.source.val].credit
+            );
+        }
         imgParams[g][k].val = imgParams[g][k].choices[selectEl.selectedIndex];
         paramsUpdated(imgParams);
     }

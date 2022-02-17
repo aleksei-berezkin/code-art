@@ -52,7 +52,9 @@
     <p>Abstract code artworks for your creations</p>
     <h2>License</h2>
     <p>Both code and generated images are licensed under <a href='https://creativecommons.org/licenses/by/4.0/' target='_blank'>CC BY 4.0</a>.
-        Please give attribution when use.</p>
+        Rendered code fragments have their own licenses (links are below in Credits).
+        If you remove attribution watermark please make sure you give your own attribution.
+    </p>
     <h2>Any feedback is welcome</h2>
     <p><Contacts size='md' color='dark'/></p>
     <h2><button on:click={toggleCredits}><Icon pic='arrow-down' rotateDeg={creditsOpen ? -180 : 0}/><span class='credits-text'>Credits</span></button></h2>

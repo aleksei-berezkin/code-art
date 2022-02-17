@@ -53,6 +53,11 @@ export type ImgParams = {
         near: ColorVal,
         far: ColorVal,
     },
+    'output image': {
+        ratio: ChoicesVal,
+        size: ChoicesVal,
+        attribution: ChoicesVal,
+    }
 }
 
 export type ParamGroup = keyof ImgParams;

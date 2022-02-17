@@ -18,6 +18,7 @@ import { fontFaces } from './fontFaces';
 import { isMinified } from './Lang';
 import { sourceSpecs } from './sourceSpecs';
 import { scoreFill } from './scoreFill';
+import { attributionPos } from './attributionPos';
 
 export type SceneParams = {
     pixelSpace: PixelSpace,
@@ -49,6 +50,60 @@ export async function generateSceneParams(source: Source, sizePx: Size, fontFace
         .reduce((p, q) => p.score > q.score ? p : q);
 
     const imgParams: ImgParams = {
+        source: {
+            'source': {
+                type: 'choices',
+                val: source.name,
+                choices: Object.keys(sourceSpecs),
+            },
+        },
+        font: {
+            face: {
+                type: 'choices',
+                val: fontFace,
+                choices: fontFaces,
+            },
+            size: {
+                type: 'slider',
+                min: 5,
+                val: fontSize,
+                max: 120,
+            },
+        },
+        scroll: {
+            v: {
+                type: 'slider',
+                min: 0,
+                val: scrollFraction.v * 100,
+                max: 100,
+                unit: '%',
+            },
+            h: {
+                type: 'slider',
+                min: 0,
+                val: scrollFraction.h * 100,
+                max: 100,
+                unit: '%',
+            },
+
+        },
+        'output image': {
+            ratio: {
+                type: 'choices',
+                val: 'Fit view',
+                choices: ['Fit view'],
+            },
+            size: {
+                type: 'choices',
+                val: 'Fit view',
+                choices: ['Fit view'],
+            },
+            attribution: {
+                type: 'choices',
+                val: attributionPos[1],
+                choices: attributionPos,
+            },
+        },
         angle: {
             x: {
                 type: 'slider',
@@ -70,43 +125,6 @@ export async function generateSceneParams(source: Source, sizePx: Size, fontFace
                 val: angles.z,
                 max: Math.PI / 2,
                 unit: 'rad',
-            },
-        },
-        scroll: {
-            v: {
-                type: 'slider',
-                min: 0,
-                val: scrollFraction.v * 100,
-                max: 100,
-                unit: '%',
-            },
-            h: {
-                type: 'slider',
-                min: 0,
-                val: scrollFraction.h * 100,
-                max: 100,
-                unit: '%',
-            },
-
-        },
-        font: {
-            face: {
-                type: 'choices',
-                val: fontFace,
-                choices: fontFaces,
-            },
-            size: {
-                type: 'slider',
-                min: 5,
-                val: fontSize,
-                max: 120,
-            },
-        },
-        source: {
-            'source': {
-                type: 'choices',
-                val: source.name,
-                choices: Object.keys(sourceSpecs),
             },
         },
         color: {
