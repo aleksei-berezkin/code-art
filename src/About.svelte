@@ -1,23 +1,41 @@
 <style>
     .about {
         --m: .9rem;
+        --max-h: calc(100vh - 2 * var(--pad-std));
 
         background-color: #ffffffe0;
         border-radius: var(--bord-r-std);
         box-sizing: border-box;
         box-shadow: var(--menu-shadow);
         left: 50%;
-        max-height: calc(100vh - 2 * var(--pad-std));
-        overflow: scroll;
-        padding: var(--pad-std);
+        max-height: var(--max-h);
         position: absolute;
         transform: translateX(-50%);
         top: var(--pad-std);
         width: calc(min(80vw, 520px));
     }
 
+    .close-wr {
+        color: var(--link-c);
+        position: absolute;
+        padding: calc(var(--pad-std) * .75);
+        top: 0;
+        transition: color var(--link-tx);
+        right: 0;
+    }
+
+    .close-wr:hover {
+        color: var(--link-c-h);
+    }
+
     .credits-text {
         padding-left: var(--m);
+    }
+
+    .scroll-container {
+        max-height: calc(var(--max-h) - 2 * var(--pad-std));
+        overflow: scroll;
+        padding: var(--pad-std);
     }
 
     h1 {
@@ -48,56 +66,61 @@
 </style>
 
 <section class='about' bind:this={rootEl}>
-    <h1>Code Art</h1>
-    <p>Abstract code artworks for your creations</p>
-    <h2>License</h2>
-    <p>Both code and generated images are licensed under <a href='https://creativecommons.org/licenses/by/4.0/' target='_blank'>CC BY 4.0</a>.
-        Rendered code fragments have their own licenses (links are below in Credits).
-        If you remove attribution watermark please make sure you give your own attribution.
-    </p>
-    <h2>Any feedback is welcome</h2>
-    <p><Contacts size='md' color='dark'/></p>
-    <h2><button on:click={toggleCredits}><Icon pic='arrow-down' rotateDeg={creditsOpen ? -180 : 0}/><span class='credits-text'>Credits</span></button></h2>
-    {#if creditsOpen}
-        <h3>Color schemes</h3>
-        <ul>
-            <li><a href='https://code.visualstudio.com/'>VS Code</a></li>
-            <li><a href='https://plugins.jetbrains.com/plugin/12275-dracula-theme'>IntelliJ Darkula</a></li>
-            <li><a href='https://www.google.com/chrome/'>Chrome browser</a></li>
-        </ul>
-        <h3>Fonts</h3>
-        <p>Free fonts from <a href='https://fonts.google.com/' target='_blank'>Google collection</a></p>
-        <ul>
-            {#each fontFacesForRandomScenes as f}
-                <li><a href={`https://fonts.google.com/specimen/${f.replace(' ', '+')}`} target='_blank'>{f}</a></li>
-            {/each}
-        </ul>
-        <h3>SVG pics</h3>
-        <ul>
-            <li><a href='https://fonts.google.com/icons'>Google Fonts Icons</a></li>
-            <li><a href='https://mui.com/components/material-icons/' target='_blank'>Material Icons</a></li>
-            <li><a href='https://worldvectorlogo.com/ru/logo/devto' target='_blank'>DEV logo</a></li>
-        </ul>
-        <h3>Rendered code</h3>
-        <ul>
-            {#each Object.entries(sourceSpecs) as [k, s]}
-                <li><a href={s.url} target='_blank'>{k}</a></li>
-            {/each}
-        </ul>
-        <h3>Software components</h3>
-        <ul>
-            <li><a href='https://github.com/acornjs/acorn' target='_blank'>Acorn</a></li>
-            <li><a href='https://svelte.dev/' target='_blank'>Svelte</a></li>
-            <li><a href='https://www.typescriptlang.org/' target='_blank'>TypeScript</a></li>
-            <li><a href='https://webpack.js.org/' target='_blank'>webpack</a></li>
-        </ul>
-        <p>See full list in <a href='https://github.com/aleksei-berezkin/code-art/blob/main/package.json' target='_blank'>project dependencies</a></p>
-        <h3>Misc</h3>
-        <ul>
-            <li><a href='https://webgl2fundamentals.org/' target='_blank'>WebGL2 Fundamentals</a></li>
-            <li><a href='https://svgcrop.com/' target='_blank'>Crop SVG</a></li>
-        </ul>
-    {/if}
+    <button class='close-wr' on:click={closeDialog}>
+        <Icon pic='close'/>
+    </button>
+    <div class='scroll-container'>
+        <h1>Code Art</h1>
+        <p>Abstract code artworks for your creations</p>
+        <h2>License</h2>
+        <p>Both code and generated images are licensed under <a href='https://creativecommons.org/licenses/by/4.0/' target='_blank'>CC BY 4.0</a>.
+            Rendered code fragments have their own licenses (links are below in Credits).
+            If you remove attribution watermark please make sure to give your own attribution.
+        </p>
+        <h2>Any feedback is welcome</h2>
+        <p><Contacts size='md' color='dark'/></p>
+        <h2><button on:click={toggleCredits}><Icon pic='arrow-down' rotateDeg={creditsOpen ? -180 : 0}/><span class='credits-text'>Credits</span></button></h2>
+        {#if creditsOpen}
+            <h3>Color schemes</h3>
+            <ul>
+                <li><a href='https://code.visualstudio.com/'>VS Code</a></li>
+                <li><a href='https://plugins.jetbrains.com/plugin/12275-dracula-theme'>IntelliJ Darkula</a></li>
+                <li><a href='https://www.google.com/chrome/'>Chrome browser</a></li>
+            </ul>
+            <h3>Fonts</h3>
+            <p>Free fonts from <a href='https://fonts.google.com/' target='_blank'>Google collection</a></p>
+            <ul>
+                {#each fontFacesForRandomScenes as f}
+                    <li><a href={`https://fonts.google.com/specimen/${f.replace(' ', '+')}`} target='_blank'>{f}</a></li>
+                {/each}
+            </ul>
+            <h3>SVG pics</h3>
+            <ul>
+                <li><a href='https://fonts.google.com/icons'>Google Fonts Icons</a></li>
+                <li><a href='https://mui.com/components/material-icons/' target='_blank'>Material Icons</a></li>
+                <li><a href='https://worldvectorlogo.com/ru/logo/devto' target='_blank'>DEV logo</a></li>
+            </ul>
+            <h3>Rendered code</h3>
+            <ul>
+                {#each Object.entries(sourceSpecs) as [k, s]}
+                    <li><a href={s.url} target='_blank'>{k}</a></li>
+                {/each}
+            </ul>
+            <h3>Software components</h3>
+            <ul>
+                <li><a href='https://github.com/acornjs/acorn' target='_blank'>Acorn</a></li>
+                <li><a href='https://svelte.dev/' target='_blank'>Svelte</a></li>
+                <li><a href='https://www.typescriptlang.org/' target='_blank'>TypeScript</a></li>
+                <li><a href='https://webpack.js.org/' target='_blank'>webpack</a></li>
+            </ul>
+            <p>See full list in <a href='https://github.com/aleksei-berezkin/code-art/blob/main/package.json' target='_blank'>project dependencies</a></p>
+            <h3>Misc</h3>
+            <ul>
+                <li><a href='https://webgl2fundamentals.org/' target='_blank'>WebGL2 Fundamentals</a></li>
+                <li><a href='https://svgcrop.com/' target='_blank'>Crop SVG</a></li>
+            </ul>
+        {/if}
+    </div>
 </section>
 
 <script lang='ts'>
