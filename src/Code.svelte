@@ -17,9 +17,22 @@
     }
 
     .code-wr {
-        height: 100%;
         position: relative;
-        width: 100%;
+    }
+
+    .code-wr.fit {
+        height: 100vh;
+        width: 100vw;
+    }
+
+    .code-wr.aspect {
+        /* Overridden in style='' */
+        --a: calc(1 / 1);
+        --mh: 100vh;
+        --mw: 100vw;
+
+        height: calc(min(var(--mh), var(--mw) / var(--a)));
+        width: calc(min(var(--mw), var(--mh) * var(--a)));
     }
 
     .code-canvas {
@@ -115,7 +128,15 @@
     <canvas class='alphabet-canvas' bind:this={alphabetCanvasEl} width='2048'></canvas>
     <canvas class='attribution-canvas' bind:this={attributionCanvasEl}></canvas>
     <canvas class='self-attr-canvas' bind:this={selfAttrCanvasEl}></canvas>
-    <div class='code-wr'>
+    <div class={`code-wr ${codeWrModifier}`} style={codeWrStyle}>
+        {#if imgParams}
+            <ImgParamsMenu imgParams={imgParams}
+                           menuOpen={openDialog === 'menu'}
+                           paramsUpdated={onParamsUpdate}
+                           closeMenu={closeMenu}
+                           clickedAbout={onClickedAbout}
+            />
+        {/if}
         <canvas class='code-canvas' bind:this={codeCanvasEl}></canvas>
         <button class='round-btn left' on:click={handleMenuClick}>
             <Icon pic={(openDialog === 'menu') ? 'close' : 'menu'}/>
@@ -132,14 +153,6 @@
             <circle class='progress-circle' fill='none' cx='0' cy='0' r='20' stroke-width='4' xmlns='http://www.w3.org/2000/svg'/>
         </svg>
     {/if}
-    {#if imgParams}
-        <ImgParamsMenu imgParams={imgParams}
-                       menuOpen={openDialog === 'menu'}
-                       paramsUpdated={onParamsUpdate}
-                       closeMenu={closeMenu}
-                       clickedAbout={onClickedAbout}
-        />
-    {/if}
     {#if openDialog === 'about'}
         <About closeDialog={closeAbout}/>
     {/if}
@@ -154,6 +167,8 @@
     import { drawRandomScene, drawScene } from './draw/drawScene';
     import { setThrottleListeners, throttle, throttleFast } from './util/throttle';
     import About from './About.svelte';
+    import { fitViewRatio } from './model/ratios';
+    import { delay } from './util/delay';
 
     let codeCanvasEl: HTMLCanvasElement;
     let alphabetCanvasEl: HTMLCanvasElement;
@@ -163,6 +178,17 @@
     let progress = false;
 
     let imgParams: ImgParams | undefined = undefined;
+    let codeWrModifier: 'fit' | 'aspect' = 'fit';
+    let codeWrStyle: string | undefined = undefined;
+    $: {
+        // TODO 1 to param upd listener 2 split file
+        const r = imgParams ? (imgParams as ImgParams)['output image'].ratio.val : undefined;
+        if (r) {
+            codeWrModifier = r === fitViewRatio ? 'fit' : 'aspect';
+            codeWrStyle = r === fitViewRatio ? undefined : `--a: calc(${r})`;
+        }
+    }
+
     let openDialog: 'menu' | 'about' | undefined = undefined;
 
     let genRotateDeg = 0;
@@ -193,8 +219,9 @@
 
     async function generateScene() {
         throttleFast(async () => {
-            setWH();
+            await setWH();
             await drawRandomScene(
+                imgParams,
                 codeCanvasEl,
                 alphabetCanvasEl,
                 attributionCanvasEl,
@@ -226,6 +253,8 @@
     async function onParamsUpdate() {
         throttle(async () => {
             if (imgParams) {
+                imgParams = imgParams;
+                await setWH();
                 await drawScene(
                     imgParams,
                     codeCanvasEl,
@@ -254,7 +283,8 @@
     }
 
 
-    function setWH() {
+    async function setWH() {
+        await delay();
         const canvasRect = codeCanvasEl.getBoundingClientRect();
         codeCanvasEl.width = canvasRect.width * dpr;
         codeCanvasEl.height = canvasRect.height * dpr;

@@ -19,6 +19,7 @@ import { isMinified } from './Lang';
 import { sourceSpecs } from './sourceSpecs';
 import { scoreFill } from './scoreFill';
 import { attributionPos } from './attributionPos';
+import { fitViewRatio, ratios } from './ratios';
 
 export type SceneParams = {
     pixelSpace: PixelSpace,
@@ -27,7 +28,7 @@ export type SceneParams = {
     imgParams: ImgParams,
 };
 
-export async function generateSceneParams(source: Source, sizePx: Size, fontFace: string, fontSize: number, alphabetRaster: AlphabetRaster, workLimiter: WorkLimiter): Promise<SceneParams> {
+export async function generateSceneParams(currentImgParams: ImgParams | undefined, source: Source, sizePx: Size, fontFace: string, fontSize: number, alphabetRaster: AlphabetRaster, workLimiter: WorkLimiter): Promise<SceneParams> {
     const blurFactorPercentLog = 1.3 + Math.random();
 
     const samplesCount = isMinified(source.spec.lang) ? 3 : 6;
@@ -185,13 +186,13 @@ export async function generateSceneParams(source: Source, sizePx: Size, fontFace
         'output image': {
             ratio: {
                 type: 'choices',
-                val: 'Fit view',
-                choices: ['Fit view'],
+                val: currentImgParams ? currentImgParams['output image'].ratio.val : fitViewRatio,
+                choices: ratios,
             },
             size: {
                 type: 'choices',
-                val: 'Fit view',
-                choices: ['Fit view'],
+                val: 'fit view',
+                choices: ['fit view'],
             },
             attribution: {
                 type: 'choices',

@@ -23,6 +23,7 @@ import { rasterizeAttribution } from './rasterizeAttribution';
 import { drawAttributionScene } from './drawAttributionScene';
 
 export async function drawRandomScene(
+    currentImgParams: ImgParams | undefined,
     codeCanvasEl: HTMLCanvasElement,
     alphabetCanvasEl: HTMLCanvasElement,
     attributionCanvasEl: HTMLCanvasElement,
@@ -39,7 +40,7 @@ export async function drawRandomScene(
     const workLimiter = createWorkLimiter();
     const alphabetRaster = await rasterizeAlphabet(source, alphabetCanvasEl, fontFace, fontSize, workLimiter);
 
-    const sceneParams = await generateSceneParams(source, getSizePixelSpace(codeCanvasEl), fontFace, fontSize, alphabetRaster, workLimiter);
+    const sceneParams = await generateSceneParams(currentImgParams, source, getSizePixelSpace(codeCanvasEl), fontFace, fontSize, alphabetRaster, workLimiter);
     await _drawScene(source, sceneParams, alphabetRaster, codeCanvasEl, alphabetCanvasEl, attributionCanvasEl, selfAttrCanvasEl, workLimiter);
 
     setParams(sceneParams.imgParams);
@@ -55,6 +56,7 @@ export async function drawScene(
     const source = await getSource(imgParams.source['source'].val);
 
     const fontFace = imgParams.font.face.val;
+    // TODO Adapt font size
     const fontSize = getSliderVal(imgParams.font.size);
     const workLimiter = createWorkLimiter();
     const alphabetRaster = await rasterizeAlphabet(source, alphabetCanvasEl, fontFace, fontSize, workLimiter);
