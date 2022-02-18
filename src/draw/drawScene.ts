@@ -26,6 +26,7 @@ export async function drawRandomScene(
     codeCanvasEl: HTMLCanvasElement,
     alphabetCanvasEl: HTMLCanvasElement,
     attributionCanvasEl: HTMLCanvasElement,
+    selfAttrCanvasEl: HTMLCanvasElement,
     setParams: (p: ImgParams) => void,
 ) {
     const sourceName = pickRandom(Object.keys(sourceSpecs));
@@ -39,7 +40,7 @@ export async function drawRandomScene(
     const alphabetRaster = await rasterizeAlphabet(source, alphabetCanvasEl, fontFace, fontSize, workLimiter);
 
     const sceneParams = await generateSceneParams(source, getSizePixelSpace(codeCanvasEl), fontFace, fontSize, alphabetRaster, workLimiter);
-    await _drawScene(source, sceneParams, alphabetRaster, codeCanvasEl, alphabetCanvasEl, attributionCanvasEl, workLimiter);
+    await _drawScene(source, sceneParams, alphabetRaster, codeCanvasEl, alphabetCanvasEl, attributionCanvasEl, selfAttrCanvasEl, workLimiter);
 
     setParams(sceneParams.imgParams);
 }
@@ -49,6 +50,7 @@ export async function drawScene(
     codeCanvasEl: HTMLCanvasElement,
     alphabetCanvasEl: HTMLCanvasElement,
     attributionCanvasEl: HTMLCanvasElement,
+    selfAttrCanvasEl: HTMLCanvasElement,
 ) {
     const source = await getSource(imgParams.source['source'].val);
 
@@ -64,10 +66,10 @@ export async function drawScene(
     const txMat = getTxMax(pixelSpace, xAngle, yAngle, zAngle);
     const extensions = await calcExtensions(pixelSpace, xAngle, yAngle, zAngle, txMat, workLimiter);
     await delay();
-    await _drawScene(source, {pixelSpace, extensions, imgParams, txMat}, alphabetRaster, codeCanvasEl, alphabetCanvasEl, attributionCanvasEl, workLimiter);
+    await _drawScene(source, {pixelSpace, extensions, imgParams, txMat}, alphabetRaster, codeCanvasEl, alphabetCanvasEl, attributionCanvasEl, selfAttrCanvasEl, workLimiter);
 }
 
-async function _drawScene(source: Source, sceneParams: SceneParams, alphabetRaster: AlphabetRaster, codeCanvasEl: HTMLCanvasElement, alphabetCanvasEl: HTMLCanvasElement, attributionCanvasEl: HTMLCanvasElement, workLimiter: WorkLimiter) {
+async function _drawScene(source: Source, sceneParams: SceneParams, alphabetRaster: AlphabetRaster, codeCanvasEl: HTMLCanvasElement, alphabetCanvasEl: HTMLCanvasElement, attributionCanvasEl: HTMLCanvasElement, selfAttrCanvasEl: HTMLCanvasElement, workLimiter: WorkLimiter) {
     const sourceCodeDetails = sourceSpecs[sceneParams.imgParams.source.source.val];
     const parseResult = await parseCode(sourceCodeDetails.url, sourceCodeDetails.lang === 'js min line');
     const colorScheme = colorSchemes[sceneParams.imgParams.color.scheme.val as ColorSchemeName];
@@ -75,8 +77,9 @@ async function _drawScene(source: Source, sceneParams: SceneParams, alphabetRast
     await delay();
     const targetTex = await drawEffectsScene(sceneParams, colorScheme.background, codeTex, codeCanvasEl, workLimiter);
     await rasterizeAttribution(source.spec.credit, sceneParams.imgParams.font.size.val, attributionCanvasEl);
+    await rasterizeAttribution('code-art.app', sceneParams.imgParams.font.size.val, selfAttrCanvasEl);
     await delay();
-    await drawAttributionScene(sceneParams, targetTex, colorScheme, codeCanvasEl, attributionCanvasEl);
+    await drawAttributionScene(sceneParams, targetTex, colorScheme, codeCanvasEl, attributionCanvasEl, selfAttrCanvasEl);
 }
 
 function getSizePixelSpace(codeCanvasEl: HTMLCanvasElement): Size {

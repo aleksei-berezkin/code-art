@@ -4,13 +4,17 @@ precision highp float;
 
 uniform sampler2D u_main;
 uniform sampler2D u_attr;
+uniform sampler2D u_selfAttr;
 
 uniform vec2 u_attrSizePx;
+uniform vec2 u_selfAttrSizePx;
+
 uniform vec2 u_blurRadiiPx;
 uniform vec3 u_bg;
 
 in vec2 v_mainPosTx;
 in vec2 v_attrPosTx;
+in vec2 v_selfAttrPosTx;
 
 out vec4 outColor;
 
@@ -22,11 +26,14 @@ vec3 pluck(float l, vec3 c, float r) {
 }
 
 void main() {
-    vec4 main = texture(u_main, v_mainPosTx);
-    vec4 attr = texture(u_attr, v_attrPosTx);
+    bool inAttr = 0.0 <= v_attrPosTx.x && v_attrPosTx.x <= 1.0 && 0.0 <= v_attrPosTx.y && v_attrPosTx.y <= 1.0;
+    bool inSelfAttr = 0.0 <= v_selfAttrPosTx.x && v_selfAttrPosTx.x <= 1.0 && 0.0 <= v_selfAttrPosTx.y && v_selfAttrPosTx.y <= 1.0;
+    
 
-    if (0.0 <= v_attrPosTx.x && v_attrPosTx.x <= 1.0 && 0.0 <= v_attrPosTx.y && v_attrPosTx.y <= 1.0) {
-        vec2 onePixel = vec2(1) / u_attrSizePx;
+    if (inAttr || inSelfAttr) {
+        vec2 attrSizePx = inAttr ? u_attrSizePx : u_selfAttrSizePx;
+
+        vec2 onePixel = vec2(1) / attrSizePx;
         vec3 blur = vec3(0);
         float w = 0.0;
         for (int i = 0; i < _K_SIZE_; i++) {
@@ -34,7 +41,9 @@ void main() {
                 int x = i - (_K_SIZE_ / 2);
                 int y = j - (_K_SIZE_ / 2);
                 vec2 deltaPx = vec2(x, y) / float(_K_SIZE_ / 2) * u_blurRadiiPx;
-                blur += texture(u_attr, v_attrPosTx + onePixel * deltaPx).xyz;
+                blur += inAttr
+                    ? texture(u_attr, v_attrPosTx + onePixel * deltaPx).xyz
+                    : texture(u_selfAttr, v_selfAttrPosTx + onePixel * deltaPx).xyz;
                 w += 1.0;
             }
         }
@@ -42,8 +51,9 @@ void main() {
         blur /= w;
         vec3 blurInverse = pluck(0.0, 1.0 - pluck(0.0, blur, .1) * 6.0 + u_bg * 2.5, 1.0);
 
-        outColor = main * vec4(blurInverse, 1.0) + attr * .75;
+        vec4 aTx = inAttr ? texture(u_attr, v_attrPosTx) : texture(u_selfAttr, v_selfAttrPosTx);
+        outColor = texture(u_main, v_mainPosTx) * vec4(blurInverse, 1.0) + aTx * .75;
     } else {
-        outColor = main;
+        outColor = texture(u_main, v_mainPosTx);
     }
 }

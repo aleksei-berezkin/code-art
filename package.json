@@ -15,7 +15,7 @@
     "url": "git+https://github.com/aleksei-berezkin/code-art.git"
   },
   "author": "Aleksei Berezkin",
-  "license": "cc-by-4.0",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/aleksei-berezkin/code-art/issues"
   },

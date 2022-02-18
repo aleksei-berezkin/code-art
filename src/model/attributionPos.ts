@@ -1,8 +1,10 @@
 export const noAttribution = 'none';
 
 export const attributionPos = [
-    'top left', 'top right',
-    'bottom left', 'bottom right',
+    'top 1',
+    'top 2',
+    'bottom 1',
+    'bottom 2',
     noAttribution,
 ];
 

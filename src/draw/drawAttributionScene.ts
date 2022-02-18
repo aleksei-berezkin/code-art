@@ -18,6 +18,7 @@ export async function drawAttributionScene(
     colorScheme: ColorScheme,
     codeCanvasEl: HTMLCanvasElement,
     attributionCanvasEl: HTMLCanvasElement,
+    selfAttrCanvasEl: HTMLCanvasElement,
 ) {
     const gl = codeCanvasEl.getContext('webgl2')!;
 
@@ -34,6 +35,7 @@ export async function drawAttributionScene(
     gl.bindTexture(gl.TEXTURE_2D, mainTexture);
 
     uploadTexture(1, attributionCanvasEl, gl);
+    uploadTexture(2, selfAttrCanvasEl, gl);
 
     gl.useProgram(prog);
 
@@ -41,18 +43,30 @@ export async function drawAttributionScene(
 
     gl.uniform1i(gl.getUniformLocation(prog, 'u_main'), 0);
     gl.uniform1i(gl.getUniformLocation(prog, 'u_attr'), 1);
+    gl.uniform1i(gl.getUniformLocation(prog, 'u_selfAttr'), 2);
 
     gl.uniform2fv(gl.getUniformLocation(prog, 'u_mainSizePx'), [codeCanvasEl.width, codeCanvasEl.height]);
-    const attrPos = sceneParams.imgParams['output image'].attribution.val as AttributionPos;
+    gl.uniform2fv(gl.getUniformLocation(prog, 'u_attrSizePx'), [attributionCanvasEl.width, attributionCanvasEl.height]);
+    gl.uniform2fv(gl.getUniformLocation(prog, 'u_selfAttrSizePx'), [selfAttrCanvasEl.width, selfAttrCanvasEl.height]);
+
+    const attrPos: AttributionPos = sceneParams.imgParams['output image'].attribution.val as AttributionPos;
+
     gl.uniform2fv(gl.getUniformLocation(prog, 'u_attrFromPx'),
-        attrPos === 'top left' ? [0, 0]
-            : attrPos === 'top right' ? [codeCanvasEl.width - attributionCanvasEl.width, 0]
-            : attrPos === 'bottom left' ? [0, codeCanvasEl.height - attributionCanvasEl.height]
-            : attrPos === 'bottom right' ? [codeCanvasEl.width - attributionCanvasEl.width, codeCanvasEl.height - attributionCanvasEl.height]
+        attrPos === 'top 1' ? [0, 0]
+            : attrPos === 'top 2' ? [codeCanvasEl.width - attributionCanvasEl.width, 0]
+            : attrPos === 'bottom 1' ? [0, codeCanvasEl.height - attributionCanvasEl.height]
+            : attrPos === 'bottom 2' ? [codeCanvasEl.width - attributionCanvasEl.width, codeCanvasEl.height - attributionCanvasEl.height]
             : attrPos === noAttribution ? [codeCanvasEl.width + 100, codeCanvasEl.height + 100]
             : undefined as never
     );
-    gl.uniform2fv(gl.getUniformLocation(prog, 'u_attrSizePx'), [attributionCanvasEl.width, attributionCanvasEl.height]);
+    gl.uniform2fv(gl.getUniformLocation(prog, 'u_selfAttrFromPx'),
+        attrPos === 'top 2' ? [0, 0]
+            : attrPos === 'top 1' ? [codeCanvasEl.width - selfAttrCanvasEl.width, 0]
+            : attrPos === 'bottom 2' ? [0, codeCanvasEl.height - selfAttrCanvasEl.height]
+            : attrPos === 'bottom 1' ? [codeCanvasEl.width - selfAttrCanvasEl.width, codeCanvasEl.height - selfAttrCanvasEl.height]
+            : attrPos === noAttribution ? [codeCanvasEl.width + 100, codeCanvasEl.height + 100]
+            : undefined as never
+    );
     gl.uniform2fv(gl.getUniformLocation(prog, 'u_blurRadiiPx'), [blurRadius, blurRadius]);
     gl.uniform3fv(gl.getUniformLocation(prog, 'u_bg'), colorScheme.background);
 

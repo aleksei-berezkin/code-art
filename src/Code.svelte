@@ -3,12 +3,13 @@
         align-items: center;
         display: flex;
         flex-direction: column;
+        justify-content: center;
         height: 100%;
         margin: 0;
         width: 100%;
     }
 
-    .alphabet-canvas, .attribution-canvas {
+    .alphabet-canvas, .attribution-canvas, .self-attr-canvas {
         left: 0;
         position: absolute;
         transform: translateY(-150%);
@@ -113,6 +114,7 @@
 <main>
     <canvas class='alphabet-canvas' bind:this={alphabetCanvasEl} width='2048'></canvas>
     <canvas class='attribution-canvas' bind:this={attributionCanvasEl}></canvas>
+    <canvas class='self-attr-canvas' bind:this={selfAttrCanvasEl}></canvas>
     <div class='code-wr'>
         <canvas class='code-canvas' bind:this={codeCanvasEl}></canvas>
         <button class='round-btn left' on:click={handleMenuClick}>
@@ -156,6 +158,7 @@
     let codeCanvasEl: HTMLCanvasElement;
     let alphabetCanvasEl: HTMLCanvasElement;
     let attributionCanvasEl: HTMLCanvasElement;
+    let selfAttrCanvasEl: HTMLCanvasElement;
 
     let progress = false;
 
@@ -195,6 +198,7 @@
                 codeCanvasEl,
                 alphabetCanvasEl,
                 attributionCanvasEl,
+                selfAttrCanvasEl,
                 p => imgParams = p,
             );
         })
@@ -227,6 +231,7 @@
                     codeCanvasEl,
                     alphabetCanvasEl,
                     attributionCanvasEl,
+                    selfAttrCanvasEl,
                 );
             }
         })
