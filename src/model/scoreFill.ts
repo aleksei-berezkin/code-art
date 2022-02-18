@@ -43,8 +43,8 @@ export async function scoreFill(
         / fillMatrixSize**2
     );
 
-    const containsZeros = fillMatrix.some(i => !i);
-    return avg - sd - (containsZeros ? 1000 : 0);
+    const zerosCount = fillMatrix.filter(i => !i).length;
+    return avg - sd - zerosCount * 1000;
 }
 
 // noinspection JSUnusedLocalSymbols

@@ -36,7 +36,7 @@ export type ImgParams = {
     source: {
         source: ChoicesVal,
     },
-    color: {
+    'main color': {
         scheme: ChoicesVal,
         brightness: SliderVal,
     },

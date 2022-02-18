@@ -31,7 +31,7 @@ export async function generateSceneParams(source: Source, sizePx: Size, fontFace
     const blurFactorPercentLog = 1.3 + Math.random();
 
     const samplesCount = isMinified(source.spec.lang) ? 3 : 6;
-    const {angles, pixelSpace, txMat, extensions, scrollFraction, score} = (await Promise.all(Array.from({length: samplesCount})
+    const {angles, pixelSpace, txMat, extensions, scrollFraction} = (await Promise.all(Array.from({length: samplesCount})
         .map(async () => {
             await workLimiter.next();
 
@@ -87,21 +87,18 @@ export async function generateSceneParams(source: Source, sizePx: Size, fontFace
             },
 
         },
-        'output image': {
-            ratio: {
+        'main color': {
+            scheme: {
                 type: 'choices',
-                val: 'Fit view',
-                choices: ['Fit view'],
+                val: pickRandom(colorSchemeNames),
+                choices: colorSchemeNames,
             },
-            size: {
-                type: 'choices',
-                val: 'Fit view',
-                choices: ['Fit view'],
-            },
-            attribution: {
-                type: 'choices',
-                val: attributionPos[3],
-                choices: attributionPos,
+            brightness: {
+                type: 'slider',
+                min: 0,
+                val: 90 + Math.random() * 20,
+                max: 300,
+                unit: '%',
             },
         },
         angle: {
@@ -125,20 +122,6 @@ export async function generateSceneParams(source: Source, sizePx: Size, fontFace
                 val: angles.z,
                 max: Math.PI / 2,
                 unit: 'rad',
-            },
-        },
-        color: {
-            scheme: {
-                type: 'choices',
-                val: pickRandom(colorSchemeNames),
-                choices: colorSchemeNames,
-            },
-            brightness: {
-                type: 'slider',
-                min: 0,
-                val: 90 + Math.random() * 20,
-                max: 300,
-                unit: '%',
             },
         },
         glow: {
@@ -197,6 +180,23 @@ export async function generateSceneParams(source: Source, sizePx: Size, fontFace
             far: {
                 type: 'color',
                 val: rgbToHex(Array.from({length: 3}).map(() => .25 + .75 * Math.random()) as RGB),
+            },
+        },
+        'output image': {
+            ratio: {
+                type: 'choices',
+                val: 'Fit view',
+                choices: ['Fit view'],
+            },
+            size: {
+                type: 'choices',
+                val: 'Fit view',
+                choices: ['Fit view'],
+            },
+            attribution: {
+                type: 'choices',
+                val: attributionPos[3],
+                choices: attributionPos,
             },
         },
     };
