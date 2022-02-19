@@ -106,14 +106,12 @@
                     <li><a href={s.url} target='_blank'>{k}</a></li>
                 {/each}
             </ul>
-            <h3>Software components</h3>
+            <h3>Software deps</h3>
             <ul>
-                <li><a href='https://github.com/acornjs/acorn' target='_blank'>Acorn</a></li>
-                <li><a href='https://svelte.dev/' target='_blank'>Svelte</a></li>
-                <li><a href='https://www.typescriptlang.org/' target='_blank'>TypeScript</a></li>
-                <li><a href='https://webpack.js.org/' target='_blank'>webpack</a></li>
+                {#each window.appDeps as dep}
+                    <li><a href={getDepLink(dep)} target='_blank'>{dep}</a></li>
+                {/each}
             </ul>
-            <p>See full list in <a href='https://github.com/aleksei-berezkin/code-art/blob/main/package.json' target='_blank'>project dependencies</a></p>
             <h3>Misc</h3>
             <ul>
                 <li><a href='https://webgl2fundamentals.org/' target='_blank'>WebGL2 Fundamentals</a></li>
@@ -142,5 +140,15 @@
 
     function toggleCredits() {
         creditsOpen = !creditsOpen;
+    }
+
+    function getDepLink(dep: string) {
+        if (dep === 'node') {
+            return 'https://nodejs.org/';
+        }
+        if (dep === 'npm') {
+            return 'https://www.npmjs.com/';
+        }
+        return `https://npmjs.com/package/${dep}`;
     }
 </script>

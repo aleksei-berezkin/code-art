@@ -7,6 +7,10 @@ const sveltePreprocess = require('svelte-preprocess');
 const mode = process.env.NODE_ENV || 'development';
 const prod = mode === 'production';
 
+const DefinePlugin = require('webpack').DefinePlugin;
+const packageJson = require('./package.json');
+const appDeps = ['node', 'npm', ...Object.keys(packageJson.dependencies), ...Object.keys(packageJson.devDependencies)].sort();
+
 module.exports = {
     entry: {
         main: ['./src/main.ts'],
@@ -58,6 +62,9 @@ module.exports = {
     },
     mode,
     plugins: [
+        new DefinePlugin({
+            'window.appDeps': JSON.stringify(appDeps),
+        }),
         new HtmlWebpackPlugin({
             template: './index.html',
             filename: 'index.html',
