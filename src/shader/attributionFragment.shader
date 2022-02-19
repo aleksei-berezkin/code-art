@@ -41,9 +41,12 @@ void main() {
                 int x = i - (_K_SIZE_ / 2);
                 int y = j - (_K_SIZE_ / 2);
                 vec2 deltaPx = vec2(x, y) / float(_K_SIZE_ / 2) * u_blurRadiiPx;
-                blur += inAttr
-                    ? texture(u_attr, v_attrPosTx + onePixel * deltaPx).xyz
-                    : texture(u_selfAttr, v_selfAttrPosTx + onePixel * deltaPx).xyz;
+                if (inAttr) {
+                    blur += texture(u_attr, v_attrPosTx + onePixel * deltaPx).xyz;
+                }
+                if (inSelfAttr) {
+                    blur += texture(u_selfAttr, v_selfAttrPosTx + onePixel * deltaPx).xyz;
+                }
                 w += 1.0;
             }
         }
@@ -51,7 +54,14 @@ void main() {
         blur /= w;
         vec3 blurInverse = pluck(0.0, 1.0 - pluck(0.0, blur, .1) * 6.0 + u_bg * 2.5, 1.0);
 
-        vec4 aTx = inAttr ? texture(u_attr, v_attrPosTx) : texture(u_selfAttr, v_selfAttrPosTx);
+        vec4 aTx = vec4(0);
+        if (inAttr) {
+            aTx += texture(u_attr, v_attrPosTx);
+        }
+        if (inSelfAttr) {
+            aTx += texture(u_selfAttr, v_selfAttrPosTx);
+        }
+
         outColor = texture(u_main, v_mainPosTx) * vec4(blurInverse, 1.0) + aTx * .75;
     } else {
         outColor = texture(u_main, v_mainPosTx);
