@@ -168,7 +168,7 @@
 <script lang='ts'>
     import { getSliderVal, ImgParams } from './model/ImgParams';
     import ImgParamsMenu from './ImgParamsMenu.svelte';
-    import { onMount } from 'svelte';
+    import { onDestroy, onMount } from 'svelte';
     import Icon from './Icon.svelte';
     import { drawRandomScene, drawScene } from './draw/drawScene';
     import { setTaskExecutorListeners, submitTask, submitTaskFast } from './util/submitTask';
@@ -240,7 +240,7 @@
     async function onParamsUpdate(_, updatedSize: boolean) {
         submitTask(async () => {
             if (imgParams) {
-                updateCodeWrSize();
+                updateCodeWrSizeStyle();
                 await drawScene(
                     imgParams,
                     codeCanvasEl,
@@ -248,15 +248,37 @@
                     attributionCanvasEl,
                     selfAttrCanvasEl,
                     updatedSize,
-                    () => imgParams = imgParams,
+                    triggerImgParamsUpdate,
                 );
             }
         });
     }
 
+    onMount(() => window.addEventListener('resize', resizeListener));
+    onDestroy(() => window.removeEventListener('resize', resizeListener));
+    async function resizeListener() {
+        submitTask(async () => {
+            if (imgParams) {
+                await drawScene(
+                    imgParams,
+                    codeCanvasEl,
+                    alphabetCanvasEl,
+                    attributionCanvasEl,
+                    selfAttrCanvasEl,
+                    true,
+                    triggerImgParamsUpdate,
+                );
+            }
+        });
+    }
+
+    function triggerImgParamsUpdate() {
+        imgParams = imgParams;
+    }
+
     let codeWrModifier: 'fit' | 'aspect' = 'fit';
     let codeWrStyle: string | undefined = undefined;
-    function updateCodeWrSize() {
+    function updateCodeWrSizeStyle() {
         if (imgParams) {
             const r = imgParams['output image'].ratio.val;
             codeWrModifier = r === fitViewRatio ? 'fit' : 'aspect';

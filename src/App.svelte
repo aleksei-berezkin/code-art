@@ -4,7 +4,7 @@
 
 <style>
     :global(html) {
-        background-color: #333;
+        background-color: #384048;
         color: #333;
         font-family: Roboto, sans-serif;
         font-size: 16px;
