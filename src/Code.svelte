@@ -182,19 +182,8 @@
     });
 
     let imgParams: ImgParams | undefined = undefined;
-    let codeWrModifier: 'fit' | 'aspect' = 'fit';
-    let codeWrStyle: string | undefined = undefined;
-    $: {
-        // TODO 1 to param upd listener 2 split file
-        const r = imgParams ? (imgParams as ImgParams)['output image'].ratio.val : undefined;
-        if (r) {
-            codeWrModifier = r === fitViewRatio ? 'fit' : 'aspect';
-            codeWrStyle = r === fitViewRatio ? undefined : `--a: calc(${r})`;
-        }
-    }
 
     let openDialog: 'menu' | 'about' | undefined = undefined;
-
     function handleImgParamsClick() {
         if (openDialog === 'menu') {
             openDialog = undefined;
@@ -243,19 +232,31 @@
         );
     }
 
-    async function onParamsUpdate() {
+    async function onParamsUpdate(_, updatedSize: boolean) {
         submitTask(async () => {
             if (imgParams) {
-                imgParams = imgParams;
+                updateCodeWrSize();
                 await drawScene(
                     imgParams,
                     codeCanvasEl,
                     alphabetCanvasEl,
                     attributionCanvasEl,
                     selfAttrCanvasEl,
+                    updatedSize,
+                    () => imgParams = imgParams,
                 );
             }
         });
+    }
+
+    let codeWrModifier: 'fit' | 'aspect' = 'fit';
+    let codeWrStyle: string | undefined = undefined;
+    function updateCodeWrSize() {
+        if (imgParams) {
+            const r = imgParams['output image'].ratio.val;
+            codeWrModifier = r === fitViewRatio ? 'fit' : 'aspect';
+            codeWrStyle = r === fitViewRatio ? undefined : `--a: calc(${r})`;
+        }
     }
 
     let downloading = false;

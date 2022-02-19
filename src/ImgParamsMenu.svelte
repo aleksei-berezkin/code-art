@@ -197,7 +197,7 @@
 
 <script lang='ts'>
     import { getSliderLabel, ImgParams, ParamGroup } from './model/ImgParams';
-    import { afterUpdate, onDestroy, onMount } from 'svelte';
+    import { afterUpdate, onDestroy } from 'svelte';
     import Icon from './Icon.svelte';
     import { getFromSelfOrParentDataset } from './util/getFromSelfOrParentDataset';
     import Contacts from './Contacts.svelte';
@@ -207,7 +207,7 @@
 
     export let imgParams: ImgParams;
     export let menuOpen: boolean;
-    export let paramsUpdated: (p: ImgParams) => void;
+    export let paramsUpdated: (params: ImgParams, updatedSize: boolean) => void;
     export let closeMenu: () => void;
     export let clickedAbout: () => void;
 
@@ -244,7 +244,7 @@
         const g = inputEl.dataset.g;
         const k = inputEl.dataset.k;
         imgParams[g][k].val = Number(inputEl.value);
-        paramsUpdated(imgParams);
+        paramsUpdated(imgParams, isUpdatedSize(g, k));
     }
 
     function handleChoiceChange(e: Event) {
@@ -258,14 +258,18 @@
             );
         }
         imgParams[g][k].val = imgParams[g][k].choices[selectEl.selectedIndex];
-        paramsUpdated(imgParams);
+        paramsUpdated(imgParams, isUpdatedSize(g, k));
     }
 
+    function isUpdatedSize(g: string, k: string) {
+        return imgParams[g][k] === imgParams['output image'].ratio
+            || imgParams[g][k] === imgParams['output image'].size
+    }
     function handleColorChange(e: Event) {
         const inputEl = (e.target as HTMLInputElement);
         const g = inputEl.dataset.g;
         const k = inputEl.dataset.k;
         imgParams[g][k].val = inputEl.value;
-        paramsUpdated(imgParams);
+        paramsUpdated(imgParams, imgParams[g][k]);
     }
 </script>

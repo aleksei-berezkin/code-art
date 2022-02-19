@@ -35,7 +35,7 @@ export async function drawRandomScene(
 
     const sizePixelSpace = await sizeToClientRect(codeCanvasEl);
     const fontFace = pickRandom(fontFacesForRandomScenes);
-    const fontSize = getFontSize(sizePixelSpace);
+    const fontSize = currentImgParams ? getSliderVal(currentImgParams.font.size) : calcFontSize(sizePixelSpace);
 
     const workLimiter = createWorkLimiter();
     const alphabetRaster = await rasterizeAlphabet(source, alphabetCanvasEl, fontFace, fontSize, workLimiter);
@@ -52,16 +52,21 @@ export async function drawScene(
     alphabetCanvasEl: HTMLCanvasElement,
     attributionCanvasEl: HTMLCanvasElement,
     selfAttrCanvasEl: HTMLCanvasElement,
+    calcFontSizeBasedOnSize: boolean,
+    onParamsUpdate: () => void,
 ) {
     const source = await getSource(imgParams.source['source'].val);
 
-    const fontFace = imgParams.font.face.val;
-    // TODO Adapt font size
-    const fontSize = getSliderVal(imgParams.font.size);
-    const workLimiter = createWorkLimiter();
-    const alphabetRaster = await rasterizeAlphabet(source, alphabetCanvasEl, fontFace, fontSize, workLimiter);
+    const sizePixelSpace = await sizeToClientRect(codeCanvasEl);
+    if (calcFontSizeBasedOnSize) {
+        imgParams.font.size.val = calcFontSize(sizePixelSpace);
+        onParamsUpdate();
+    }
 
-    const pixelSpace = makePixelSpace(await sizeToClientRect(codeCanvasEl));
+    const workLimiter = createWorkLimiter();
+    const alphabetRaster = await rasterizeAlphabet(source, alphabetCanvasEl, imgParams.font.face.val, getSliderVal(imgParams.font.size), workLimiter);
+
+    const pixelSpace = makePixelSpace(sizePixelSpace);
     const xAngle = getSliderVal(imgParams.angle.x);
     const yAngle = getSliderVal(imgParams.angle.y);
     const zAngle = getSliderVal(imgParams.angle.z);
@@ -85,7 +90,7 @@ async function _drawScene(source: Source, sceneParams: SceneParams, alphabetRast
 }
 
 async function sizeToClientRect(canvasEl: HTMLCanvasElement): Promise<Size> {
-    await delayToAnimationFrame();
+    await delayToAnimationFrame(); // Make sure layout happened
     const canvasRect = canvasEl.getBoundingClientRect();
     const size = {w: canvasRect.width, h: canvasRect.height};
     canvasEl.width = size.w * dpr;
@@ -93,6 +98,6 @@ async function sizeToClientRect(canvasEl: HTMLCanvasElement): Promise<Size> {
     return size;
 }
 
-function getFontSize(sizePx: Size) {
+function calcFontSize(sizePx: Size) {
     return Math.min(36, 18 + sizePx.w / 1280 * 18);
 }
