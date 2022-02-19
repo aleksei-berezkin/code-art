@@ -32,8 +32,9 @@ export async function rasterizeAlphabet(
     
     const ctx = canvasEl.getContext('2d');
     if (!ctx) {
-        window.showStub();
-        throw new Error('No 2d context');
+        const msg = 'cannot create 2d context';
+        window.showStub(msg);
+        throw new Error(msg);
     }
 
     const _fontSize = fontSize * dpr * fontSizeMultiplier;
@@ -57,6 +58,12 @@ export async function rasterizeAlphabet(
         await workLimiter.next();
         ctx.fillText(letter, x, baseline);
         const tm = ctx.measureText(letter);
+        if (tm.actualBoundingBoxAscent == null || tm.actualBoundingBoxDescent == null || tm.width == null) {
+            const msg = 'text metrics not fully supported';
+            window.showStub(msg);
+            throw new Error(msg);
+        }
+
         glyphs.set(
             letter,
             {

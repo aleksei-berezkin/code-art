@@ -12,35 +12,36 @@
 <body>
     <script>
         (function() {
+            var msg = 'ES2020 syntax not fully supported';
             try {
                 var p = eval(
                     '(async () => {\n' +
-                    'let a = [];\n' +
+                    'let a = undefined ?? [];\n' +
                     'for await (const x of gen()) {\n' +
                     '  a = [...a, x];\n' +
                     '}\n' +
                     'async function* gen() {\n' +
-                    '  yield Promise.resolve(3);\n' +
+                    '  yield 3;\n' +
                     '  yield 5**2;\n' +
                     '}\n' +
                     'return a;})();'
                 );
     
                 if (!p || !('then' in p)) {
-                    showStub();
+                    showStub(msg);
                 } else {
                     p.then(function (arr) {
                         if (!arr || arr.length !== 2 || arr[0] !== 3 || arr[1] !== 25) {
-                            showStub();
+                            showStub(msg);
                         }
                     });
                 }
             } catch(e) {
-                showStub();
+                showStub(msg);
             }
         })();
 
-        function showStub() {
+        function showStub(details) {
             window.isStubShown = true;
 
             var styles = document.getElementsByTagName('style');
@@ -50,9 +51,10 @@
                 }
             }
 
-            document.body.innerHTML = '<p style="max-width: 460px; margin-top: 40px; margin-left: auto; margin-right: auto; padding: 12px; font-family: sans-serif; text-align: center">' +
+            document.body.style.background = 'white';
+            document.body.innerHTML = '<p style="max-width: 460px; margin-top: 40px; margin-left: auto; margin-right: auto; padding: 12px; font-family: sans-serif; text-align: center; background: white">' +
                 'Sorry, this site cannot work in your browser because it\'s outdated. Would you like to <a href="https://www.whatismybrowser.com/guides/how-to-update-your-browser/">upgrade</a> it?' +
-            '</p>';
+                '<br><br><span style="color: darkgray">Details: ' + details + '</span></p>';
         }
     </script>
 </body>

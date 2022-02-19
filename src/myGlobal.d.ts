@@ -4,7 +4,7 @@ declare module '*.shader' {
 }
 
 declare interface Window {
-    showStub: () => void;
+    showStub: (details?: string) => void;
     isStubShown?: boolean;
     appDeps: string[],  // webpack define
 }

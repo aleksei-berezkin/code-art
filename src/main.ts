@@ -1,12 +1,13 @@
 import App from './App.svelte';
-import { checkApi } from './checkApi';
+import { getUnsupportedAPI } from './getUnsupportedAPI';
 
 if (!window.isStubShown) {
-    if (checkApi()) {
+    const unsupportedApi = getUnsupportedAPI();
+    if (unsupportedApi) {
+        window.showStub(`not supported ${unsupportedApi}`);
+    } else {
         new App({
             target: document.body,
         });
-    } else {
-        window.showStub();
     }
 }
