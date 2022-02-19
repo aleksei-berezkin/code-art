@@ -55,9 +55,9 @@ export type ImgParams = {
     },
     'output image': {
         ratio: ChoicesVal,
-        size: ChoicesVal,
+        size: SliderVal,
         attribution: ChoicesVal,
-    }
+    },
 }
 
 export type ParamGroup = keyof ImgParams;

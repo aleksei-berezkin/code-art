@@ -10,7 +10,7 @@ import { makePixelSpace } from '../model/PixelSpace';
 import { getSliderVal } from '../model/ImgParams';
 import { getTxMax } from '../model/getTxMax';
 import type { Size } from '../model/Size';
-import { delay } from '../util/delay';
+import { delay, delayToAnimationFrame } from '../util/delay';
 import { parseCode } from '../parse/parseCode';
 import type { ColorSchemeName } from '../model/colorSchemes';
 import { colorSchemes } from '../model/colorSchemes';
@@ -33,14 +33,14 @@ export async function drawRandomScene(
     const sourceName = pickRandom(Object.keys(sourceSpecs));
     const source = await getSource(sourceName);
 
-    const sizePixelSpace = getSizePixelSpace(codeCanvasEl);
+    const sizePixelSpace = await sizeToClientRect(codeCanvasEl);
     const fontFace = pickRandom(fontFacesForRandomScenes);
     const fontSize = getFontSize(sizePixelSpace);
 
     const workLimiter = createWorkLimiter();
     const alphabetRaster = await rasterizeAlphabet(source, alphabetCanvasEl, fontFace, fontSize, workLimiter);
 
-    const sceneParams = await generateSceneParams(currentImgParams, source, getSizePixelSpace(codeCanvasEl), fontFace, fontSize, alphabetRaster, workLimiter);
+    const sceneParams = await generateSceneParams(currentImgParams, source, sizePixelSpace, fontFace, fontSize, alphabetRaster, workLimiter);
     await _drawScene(source, sceneParams, alphabetRaster, codeCanvasEl, alphabetCanvasEl, attributionCanvasEl, selfAttrCanvasEl, workLimiter);
 
     setParams(sceneParams.imgParams);
@@ -61,7 +61,7 @@ export async function drawScene(
     const workLimiter = createWorkLimiter();
     const alphabetRaster = await rasterizeAlphabet(source, alphabetCanvasEl, fontFace, fontSize, workLimiter);
 
-    const pixelSpace = makePixelSpace(getSizePixelSpace(codeCanvasEl));
+    const pixelSpace = makePixelSpace(await sizeToClientRect(codeCanvasEl));
     const xAngle = getSliderVal(imgParams.angle.x);
     const yAngle = getSliderVal(imgParams.angle.y);
     const zAngle = getSliderVal(imgParams.angle.z);
@@ -84,11 +84,13 @@ async function _drawScene(source: Source, sceneParams: SceneParams, alphabetRast
     await drawAttributionScene(sceneParams, targetTex, colorScheme, codeCanvasEl, attributionCanvasEl, selfAttrCanvasEl);
 }
 
-function getSizePixelSpace(codeCanvasEl: HTMLCanvasElement): Size {
-    return {
-        w: codeCanvasEl.width / dpr,
-        h: codeCanvasEl.height / dpr,
-    };
+async function sizeToClientRect(canvasEl: HTMLCanvasElement): Promise<Size> {
+    await delayToAnimationFrame();
+    const canvasRect = canvasEl.getBoundingClientRect();
+    const size = {w: canvasRect.width, h: canvasRect.height};
+    canvasEl.width = size.w * dpr;
+    canvasEl.height = size.h * dpr;
+    return size;
 }
 
 function getFontSize(sizePx: Size) {

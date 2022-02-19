@@ -1,24 +1,24 @@
 type Cb = () => Promise<void>;
 
-export function throttle(cb: Cb) {
-    _throttle(cb, 200);
+export function submitTask(cb: Cb) {
+    _submit(cb, 200);
 }
 
-export function throttleFast(cb: Cb) {
-    _throttle(cb, 20);
+export function submitTaskFast(cb: Cb) {
+    _submit(cb, 20);
 }
 
 type LCb = () => void;
 let onStart: LCb = () => {};
 let onEnd: LCb = () => {};
-export function setThrottleListeners(_onStart: LCb, _onEnd: LCb) {
-    onStart = _onStart;
-    onEnd = _onEnd;
+export function setTaskExecutorListeners(l: {onStart: LCb, onEnd: LCb}) {
+    onStart = l.onStart;
+    onEnd = l.onEnd;
 }
 
 let nextCb: Cb | undefined;
 let state: 'idle' | 'working' = 'idle';
-function _throttle(cb: Cb, firstDelay: number) {
+function _submit(cb: Cb, firstDelay: number) {
     nextCb = cb;
     if (state === 'idle') {
         state = 'working';

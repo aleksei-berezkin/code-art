@@ -184,15 +184,17 @@ export async function generateSceneParams(currentImgParams: ImgParams | undefine
             },
         },
         'output image': {
+            size: {
+                type: 'slider',
+                min: 0,
+                val: 100,
+                max: 100,
+                unit: '%',
+            },
             ratio: {
                 type: 'choices',
                 val: currentImgParams ? currentImgParams['output image'].ratio.val : fitViewRatio,
                 choices: ratios,
-            },
-            size: {
-                type: 'choices',
-                val: 'fit view',
-                choices: ['fit view'],
             },
             attribution: {
                 type: 'choices',

@@ -133,18 +133,18 @@
             <ImgParamsMenu imgParams={imgParams}
                            menuOpen={openDialog === 'menu'}
                            paramsUpdated={onParamsUpdate}
-                           closeMenu={closeMenu}
-                           clickedAbout={onClickedAbout}
+                           closeMenu={closeImgParams}
+                           clickedAbout={handleAboutClick}
             />
         {/if}
         <canvas class='code-canvas' bind:this={codeCanvasEl}></canvas>
-        <button class='round-btn left' on:click={handleMenuClick}>
+        <button class='round-btn left' on:click={handleImgParamsClick}>
             <Icon pic={(openDialog === 'menu') ? 'close' : 'menu'}/>
         </button>
         <button class='round-btn second-to-right' on:click={handleGenerateClick}>
-            <Icon pic='reload' rotateDeg={genRotateDeg}/>
+            <Icon pic='reload' rotateDeg={generateRotateDeg}/>
         </button>
-        <button class='round-btn right' on:click={handleDownload}>
+        <button class='round-btn right' on:click={handleDownloadClick}>
             <Icon pic={downloading ? 'pending' : 'download'}/>
         </button>
     </div>
@@ -165,7 +165,7 @@
     import { onMount } from 'svelte';
     import Icon from './Icon.svelte';
     import { drawRandomScene, drawScene } from './draw/drawScene';
-    import { setThrottleListeners, throttle, throttleFast } from './util/throttle';
+    import { setTaskExecutorListeners, submitTask, submitTaskFast } from './util/submitTask';
     import About from './About.svelte';
     import { fitViewRatio } from './model/ratios';
     import { delay } from './util/delay';
@@ -176,6 +176,10 @@
     let selfAttrCanvasEl: HTMLCanvasElement;
 
     let progress = false;
+    setTaskExecutorListeners({
+        onStart: () => progress = true,
+        onEnd: () => progress = false,
+    });
 
     let imgParams: ImgParams | undefined = undefined;
     let codeWrModifier: 'fit' | 'aspect' = 'fit';
@@ -191,18 +195,7 @@
 
     let openDialog: 'menu' | 'about' | undefined = undefined;
 
-    let genRotateDeg = 0;
-
-    // In Safari sizes may be not ready on mount, that's why raf
-    onMount(() => {
-        setThrottleListeners(
-            () => progress = true,
-            () => progress = false,
-        );
-        requestAnimationFrame(async () => await generateScene());
-    });
-
-    function handleMenuClick() {
+    function handleImgParamsClick() {
         if (openDialog === 'menu') {
             openDialog = undefined;
         } else {
@@ -210,16 +203,35 @@
         }
     }
 
+    function closeImgParams() {
+        if (openDialog === 'menu') {
+            openDialog = undefined;
+        }
+    }
+
+    function handleAboutClick() {
+        openDialog = 'about';
+    }
+
+    function closeAbout() {
+        if (openDialog === 'about') {
+            openDialog = undefined;
+        }
+    }
+
+    // In Safari sizes may be not ready on mount, that's why raf
+    onMount(() => requestAnimationFrame(async () => await generateScene()));
+
+    let generateRotateDeg = 0;
     async function handleGenerateClick() {
         if (imgParams) {
-            genRotateDeg += 360;
+            generateRotateDeg += 360;
             await generateScene();
         }
     }
 
     async function generateScene() {
-        throttleFast(async () => {
-            await setWH();
+        submitTaskFast(async () =>
             await drawRandomScene(
                 imgParams,
                 codeCanvasEl,
@@ -227,12 +239,27 @@
                 attributionCanvasEl,
                 selfAttrCanvasEl,
                 p => imgParams = p,
-            );
-        })
+            )
+        );
+    }
+
+    async function onParamsUpdate() {
+        submitTask(async () => {
+            if (imgParams) {
+                imgParams = imgParams;
+                await drawScene(
+                    imgParams,
+                    codeCanvasEl,
+                    alphabetCanvasEl,
+                    attributionCanvasEl,
+                    selfAttrCanvasEl,
+                );
+            }
+        });
     }
 
     let downloading = false;
-    function handleDownload() {
+    function handleDownloadClick() {
         if (!downloading) {
             downloading = true;
             codeCanvasEl.toBlob(blob => {
@@ -248,45 +275,5 @@
                 setTimeout(() => URL.revokeObjectURL(objUrl), 5000);
             });
         }
-    }
-
-    async function onParamsUpdate() {
-        throttle(async () => {
-            if (imgParams) {
-                imgParams = imgParams;
-                await setWH();
-                await drawScene(
-                    imgParams,
-                    codeCanvasEl,
-                    alphabetCanvasEl,
-                    attributionCanvasEl,
-                    selfAttrCanvasEl,
-                );
-            }
-        })
-    }
-
-    function onClickedAbout() {
-        openDialog = 'about';
-    }
-
-    function closeMenu() {
-        if (openDialog === 'menu') {
-            openDialog = undefined;
-        }
-    }
-
-    function closeAbout() {
-        if (openDialog === 'about') {
-            openDialog = undefined;
-        }
-    }
-
-
-    async function setWH() {
-        await delay();
-        const canvasRect = codeCanvasEl.getBoundingClientRect();
-        codeCanvasEl.width = canvasRect.width * dpr;
-        codeCanvasEl.height = canvasRect.height * dpr;
     }
 </script>
