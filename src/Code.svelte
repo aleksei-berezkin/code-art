@@ -16,23 +16,25 @@
         top: 0;
     }
 
+    /* TODO remove? */
     .code-wr {
+        /* Overridden in style='' */
+        --h: 100vh;
+        --w: 100vw;
+
         position: relative;
     }
 
     .code-wr.fit {
-        height: 100vh;
-        width: 100vw;
+        height: var(--h);
+        width: var(--w);
     }
 
     .code-wr.aspect {
-        /* Overridden in style='' */
         --a: calc(1 / 1);
-        --mh: 100vh;
-        --mw: 100vw;
 
-        height: calc(min(var(--mh), var(--mw) / var(--a)));
-        width: calc(min(var(--mw), var(--mh) * var(--a)));
+        height: calc(min(var(--h), var(--w) / var(--a)));
+        width: calc(min(var(--w), var(--h) * var(--a)));
     }
 
     .code-canvas {
@@ -128,39 +130,43 @@
     <canvas class='alphabet-canvas' bind:this={alphabetCanvasEl} width='2048'></canvas>
     <canvas class='attribution-canvas' bind:this={attributionCanvasEl}></canvas>
     <canvas class='self-attr-canvas' bind:this={selfAttrCanvasEl}></canvas>
+
     <div class={`code-wr ${codeWrModifier}`} style={codeWrStyle}>
-        {#if imgParams}
-            <ImgParamsMenu imgParams={imgParams}
-                           menuOpen={openDialog === 'menu'}
-                           paramsUpdated={onParamsUpdate}
-                           closeMenu={closeImgParams}
-                           clickedAbout={handleAboutClick}
-            />
-        {/if}
         <canvas class='code-canvas' bind:this={codeCanvasEl}></canvas>
-        <button class='round-btn left' on:click={handleImgParamsClick}>
-            <Icon pic={(openDialog === 'menu') ? 'close' : 'menu'}/>
-        </button>
-        <button class='round-btn second-to-right' on:click={handleGenerateClick}>
-            <Icon pic='reload' rotateDeg={generateRotateDeg}/>
-        </button>
-        <button class='round-btn right' on:click={handleDownloadClick}>
-            <Icon pic={downloading ? 'pending' : 'download'}/>
-        </button>
     </div>
+
+    <button class='round-btn left' on:click={handleImgParamsClick}>
+        <Icon pic={(openDialog === 'menu') ? 'close' : 'menu'}/>
+    </button>
+    <button class='round-btn second-to-right' on:click={handleGenerateClick}>
+        <Icon pic='reload' rotateDeg={generateRotateDeg}/>
+    </button>
+    <button class='round-btn right' on:click={handleDownloadClick}>
+        <Icon pic={downloading ? 'pending' : 'download'}/>
+    </button>
+
+    {#if imgParams}
+        <ImgParamsMenu imgParams={imgParams}
+                       menuOpen={openDialog === 'menu'}
+                       paramsUpdated={onParamsUpdate}
+                       closeMenu={closeImgParams}
+                       clickedAbout={handleAboutClick}
+        />
+    {/if}
+
     {#if progress}
         <svg class='progress-svg' viewBox='-26 -26 52 52' xmlns='http://www.w3.org/2000/svg'>
             <circle class='progress-circle' fill='none' cx='0' cy='0' r='20' stroke-width='4' xmlns='http://www.w3.org/2000/svg'/>
         </svg>
     {/if}
+
     {#if openDialog === 'about'}
         <About closeDialog={closeAbout}/>
     {/if}
 </main>
     
 <script lang='ts'>
-    import { ImgParams } from './model/ImgParams';
-    import { dpr } from './util/dpr';
+    import { getSliderVal, ImgParams } from './model/ImgParams';
     import ImgParamsMenu from './ImgParamsMenu.svelte';
     import { onMount } from 'svelte';
     import Icon from './Icon.svelte';
@@ -168,7 +174,6 @@
     import { setTaskExecutorListeners, submitTask, submitTaskFast } from './util/submitTask';
     import About from './About.svelte';
     import { fitViewRatio } from './model/ratios';
-    import { delay } from './util/delay';
 
     let codeCanvasEl: HTMLCanvasElement;
     let alphabetCanvasEl: HTMLCanvasElement;
@@ -255,7 +260,12 @@
         if (imgParams) {
             const r = imgParams['output image'].ratio.val;
             codeWrModifier = r === fitViewRatio ? 'fit' : 'aspect';
-            codeWrStyle = r === fitViewRatio ? undefined : `--a: calc(${r})`;
+
+            const s = getSliderVal(imgParams['output image'].size) * 100;
+            codeWrStyle = `--h: ${s}vh; --w: ${s}vw; `;
+            if (r !== fitViewRatio) {
+                codeWrStyle += `--a: calc(${r});`;
+            }
         }
     }
 

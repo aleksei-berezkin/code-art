@@ -186,7 +186,7 @@ export async function generateSceneParams(currentImgParams: ImgParams | undefine
         'output image': {
             size: {
                 type: 'slider',
-                min: 0,
+                min: 10,
                 val: 100,
                 max: 100,
                 unit: '%',
