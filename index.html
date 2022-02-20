@@ -17,7 +17,7 @@
             try {
                 var p = eval(
                     '(async () => {\n' +
-                    'let a = undefined ?? [];\n' +
+                    'let a = [];\n' +
                     'for await (const x of gen()) {\n' +
                     '  a = [...a, x];\n' +
                     '}\n' +

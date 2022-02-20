@@ -49,7 +49,7 @@
 
 <svg xmlns='http://www.w3.org/2000/svg'
      class={`ic ${pic} ${size} ${scaleTo0 ? 'scale-to-0' : '' }`}
-     viewBox={viewBoxes[pic] ?? '0 0 24 24'}
+     viewBox={viewBoxes[pic] || '0 0 24 24'}
      style={ rotateDeg ? `transform: rotate(${rotateDeg}deg)` : undefined}
      bind:this={svgEl}>
     <title>{p}</title>

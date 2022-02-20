@@ -71,7 +71,7 @@ export async function* createCodeSceneVertices(
         );
 
         const _color = colorScheme[shortColorKeyToColorKey[parseResult.colorization[pos]]]
-            ?? colorScheme.default;
+            || colorScheme.default;
         setColor(v.color, v.verticesNum * rgbSize, _color);
 
         v.verticesNum += rect2dVerticesNum;
