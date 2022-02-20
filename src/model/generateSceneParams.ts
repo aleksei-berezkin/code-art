@@ -3,7 +3,7 @@ import type { Source } from './Source';
 import type { ImgParams } from './ImgParams';
 import { degToRad } from '../util/degToRad';
 import { colorSchemeNames } from './colorSchemes';
-import { RGB, rgbToHex } from './RGB';
+import { rgbToHex } from './RGB';
 import { makePixelSpace, PixelSpace } from './PixelSpace';
 import { getTxMax } from './getTxMax';
 import type { Mat4 } from '../util/matrices';
@@ -20,6 +20,7 @@ import { sourceSpecs } from './sourceSpecs';
 import { scoreFill } from './scoreFill';
 import { attributionPos } from './attributionPos';
 import { fitViewRatio, ratios } from './ratios';
+import { generate3DifferentBrightColors } from '../util/generate3DifferentBrightColors';
 
 export type SceneParams = {
     pixelSpace: PixelSpace,
@@ -31,7 +32,7 @@ export type SceneParams = {
 export async function generateSceneParams(currentImgParams: ImgParams | undefined, source: Source, sizePx: Size, fontFace: string, fontSize: number, alphabetRaster: AlphabetRaster, workLimiter: WorkLimiter): Promise<SceneParams> {
     const blurFactorPercentLog = 1.3 + Math.random();
 
-    const samplesCount = isMinified(source.spec.lang) ? 3 : 6;
+    const samplesCount = isMinified(source.spec.lang) ? 4 : 6;
     const {angles, pixelSpace, txMat, extensions, scrollFraction} = (await Promise.all(Array.from({length: samplesCount})
         .map(async () => {
             await workLimiter.next();
@@ -49,6 +50,8 @@ export async function generateSceneParams(currentImgParams: ImgParams | undefine
         })))
         .flatMap(p => p)
         .reduce((p, q) => p.score > q.score ? p : q);
+
+    const [glowColor, nearColor, farColor] = generate3DifferentBrightColors();
 
     const imgParams: ImgParams = {
         source: {
@@ -129,14 +132,14 @@ export async function generateSceneParams(currentImgParams: ImgParams | undefine
             radius: {
                 type: 'slider',
                 min: 0,
-                val: 20 + Math.random() * 40,
+                val: 10 + Math.random() * 60,
                 max: 100,
                 unit: '%',
             },
             brightness: {
                 type: 'slider',
                 min: 0,
-                val: 100 + Math.random() * 120,
+                val: 10 + Math.random() * 260,
                 max: 400,
                 unit: '%',
             },
@@ -149,8 +152,7 @@ export async function generateSceneParams(currentImgParams: ImgParams | undefine
             },
             to: {
                 type: 'color',
-                // TODO good colors in col scheme
-                val: rgbToHex(Array.from({length: 3}).map(() => .25 + .75 * Math.random()) as RGB),
+                val: rgbToHex(glowColor),
             },
         },
         fade: {
@@ -176,11 +178,11 @@ export async function generateSceneParams(currentImgParams: ImgParams | undefine
             },
             near: {
                 type: 'color',
-                val: rgbToHex(Array.from({length: 3}).map(() => .25 + .75 * Math.random()) as RGB),
+                val: rgbToHex(nearColor),
             },
             far: {
                 type: 'color',
-                val: rgbToHex(Array.from({length: 3}).map(() => .25 + .75 * Math.random()) as RGB),
+                val: rgbToHex(farColor),
             },
         },
         'output image': {

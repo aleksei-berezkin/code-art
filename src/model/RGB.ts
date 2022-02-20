@@ -1,5 +1,6 @@
 import { pluck } from '../util/pluck';
 
+// Each component 0..1
 export type RGB = [number, number, number];
 
 export const rgbSize = 3;
