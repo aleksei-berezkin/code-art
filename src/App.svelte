@@ -46,6 +46,7 @@
         font: unset;
         margin: 0;
         padding: 0;
+        text-align: left;
     }
 </style>
 

@@ -101,7 +101,6 @@
         transition: background-color 250ms;
         top: var(--pad-std);
         width: var(--btn-size);
-        -webkit-tap-highlight-color: transparent;
     }
 
     .round-btn.left {

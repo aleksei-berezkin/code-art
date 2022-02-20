@@ -14,10 +14,9 @@
         transition: transform var(--ic-tx), opacity var(--ic-tx);
         top: calc(var(--pad-std) * 2 + var(--btn-size));
 
-        --pad-gr: calc(var(--pad-std) *.75);
         --input-w: 12rem;
-        --label-p: .75rem;
         --label-w: 2.5rem;
+        --pad-gr: calc(var(--pad-std) *.75);
     }
 
     .menu-root.open {
@@ -26,16 +25,9 @@
     }
 
     .group {
+        padding-bottom: var(--pad-gr);
         padding-left: var(--pad-std);
         padding-right: var(--pad-std);
-    }
-
-    .group:not(:last-child) {
-        padding-bottom: var(--pad-gr);
-    }
-
-    .group:last-child {
-        padding-bottom: var(--pad-gr);
     }
 
     .group-button:active {
@@ -44,10 +36,13 @@
 
     .group-button-txt {
         padding-left: .5em;
-        padding-right: var(--input-w);
+        padding-right: 1em;
     }
 
     .group-body {
+        display: grid;
+        gap: calc(var(--pad-gr) * .75);
+        grid-template-columns: auto var(--label-w) var(--input-w) var(--label-w);
         height: 0;
         opacity: 0;
         padding-left: calc(1.6em);
@@ -60,56 +55,26 @@
     .group-body.open {
         height: auto;
         opacity: 1;
+        padding-top: var(--pad-gr);
         transform: scale(1);
     }
 
-    .slider-wr {
+    .param-label-wr {
         align-items: center;
         display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        padding-top: calc(var(--pad-gr) * .75);
     }
 
-    .slider-label {
-        flex-grow: 1;
-    }
-
-    .slider-min {
-        padding-right: var(--label-p);
+    .param-min {
         text-align: right;
-        width: var(--label-w);
     }
 
-    .slider-slider {
+    .input-slider {
         margin: 0;
-        max-width: 50vw;
-        width: var(--input-w);
     }
 
-    .slider-max {
-        padding-left: var(--label-p);
-        width: var(--label-w);
-    }
-
-    .choices-wr {
-        align-items: center;
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        padding-top: calc(var(--pad-gr) * .25);
-    }
-
-    .choices-select {
+    .input-select {
         font: inherit;
-        margin-right: calc(var(--label-w) + var(--label-p));
         padding: 0.25em;
-        width: var(--input-w);
-    }
-
-    .input-color-wr {
-        padding-top: calc(var(--pad-gr) * .3);
-        width: calc(var(--input-w) + var(--label-w) + var(--label-p));
     }
 
     .footer-group {
@@ -143,46 +108,49 @@
 
             <div class={`group-body ${openGroups.includes(g) ? 'open' : ''}`}>
                 {#each Object.entries(ps) as [k, p]}
+                    <div class='param-label-wr'>
+                        <label for={toId(g, k)}>{k}</label>
+                    </div>
+
                     {#if p.type === 'slider'}
-                        <div class='slider-wr'>
-                            <label class='slider-label' for={toId(g, k)}>{k}</label>
-                            <div class='slider-min'>{getSliderLabel(p, 'min')}</div>
-                            <!--suppress XmlDuplicatedId -->
-                            <input class='slider-slider' id={toId(g, k)}
-                                   data-g={g} data-k={k}
-                                   type='range' min='{p.min}' max='{p.max}' step='any'
-                                   value='{p.val}'
-                                   on:input={handleSliderChange}
-                                   title="{getSliderLabel(p, 'val')}"
-                            />
-                            <div class='slider-max'>{getSliderLabel(p, 'max')}</div>
-                        </div>
+                        <div class='param-min'>{getSliderLabel(p, 'min')}</div>
+                    {:else}
+                        <div></div>
                     {/if}
-            
+
+                    {#if p.type === 'slider'}
+                        <!--suppress XmlDuplicatedId -->
+                        <input class='input-slider' id={toId(g, k)}
+                               data-g={g} data-k={k}
+                               type='range' min='{p.min}' max='{p.max}' step='any'
+                               value='{p.val}'
+                               on:input={handleSliderChange}
+                               title="{getSliderLabel(p, 'val')}"
+                        />
+                    {/if}
+
                     {#if p.type === 'choices'}
-                        <div class='choices-wr'>
-                            <label class='choices-label' for={toId(g, k)}>{k}</label>
-                            <!--suppress XmlDuplicatedId -->
-                            <select class='choices-select' id={toId(g, k)} data-g={g} data-k={k} on:change={handleChoiceChange}>
-                                {#each p.choices as choice}
-                                    {#if p.val === choice}
-                                        <option value={choice} selected>{choice}</option>
-                                    {:else}
-                                        <option value={choice}>{choice}</option>
-                                    {/if}
-                                {/each}
-                            </select>
-                        </div>
+                        <!--suppress XmlDuplicatedId -->
+                        <select class='input-select' id={toId(g, k)} data-g={g} data-k={k} on:change={handleChoiceChange}>
+                            {#each p.choices as choice}
+                                {#if p.val === choice}
+                                    <option value={choice} selected>{choice}</option>
+                                {:else}
+                                    <option value={choice}>{choice}</option>
+                                {/if}
+                            {/each}
+                        </select>
                     {/if}
-            
+
                     {#if p.type === 'color'}
-                        <div class='choices-wr'>
-                            <label for={toId(g, k)}>{k}</label>
-                            <div class='input-color-wr'>
-                                <!--suppress XmlDuplicatedId -->
-                                <input id={toId(g, k)} data-g={g} data-k={k} type='color' class='input-color' value='{p.val}' on:change={handleColorChange}/>
-                            </div>
-                        </div>
+                        <!--suppress XmlDuplicatedId -->
+                        <input id={toId(g, k)} data-g={g} data-k={k} type='color' value='{p.val}' on:change={handleColorChange}/>
+                    {/if}
+
+                    {#if p.type === 'slider'}
+                        <div class='param-max'>{getSliderLabel(p, 'max')}</div>
+                    {:else}
+                        <div></div>
                     {/if}
                 {/each}
             </div>
