@@ -98,7 +98,7 @@
             <ul>
                 <li><a href='https://fonts.google.com/icons'>Google Fonts Icons</a></li>
                 <li><a href='https://mui.com/components/material-icons/' target='_blank'>Material Icons</a></li>
-                <li><a href='https://worldvectorlogo.com/ru/logo/devto' target='_blank'>DEV logo</a></li>
+                <li><a href='https://worldvectorlogo.com/ru/logo/devto' target='_blank'>DEV logo</a> from <a href='https://worldvectorlogo.com/'>worldvectorlogo</a></li>
             </ul>
             <h3>Rendered code</h3>
             <ul>

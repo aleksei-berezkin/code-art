@@ -14,8 +14,6 @@
         transition: transform var(--ic-tx), opacity var(--ic-tx);
         top: calc(var(--pad-std) * 2 + var(--btn-size));
 
-        --input-w: 12rem;
-        --label-w: 2.5rem;
         --pad-gr: calc(var(--pad-std) *.75);
     }
 
@@ -40,6 +38,9 @@
     }
 
     .group-body {
+        --label-w: 2.5rem;
+        --input-w: 12rem;
+
         display: grid;
         gap: calc(var(--pad-gr) * .75);
         grid-template-columns: auto var(--label-w) var(--input-w) var(--label-w);
@@ -70,11 +71,33 @@
 
     .input-slider {
         margin: 0;
+        width: 100%;
     }
 
     .input-select {
         font: inherit;
         padding: 0.25em;
+        width: 100%;
+    }
+
+    @media (max-width: 510px) {
+        .menu-root {
+            --pad-gr: calc(var(--pad-std) *.55);
+            max-width: calc(100vw - 2 * var(--pad-std));
+        }
+
+        .group-body {
+            grid-template-columns: auto 0 minmax(auto, var(--input-w)) 0;
+            column-gap: 0;
+        }
+
+        .param-label-wr {
+            padding-right: calc(var(--pad-gr));
+        }
+
+        .param-min, .param-max {
+            visibility: hidden;
+        }
     }
 
     .footer-group {
