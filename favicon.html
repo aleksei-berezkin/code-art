@@ -1,0 +1,39 @@
+<html lang="en">
+<head>
+    <title>Code Art Favicon</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400&family=Anonymous+Pro&family=B612+Mono&family=Courier+Prime&family=Cutive+Mono&family=Inconsolata&family=JetBrains+Mono&family=Noto+Sans+Mono&family=Nova+Mono&family=Share+Tech+Mono&family=Syne+Mono&family=Ubuntu+Mono&display=swap" rel="stylesheet">
+    <style>
+        #main {
+            background: #0000;
+        }
+    </style>
+</head>
+<body>
+<canvas id="main" height="128" width="128"></canvas>
+<script>
+    main();
+
+    async function main() {
+        const canvas = document.getElementById('main');
+        const s = Number(canvas.width);
+        const ctx = canvas.getContext('2d');
+    
+        ctx.fillStyle = 'black';
+        ctx.beginPath();
+        ctx.arc(s/2, s/2, s/2, 0, 2 * Math.PI);
+        ctx.fill();
+    
+        const fontSize = s * 1.2;
+        const fontCssStr = `${fontSize}px 'Ubuntu Mono'`;
+        const text = 'a';
+        await document.fonts.load(fontCssStr, text)
+
+        ctx.fillStyle = 'white';
+        ctx.font = fontCssStr;
+        const m = ctx.measureText('a');
+        const height = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent;
+        ctx.fillText(text, (s - m.width) / 2, ((s - height) / 2 + height) * .98);
+    }
+</script>
+</body>
+</html>
