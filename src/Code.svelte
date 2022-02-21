@@ -4,10 +4,10 @@
         display: flex;
         flex-direction: column;
         justify-content: center;
-        height: 100vh;
+        height: 100%;
         margin: 0;
         padding: 0;
-        width: 100vw;
+        width: 100%;
     }
 
     .alphabet-canvas, .attribution-canvas, .self-attr-canvas {
@@ -19,8 +19,8 @@
 
     .code-canvas {
         /* Overridden in style='' */
-        --h: 100vh;
-        --w: 100vw;
+        --h: 100%;
+        --w: 100%;
 
         background-color: #707688;
         height: var(--h);
@@ -162,6 +162,8 @@
     import { setTaskExecutorListeners, submitTask, submitTaskFast } from './util/submitTask';
     import About from './About.svelte';
     import { fitViewRatio } from './model/ratios';
+    import { delayToAnimationFrame } from './util/delay';
+    import { dpr } from './util/dpr';
 
     let codeCanvasEl: HTMLCanvasElement;
     let alphabetCanvasEl: HTMLCanvasElement;
@@ -202,7 +204,10 @@
     }
 
     // In Safari sizes may be not ready on mount, that's why raf
-    onMount(() => requestAnimationFrame(async () => await generateScene()));
+    onMount(async () => {
+        await setCodeCanvasWH();
+        await generateScene();
+    });
 
     let generateRotateDeg = 0;
     async function handleGenerateClick() {
@@ -228,7 +233,10 @@
     async function onParamsUpdate(_, updatedSize: boolean) {
         submitTask(async () => {
             if (imgParams) {
-                updateCodeWrSizeStyle();
+                if (updatedSize) {
+                    updateCodeCanvasStyle();
+                    await setCodeCanvasWH();
+                }
                 await drawScene(
                     imgParams,
                     codeCanvasEl,
@@ -247,6 +255,7 @@
     async function resizeListener() {
         submitTask(async () => {
             if (imgParams) {
+                await setCodeCanvasWH();
                 await drawScene(
                     imgParams,
                     codeCanvasEl,
@@ -266,17 +275,24 @@
 
     let codeCanvasModifier: '' | 'aspect' = '';
     let codeCanvasStyle: string | undefined = undefined;
-    function updateCodeWrSizeStyle() {
+    function updateCodeCanvasStyle() {
         if (imgParams) {
             const r = imgParams['output image'].ratio.val;
             codeCanvasModifier = r === fitViewRatio ? '' : 'aspect';
 
             const s = getSliderVal(imgParams['output image'].size) * 100;
-            codeCanvasStyle = `--h: ${s}vh; --w: ${s}vw; `;
+            codeCanvasStyle = `--h: ${s}%; --w: ${s}%; `;
             if (r !== fitViewRatio) {
                 codeCanvasStyle += `--a: calc(${r});`;
             }
         }
+    }
+
+    async function setCodeCanvasWH() {
+        await delayToAnimationFrame(); // Make sure layout happened
+        const canvasRect = codeCanvasEl.getBoundingClientRect();
+        codeCanvasEl.width = canvasRect.width * dpr;
+        codeCanvasEl.height = canvasRect.height * dpr;
     }
 
     let downloading = false;

@@ -16,7 +16,7 @@
     .about.credits-open {
         /* Overflow + max-height may force browser to remove nav overlays and extend content size, so setting
          * fixed height. Unfortunately this height looks weird on very tall screens. */
-        height: calc(100vh - 2 * var(--pad-std));
+        height: calc(100% - 2 * var(--pad-std));
     }
 
     .close-wr {
@@ -80,7 +80,7 @@
         <h2>License</h2>
         <p>Generated images are licensed under <a href='https://creativecommons.org/licenses/by/4.0/' target='_blank'>CC BY 4.0</a>.
             Rendered code fragments have their own licenses, see &ldquo;Credits&rdquo;.
-            If you remove attribution watermarks please make sure to give your own attribution both to <a href='https://code-art.app'>code-art.app</a> and rendered code fragment.
+            If you remove attribution watermarks please make sure to give your own attribution both to <a href='https://code-art.images/'>code-art.images</a> and rendered code fragment.
         </p>
         <h2>Any feedback is welcome</h2>
         <p><Contacts size='md' color='dark'/></p>

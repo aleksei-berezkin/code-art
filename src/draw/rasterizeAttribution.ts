@@ -8,7 +8,7 @@ const pad = {
 }
 
 export async function rasterizeAttribution(text: string, fontSize: number, canvasEl: HTMLCanvasElement) {
-    const _fontSize = .9 * fontSize * dpr;
+    const _fontSize = .8 * fontSize * dpr;
     const fontCssStr = `300 ${_fontSize}px 'Roboto'`;
     await document.fonts.load(fontCssStr, text)
 

@@ -10,7 +10,7 @@ import { makePixelSpace } from '../model/PixelSpace';
 import { getSliderVal } from '../model/ImgParams';
 import { getTxMax } from '../model/getTxMax';
 import type { Size } from '../model/Size';
-import { delay, delayToAnimationFrame } from '../util/delay';
+import { delay } from '../util/delay';
 import { parseCode } from '../parse/parseCode';
 import type { ColorSchemeName } from '../model/colorSchemes';
 import { colorSchemes } from '../model/colorSchemes';
@@ -33,7 +33,7 @@ export async function drawRandomScene(
     const sourceName = pickRandom(Object.keys(sourceSpecs));
     const source = await getSource(sourceName);
 
-    const sizePixelSpace = await sizeToClientRect(codeCanvasEl);
+    const sizePixelSpace = getPixelSpaceSize(codeCanvasEl);
     const fontFace = pickRandom(fontFacesForRandomScenes);
     const fontSize = currentImgParams ? getSliderVal(currentImgParams.font.size) : calcFontSize(sizePixelSpace);
 
@@ -57,7 +57,7 @@ export async function drawScene(
 ) {
     const source = await getSource(imgParams.source['source'].val);
 
-    const sizePixelSpace = await sizeToClientRect(codeCanvasEl);
+    const sizePixelSpace = getPixelSpaceSize(codeCanvasEl);
     if (calcFontSizeBasedOnSize) {
         imgParams.font.size.val = calcFontSize(sizePixelSpace);
         onParamsUpdate();
@@ -84,18 +84,16 @@ async function _drawScene(source: Source, sceneParams: SceneParams, alphabetRast
     await delay();
     const targetTex = await drawEffectsScene(sceneParams, colorScheme.background, codeTex, codeCanvasEl, workLimiter);
     await rasterizeAttribution(source.spec.credit, sceneParams.imgParams.font.size.val, attributionCanvasEl);
-    await rasterizeAttribution('code-art.app', sceneParams.imgParams.font.size.val, selfAttrCanvasEl);
+    await rasterizeAttribution('code-art.images', sceneParams.imgParams.font.size.val, selfAttrCanvasEl);
     await delay();
     await drawAttributionScene(sceneParams, targetTex, colorScheme, codeCanvasEl, attributionCanvasEl, selfAttrCanvasEl);
 }
 
-async function sizeToClientRect(canvasEl: HTMLCanvasElement): Promise<Size> {
-    await delayToAnimationFrame(); // Make sure layout happened
-    const canvasRect = canvasEl.getBoundingClientRect();
-    const size = {w: canvasRect.width, h: canvasRect.height};
-    canvasEl.width = size.w * dpr;
-    canvasEl.height = size.h * dpr;
-    return size;
+function getPixelSpaceSize(canvasEl: HTMLCanvasElement): Size {
+    return {
+        w: canvasEl.width / dpr,
+        h: canvasEl.height / dpr,
+    };
 }
 
 function calcFontSize(sizePx: Size) {

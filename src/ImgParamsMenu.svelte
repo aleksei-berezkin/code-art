@@ -244,7 +244,7 @@
         const k = selectEl.dataset.k;
         if (g === 'output image' && k === 'attribution'
             && imgParams[g][k].choices[selectEl.selectedIndex] === noAttribution) {
-            alert('Please make sure to give attribution both for code-art.app and '
+            alert('Please make sure to give attribution both for code-art.images and '
                 + sourceSpecs[imgParams.source.source.val].credit
             );
         }
