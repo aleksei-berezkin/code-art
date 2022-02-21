@@ -4,9 +4,10 @@
         display: flex;
         flex-direction: column;
         justify-content: center;
-        height: 100%;
+        height: 100vh;
         margin: 0;
-        width: 100%;
+        padding: 0;
+        width: 100vw;
     }
 
     .alphabet-canvas, .attribution-canvas, .self-attr-canvas {
@@ -16,31 +17,21 @@
         top: 0;
     }
 
-    /* TODO remove? */
-    .code-wr {
+    .code-canvas {
         /* Overridden in style='' */
         --h: 100vh;
         --w: 100vw;
 
-        position: relative;
-    }
-
-    .code-wr.fit {
+        background-color: #707688;
         height: var(--h);
         width: var(--w);
     }
 
-    .code-wr.aspect {
+    .code-canvas.aspect {
         --a: calc(1 / 1);
 
         height: calc(min(var(--h), var(--w) / var(--a)));
         width: calc(min(var(--w), var(--h) * var(--a)));
-    }
-
-    .code-canvas {
-        background-color: #707688;
-        height: 100%;
-        width: 100%;
     }
 
     .progress-svg {
@@ -130,9 +121,7 @@
     <canvas class='attribution-canvas' bind:this={attributionCanvasEl}></canvas>
     <canvas class='self-attr-canvas' bind:this={selfAttrCanvasEl}></canvas>
 
-    <div class={`code-wr ${codeWrModifier}`} style={codeWrStyle}>
-        <canvas class='code-canvas' bind:this={codeCanvasEl}></canvas>
-    </div>
+    <canvas class={`code-canvas ${codeCanvasModifier}`} style={codeCanvasStyle} bind:this={codeCanvasEl}></canvas>
 
     <button class='round-btn left' on:click={handleImgParamsClick}>
         <Icon pic={(openDialog === 'menu') ? 'close' : 'menu'}/>
@@ -275,17 +264,17 @@
         imgParams = imgParams;
     }
 
-    let codeWrModifier: 'fit' | 'aspect' = 'fit';
-    let codeWrStyle: string | undefined = undefined;
+    let codeCanvasModifier: '' | 'aspect' = '';
+    let codeCanvasStyle: string | undefined = undefined;
     function updateCodeWrSizeStyle() {
         if (imgParams) {
             const r = imgParams['output image'].ratio.val;
-            codeWrModifier = r === fitViewRatio ? 'fit' : 'aspect';
+            codeCanvasModifier = r === fitViewRatio ? '' : 'aspect';
 
             const s = getSliderVal(imgParams['output image'].size) * 100;
-            codeWrStyle = `--h: ${s}vh; --w: ${s}vw; `;
+            codeCanvasStyle = `--h: ${s}vh; --w: ${s}vw; `;
             if (r !== fitViewRatio) {
-                codeWrStyle += `--a: calc(${r});`;
+                codeCanvasStyle += `--a: calc(${r});`;
             }
         }
     }

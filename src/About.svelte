@@ -1,18 +1,22 @@
 <style>
     .about {
         --m: .9rem;
-        --max-h: calc(100vh - 2 * var(--pad-std));
 
         background-color: #ffffffe0;
         border-radius: var(--bord-r-std);
         box-sizing: border-box;
         box-shadow: var(--menu-shadow);
         left: 50%;
-        max-height: var(--max-h);
         position: absolute;
         transform: translateX(-50%);
         top: var(--pad-std);
         width: calc(min(80vw, 520px));
+    }
+
+    .about.credits-open {
+        /* Overflow + max-height may force browser to remove nav overlays and extend content size, so setting
+         * fixed height. Unfortunately this height looks weird on very tall screens. */
+        height: calc(100vh - 2 * var(--pad-std));
     }
 
     .close-wr {
@@ -33,7 +37,8 @@
     }
 
     .scroll-container {
-        max-height: calc(var(--max-h) - 2 * var(--pad-std));
+        box-sizing: border-box;
+        height: 100%;
         overflow: scroll;
         padding: var(--pad-std);
     }
@@ -65,7 +70,7 @@
     }
 </style>
 
-<section class='about' bind:this={rootEl}>
+<section class={`about ${creditsOpen ? 'credits-open' : ''}`} bind:this={rootEl}>
     <button class='close-wr' on:click={closeDialog}>
         <Icon pic='close'/>
     </button>

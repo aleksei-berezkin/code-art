@@ -21,10 +21,10 @@
     }
 
     :global(html, body) {
-        height: 100%;
+        height: 100vh;
         margin: 0;
         padding: 0;
-        width: 100%;
+        width: 100vw;
     }
 
     :global(a, a:visited) {

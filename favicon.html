@@ -6,6 +6,19 @@
         #main {
             background: #0000;
         }
+
+        html, body {
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+        }
+
+        body {
+            align-items: center;
+            display: flex;
+            justify-content: center;
+        }
     </style>
 </head>
 <body>
@@ -18,7 +31,8 @@
         const s = Number(canvas.width);
         const ctx = canvas.getContext('2d');
     
-        ctx.fillStyle = 'black';
+        ctx.fillStyle = '#007a43';
+        // ctx.fillStyle = '#240dd0';
         ctx.beginPath();
         ctx.arc(s/2, s/2, s/2, 0, 2 * Math.PI);
         ctx.fill();
