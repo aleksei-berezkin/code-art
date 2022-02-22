@@ -19,19 +19,22 @@
 
     .code-canvas {
         /* Overridden in style='' */
-        --h: 100%;
-        --w: 100%;
+        --outline-h: 100%;
+        --outline-w: 100%;
 
         background-color: #707688;
-        height: var(--h);
-        width: var(--w);
+    }
+
+    .code-canvas.fit {
+        height: var(--outline-h);
+        width: var(--outline-w);
     }
 
     .code-canvas.aspect {
         --a: calc(1 / 1);
 
-        height: calc(min(var(--h), var(--w) / var(--a)));
-        width: calc(min(var(--w), var(--h) * var(--a)));
+        height: calc(min(var(--outline-h), var(--outline-w) / var(--a)));
+        width: calc(min(var(--outline-w), var(--outline-h) * var(--a)));
     }
 
     .progress-svg {
@@ -116,7 +119,7 @@
 
 </style>
 
-<main>
+<main bind:this={mainEl}>
     <canvas class='alphabet-canvas' bind:this={alphabetCanvasEl} width='2048'></canvas>
     <canvas class='attribution-canvas' bind:this={attributionCanvasEl}></canvas>
     <canvas class='self-attr-canvas' bind:this={selfAttrCanvasEl}></canvas>
@@ -165,6 +168,7 @@
     import { delayToAnimationFrame } from './util/delay';
     import { dpr } from './util/dpr';
 
+    let mainEl: HTMLElement;
     let codeCanvasEl: HTMLCanvasElement;
     let alphabetCanvasEl: HTMLCanvasElement;
     let attributionCanvasEl: HTMLCanvasElement;
@@ -250,11 +254,12 @@
         });
     }
 
-    onMount(() => document.addEventListener('resize', resizeListener));
-    onDestroy(() => document.removeEventListener('resize', resizeListener));
+    onMount(() => window.addEventListener('resize', resizeListener));
+    onDestroy(() => window.removeEventListener('resize', resizeListener));
     async function resizeListener() {
         submitTask(async () => {
             if (imgParams) {
+                updateCodeCanvasStyle();
                 await setCodeCanvasWH();
                 await drawScene(
                     imgParams,
@@ -273,15 +278,20 @@
         imgParams = imgParams;
     }
 
-    let codeCanvasModifier: '' | 'aspect' = '';
+    let codeCanvasModifier: 'fit' | 'aspect' = 'fit';
     let codeCanvasStyle: string | undefined = undefined;
     function updateCodeCanvasStyle() {
         if (imgParams) {
             const r = imgParams['output image'].ratio.val;
-            codeCanvasModifier = r === fitViewRatio ? '' : 'aspect';
+            codeCanvasModifier = r === fitViewRatio ? 'fit' : 'aspect';
 
-            const s = getSliderVal(imgParams['output image'].size) * 100;
-            codeCanvasStyle = `--h: ${s}%; --w: ${s}%; `;
+            codeCanvasStyle = '';
+            const sizeFr = getSliderVal(imgParams['output image'].size);
+            if (r !== fitViewRatio || sizeFr < 1) {
+                const outlineRect = mainEl.getBoundingClientRect();
+                codeCanvasStyle = `--outline-h: ${outlineRect.height * sizeFr}px; --outline-w: ${outlineRect.width * sizeFr}px; `;
+            }
+
             if (r !== fitViewRatio) {
                 codeCanvasStyle += `--a: calc(${r});`;
             }
