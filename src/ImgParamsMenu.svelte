@@ -82,7 +82,6 @@
 
     @media (max-width: 510px) {
         .menu-root {
-            --pad-gr: calc(var(--pad-std) *.55);
             max-width: calc(100vw - 2 * var(--pad-std));
         }
 
@@ -104,14 +103,14 @@
         align-items: center;
         display: flex;
         flex-direction: column;
-        padding-bottom: var(--pad-gr);
+        padding-bottom: var(--pad-std);
     }
 
     .footer-about {
         color: var(--link-c);
         font-size: .9em;
         letter-spacing: .04em;
-        margin-top: calc(var(--pad-gr) * .25);
+        margin-top: calc(var(--pad-gr) * .6);
         transition: color var(--link-tx);
     }
 
