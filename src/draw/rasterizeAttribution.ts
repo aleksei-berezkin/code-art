@@ -8,8 +8,12 @@ const pad = {
 }
 
 export async function rasterizeAttribution(text: string, fontSize: number, canvasEl: HTMLCanvasElement) {
+    if (canvasEl.dataset.text === text) {
+        return;
+    }
+
     const _fontSize = .8 * fontSize * dpr;
-    const fontCssStr = `300 ${_fontSize}px 'Roboto'`;
+    const fontCssStr = `300 ${_fontSize}px 'Ubuntu'`;
     await document.fonts.load(fontCssStr, text)
 
     const ctx = canvasEl.getContext('2d')!;
@@ -27,4 +31,6 @@ export async function rasterizeAttribution(text: string, fontSize: number, canva
     ctx.font = fontCssStr;
 
     ctx.fillText(text, pad.left * _fontSize, pad.aboveAscent * _fontSize + metrics.actualBoundingBoxAscent);
+
+    canvasEl.dataset.text = text;
 }

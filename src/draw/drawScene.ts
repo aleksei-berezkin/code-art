@@ -84,7 +84,7 @@ async function _drawScene(source: Source, sceneParams: SceneParams, alphabetRast
     await delay();
     const targetTex = await drawEffectsScene(sceneParams, colorScheme.background, codeTex, codeCanvasEl, workLimiter);
     await rasterizeAttribution(source.spec.credit, sceneParams.imgParams.font.size.val, attributionCanvasEl);
-    await rasterizeAttribution('code-art.images', sceneParams.imgParams.font.size.val, selfAttrCanvasEl);
+    await rasterizeAttribution('code-art.pictures', sceneParams.imgParams.font.size.val, selfAttrCanvasEl);
     await delay();
     await drawAttributionScene(sceneParams, targetTex, colorScheme, codeCanvasEl, attributionCanvasEl, selfAttrCanvasEl);
 }
