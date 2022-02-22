@@ -27,18 +27,18 @@ export function createCloseBehavior() {
                     }
                 }
     
-                window.addEventListener('click', windowClickListener);
-                window.addEventListener('keydown', keyDownHandler);
+                document.addEventListener('click', windowClickListener);
+                document.addEventListener('keydown', keyDownHandler);
             });
         },
 
         detach() {
             if (windowClickListener) {
-                window.removeEventListener('click', windowClickListener);
+                document.removeEventListener('click', windowClickListener);
                 windowClickListener = undefined;
             }
             if (keyDownHandler) {
-                window.removeEventListener('keydown', keyDownHandler);
+                document.removeEventListener('keydown', keyDownHandler);
                 keyDownHandler = undefined;
             }
         },

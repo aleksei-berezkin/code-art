@@ -250,8 +250,8 @@
         });
     }
 
-    onMount(() => window.addEventListener('resize', resizeListener));
-    onDestroy(() => window.removeEventListener('resize', resizeListener));
+    onMount(() => document.addEventListener('resize', resizeListener));
+    onDestroy(() => document.removeEventListener('resize', resizeListener));
     async function resizeListener() {
         submitTask(async () => {
             if (imgParams) {
