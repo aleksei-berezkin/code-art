@@ -13,12 +13,6 @@
         width: calc(min(80vw, 520px));
     }
 
-    .about.credits-open {
-        /* Overflow + max-height may force browser to remove nav overlays and extend content size, so setting
-         * fixed height. Unfortunately this height looks weird on very tall screens. */
-        height: calc(100% - 2 * var(--pad-std));
-    }
-
     .close-wr {
         color: var(--link-c);
         position: absolute;
@@ -38,7 +32,7 @@
 
     .scroll-container {
         box-sizing: border-box;
-        height: 100%;
+        max-height: calc(var(--main-h) - 2 * var(--pad-std));
         overflow: scroll;
         padding: var(--pad-std);
     }
@@ -70,7 +64,7 @@
     }
 </style>
 
-<section class={`about ${creditsOpen ? 'credits-open' : ''}`} bind:this={rootEl}>
+<section class='about' bind:this={rootEl}>
     <button class='close-wr' on:click={closeDialog}>
         <Icon pic='close'/>
     </button>
@@ -80,7 +74,7 @@
         <h2>License</h2>
         <p>Generated images are licensed under <a href='https://creativecommons.org/licenses/by/4.0/' target='_blank'>CC BY 4.0</a>.
             Rendered code fragments have their own licenses, see &ldquo;Credits&rdquo;.
-            If you remove attribution watermarks please make sure to give your own attribution both to <a href='https://code-art.pictures/'>code-art.pictures</a> and rendered code fragment.
+            If you remove attribution watermarks please make sure to give your own attribution both to <a href='https://code-art.pictures/'>code-art.pictures</a> and to rendered code fragment.
         </p>
         <h2>Any feedback is welcome</h2>
         <p><Contacts size='md' color='dark'/></p>
@@ -95,7 +89,7 @@
             <h3>Fonts</h3>
             <p>Free fonts from <a href='https://fonts.google.com/' target='_blank'>Google collection</a></p>
             <ul>
-                {#each fontFacesForRandomScenes as f}
+                {#each [...fontFacesForRandomScenes, 'Roboto', 'Ubuntu'].sort() as f}
                     <li><a href={`https://fonts.google.com/specimen/${f.replace(' ', '+')}`} target='_blank'>{f}</a></li>
                 {/each}
             </ul>

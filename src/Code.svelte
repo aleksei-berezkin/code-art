@@ -1,5 +1,10 @@
 <style>
     main {
+        /* We can't use vh in mobile browsers because it may result in vertical scroll */
+        /* So we introduce like 'container-height' properties */
+        --main-h: 100%;
+        --main-w: 100%;
+
         align-items: center;
         display: flex;
         flex-direction: column;
@@ -18,9 +23,9 @@
     }
 
     .code-canvas {
-        /* Overridden in style='' */
-        --outline-h: 100%;
-        --outline-w: 100%;
+        --s: 1;
+        --outline-h: calc(var(--main-h) * var(--s));
+        --outline-w: calc(var(--main-w) * var(--s));
 
         background-color: #707688;
     }
@@ -124,7 +129,7 @@
     <canvas class='attribution-canvas' bind:this={attributionCanvasEl}></canvas>
     <canvas class='self-attr-canvas' bind:this={selfAttrCanvasEl}></canvas>
 
-    <canvas class={`code-canvas ${codeCanvasModifier}`} style={codeCanvasStyle} bind:this={codeCanvasEl}></canvas>
+    <canvas class={`code-canvas ${codeCanvasModifier}`} bind:this={codeCanvasEl}></canvas>
 
     <button class='round-btn left' on:click={handleImgParamsClick}>
         <Icon pic={(openDialog === 'menu') ? 'close' : 'menu'}/>
@@ -169,6 +174,17 @@
     import { dpr } from './util/dpr';
 
     let mainEl: HTMLElement;
+    onMount(() => {
+        setMainSizeVars();
+        window.addEventListener('resize', setMainSizeVars);
+    });
+    onDestroy(() => window.removeEventListener('resize', setMainSizeVars));
+    function setMainSizeVars() {
+        const rect = mainEl.getBoundingClientRect();
+        mainEl.style.setProperty('--main-h', `${rect.height}px`);
+        mainEl.style.setProperty('--main-w', `${rect.width}px`);
+    }
+
     let codeCanvasEl: HTMLCanvasElement;
     let alphabetCanvasEl: HTMLCanvasElement;
     let attributionCanvasEl: HTMLCanvasElement;
@@ -254,9 +270,9 @@
         });
     }
 
-    onMount(() => window.addEventListener('resize', resizeListener));
-    onDestroy(() => window.removeEventListener('resize', resizeListener));
-    async function resizeListener() {
+    onMount(() => window.addEventListener('resize', drawOnResize));
+    onDestroy(() => window.removeEventListener('resize', drawOnResize));
+    async function drawOnResize() {
         submitTask(async () => {
             if (imgParams) {
                 updateCodeCanvasStyle();
@@ -279,21 +295,16 @@
     }
 
     let codeCanvasModifier: 'fit' | 'aspect' = 'fit';
-    let codeCanvasStyle: string | undefined = undefined;
     function updateCodeCanvasStyle() {
         if (imgParams) {
             const r = imgParams['output image'].ratio.val;
             codeCanvasModifier = r === fitViewRatio ? 'fit' : 'aspect';
 
-            codeCanvasStyle = '';
             const sizeFr = getSliderVal(imgParams['output image'].size);
-            if (r !== fitViewRatio || sizeFr < 1) {
-                const outlineRect = mainEl.getBoundingClientRect();
-                codeCanvasStyle = `--outline-h: ${outlineRect.height * sizeFr}px; --outline-w: ${outlineRect.width * sizeFr}px; `;
-            }
+            codeCanvasEl.style.setProperty('--s', String(sizeFr));
 
             if (r !== fitViewRatio) {
-                codeCanvasStyle += `--a: calc(${r});`;
+                codeCanvasEl.style.setProperty('--a', `calc(${r})`);
             }
         }
     }

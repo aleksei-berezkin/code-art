@@ -20,7 +20,7 @@
     }
 
     .link:not(:last-child) {
-        margin-right: .6em;
+        margin-right: .65em;
     }
 
     .link, .link:visited {

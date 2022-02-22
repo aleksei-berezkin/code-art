@@ -108,9 +108,8 @@
 
     .footer-about {
         color: var(--link-c);
-        font-size: .9em;
         letter-spacing: .04em;
-        margin-top: calc(var(--pad-gr) * .6);
+        margin-top: calc(var(--pad-gr) * .7);
         transition: color var(--link-tx);
     }
 
@@ -243,7 +242,7 @@
         const k = selectEl.dataset.k;
         if (g === 'output image' && k === 'attribution'
             && imgParams[g][k].choices[selectEl.selectedIndex] === noAttribution) {
-            alert('Please make sure to give attribution both for code-art.pictures and '
+            alert('Please make sure to give attribution both to code-art.pictures and to '
                 + sourceSpecs[imgParams.source.source.val].credit
             );
         }
