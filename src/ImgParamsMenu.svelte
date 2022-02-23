@@ -259,6 +259,6 @@
         const g = inputEl.dataset.g;
         const k = inputEl.dataset.k;
         imgParams[g][k].val = inputEl.value;
-        paramsUpdated(imgParams, imgParams[g][k]);
+        paramsUpdated(imgParams, false);
     }
 </script>

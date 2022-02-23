@@ -10,7 +10,6 @@ import { rgbSize } from '../model/RGB';
 import type { SceneParams } from '../model/generateSceneParams';
 import { renderColorToTexture } from './renderColorToTexture';
 import type { ColorScheme } from '../model/colorSchemes';
-import { getSceneBounds } from '../model/SceneBounds';
 import { getScrollFraction } from '../model/ScrollFraction';
 import type { WorkLimiter } from '../util/workLimiter';
 import type { AlphabetRaster } from '../model/AlphabetRaster';
