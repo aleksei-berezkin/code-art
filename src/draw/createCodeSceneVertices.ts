@@ -13,6 +13,8 @@ import type { AlphabetRaster } from '../model/AlphabetRaster';
 import type { ParseResult } from '../model/ParseResult';
 import { dpr } from '../util/dpr';
 import { RGB, rgbSize } from '../model/RGB';
+import type { PixelSpace } from '../model/PixelSpace';
+import type { Extensions } from '../model/Extensions';
 
 export type CodeSceneVertices = {
     // only (x, y); z is always = 0
@@ -27,7 +29,8 @@ export type CodeSceneVertices = {
 const verticesInArray = 100 * rect2dVerticesNum;
 
 export async function* createCodeSceneVertices(
-    bounds: SceneBounds,
+    pixelSpace: PixelSpace,
+    extensions: Extensions,
     txMat: Mat4,
     scrollFraction: ScrollFraction,
     fontSize: number,
@@ -45,7 +48,7 @@ export async function* createCodeSceneVertices(
         verticesNum: 0,
     };
 
-    for (const codeLetter of iterateCode(bounds, scrollFraction, fontSize, source, alphabetRaster)) {
+    for (const codeLetter of iterateCode(pixelSpace, extensions, scrollFraction, fontSize, source, alphabetRaster)) {
         await workLimiter.next();
 
         const {pos, letter, x, baseline} = codeLetter;

@@ -8,7 +8,6 @@ import { makePixelSpace, PixelSpace } from './PixelSpace';
 import { getTxMax } from './getTxMax';
 import type { Mat4 } from '../util/matrices';
 import type { Size } from './Size';
-import { getSceneBounds } from './SceneBounds';
 import { calcExtensions, Extensions } from './Extensions';
 import { generateScrollFractions } from './generateScrollFractions';
 import { generateAngles } from './generateAngles';
@@ -44,8 +43,8 @@ export async function generateSceneParams(currentImgParams: ImgParams | undefine
             const scrollFractions = generateScrollFractions(source);
 
             return await Promise.all(scrollFractions.map(async (scrollFraction) => {
-                const score = await scoreFill(source, getSceneBounds(pixelSpace, extensions), txMat, scrollFraction, fontSize, alphabetRaster, workLimiter);
-                return {angles, pixelSpace, txMat, extensions, scrollFraction, score}
+                const score = await scoreFill(source, pixelSpace, extensions, txMat, scrollFraction, fontSize, alphabetRaster, workLimiter);
+                return {angles, pixelSpace, txMat, extensions, scrollFraction, score};
             }));
         })))
         .flatMap(p => p)

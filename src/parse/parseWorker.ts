@@ -80,16 +80,17 @@ function parse(text: string, insertWraps: boolean): ParseResult {
     );
 
     const lines = getLines(text, strPositions, insertWraps);
-    const longestLineLength = lines
+    // This works best for scroll
+    const longestLines = lines
         .map(([start, end]) => end - start)
-        .reduce((a, b) => a > b ? a : b);
-    const avgLineLength = text.length / lines.length;
+        .sort((l, m) => m - l)
+        .slice(0, 10);
+    const lineLengthChars = longestLines.reduce((a, b) => a + b) / longestLines.length;
 
     return {
         colorization: colorKeys,
         lines,
-        longestLineLength,
-        avgLineLength,
+        lineLengthChars,
         alphabet: getAlphabet(text),
     };
 }

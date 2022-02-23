@@ -8,8 +8,7 @@ export type Lines = Line[];
 export type ParseResult = {
     colorization: ShortColorKey[],
     lines: Lines,
-    longestLineLength: number,
-    avgLineLength: number,
+    lineLengthChars: number,
     // Always includes space; never includes with code < 32; always sorted
     alphabet: string,
 };

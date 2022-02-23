@@ -62,7 +62,8 @@ export async function drawCodeScene(
     const uploadToColor = createUploadToAttribute('a_color', rgbSize, program, gl);
 
     for await (const vertices of createCodeSceneVertices(
-        getSceneBounds(sceneParams.pixelSpace, sceneParams.extensions),
+        sceneParams.pixelSpace,
+        sceneParams.extensions,
         sceneParams.txMat,
         getScrollFraction(sceneParams.imgParams),
         sceneParams.imgParams.font.size.val,

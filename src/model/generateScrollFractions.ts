@@ -5,22 +5,14 @@ import { isMinified } from './Lang';
 export function generateScrollFractions(
     source: Source,
 ): ScrollFraction[] {
+    const v = isMinified(source.spec.lang)
+        ? .2 + Math.random() * .6
+        : .1 + Math.random() * .8;
 
-    if (isMinified(source.spec.lang)) {
-        const v = .2 + Math.random() * .6;
-        const h = .2 + Math.random() * .6;
-        return [
-            {v, h},
-            {v, h: .15 + h / 10},
-        ];
-    }
-
-    const v = Math.random();
-    const h = Math.random() * .4;
     return [
-        {v, h},
-        {v, h: h / 1.3},
-        {v, h: h / 2.2},
-        {v, h: h / 6},
+        {v, h: .2 + Math.random() * .1},
+        {v, h: .4 + Math.random() * .1},
+        {v, h: .6 + Math.random() * .1},
+        {v, h: .8 + Math.random() * .1},
     ];
 }
