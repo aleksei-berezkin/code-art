@@ -8,7 +8,7 @@ const pad = {
 }
 
 export async function rasterizeAttribution(text: string, fontSize: number, canvasEl: HTMLCanvasElement) {
-    if (canvasEl.dataset.text === text) {
+    if (canvasEl.dataset.text === text && canvasEl.dataset.fontSize === String(fontSize)) {
         return;
     }
 
@@ -33,4 +33,5 @@ export async function rasterizeAttribution(text: string, fontSize: number, canva
     ctx.fillText(text, pad.left * _fontSize, pad.aboveAscent * _fontSize + metrics.actualBoundingBoxAscent);
 
     canvasEl.dataset.text = text;
+    canvasEl.dataset.fontSize = String(fontSize);
 }

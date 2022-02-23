@@ -40,6 +40,7 @@ export async function generateSceneParams(currentImgParams: ImgParams | undefine
             const pixelSpace = makePixelSpace(sizePx);
             const txMat = getTxMax(pixelSpace, angles.x, angles.y, angles.z);
             const extensions = await calcExtensions(pixelSpace, angles.x, angles.y, angles.z, txMat, workLimiter);
+            // TODO more h options for non-minified; less for minified 
             const scrollFractions = generateScrollFractions(source);
 
             return await Promise.all(scrollFractions.map(async (scrollFraction) => {
