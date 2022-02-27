@@ -2,31 +2,33 @@ import type { Source } from './Source';
 import type { ScrollFraction } from './ScrollFraction';
 import { isMinified } from './Lang';
 
-const vSize = 4;
-const minifiedHSize = 5;
-const nonMinifiedHSize = 8;
+const vRange = .7;
+const vSize = 2;
+
+const hRange = .6;
+const minifiedHSize = 6;
+const nonMinifiedHSize = 32;
 
 export function generateScrollFractions(
     source: Source,
 ): ScrollFraction[] {
-    if (isMinified(source.spec.lang)) {
-        return doGenScrollFractions(vSize, minifiedHSize);
-    }
-
-    return doGenScrollFractions(vSize, nonMinifiedHSize);
+    const hSize = isMinified(source.spec.lang)
+        ? minifiedHSize
+        : nonMinifiedHSize;
+    return [...doGenScrollFractions(hSize)];
 }
 
-function doGenScrollFractions(vSize: number, hSize: number) {
-    const vBase = (1 / vSize) * Math.random();
-    const hBase = (1 / hSize) * Math.random();
+function* doGenScrollFractions(hSize: number) {
+    const hStep = (hRange / hSize);
+    const hBase = hStep * Math.random();
 
-    return Array.from({length: vSize})
-        .map((_, i) => vBase + i * (1 / vSize))
-        .flatMap(v =>
-            Array.from({length: hSize})
-                .map((_, i) => ({
-                    v,
-                    h: hBase + i * (1 / hSize),
-                }))
-        );
+    for (let i = 0; i < vSize; i++) {
+        const v = (1 - vRange) / 2 + vRange * Math.random();
+        for (let j = 0; j < hSize; j++) {
+            yield {
+                v,
+                h: (1 - hRange) / 2 + hBase + j * hStep,
+            }
+        }
+    }
 }

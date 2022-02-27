@@ -10,8 +10,7 @@ import type { AlphabetRaster } from './AlphabetRaster';
 import type { PixelSpace } from './PixelSpace';
 import type { Extensions } from './Extensions';
 
-const fontSizeToCellMultiplier = 5.5;
-const fillMatrixMaxSize = 8;
+const fontSizeToCellMultiplier = 2.7;
 
 export async function scoreFill(
     source: Source,
@@ -23,10 +22,10 @@ export async function scoreFill(
     alphabetRaster: AlphabetRaster,
     workLimiter: WorkLimiter,
 ) {
-    const rowsNum = pluck(1, Math.ceil(pixelSpace.h / (fontSize * fontSizeToCellMultiplier)), fillMatrixMaxSize);
-    const colsNum = pluck(1, Math.ceil(pixelSpace.w / (fontSize * fontSizeToCellMultiplier)), fillMatrixMaxSize);
+    const rowsNum = Math.max(2, Math.ceil(pixelSpace.h / (fontSize * fontSizeToCellMultiplier)));
+    const colsNum = Math.max(2, Math.ceil(pixelSpace.w / (fontSize * fontSizeToCellMultiplier)));
     const fillMatrix: number[] = new Array(rowsNum * colsNum).fill(0);
-    for (const c of iterateCode(pixelSpace, extensions, scrollFraction, fontSize, source, alphabetRaster, {sample: .5})) {
+    for (const c of iterateCode(pixelSpace, extensions, scrollFraction, fontSize, source, alphabetRaster)) {
         await workLimiter.next();
         const [x, y, w] = applyTx(txMat, c.x + alphabetRaster.avgW / 2 / alphabetRaster.fontSizeRatio, c.baseline + alphabetRaster.maxAscent / 2 / alphabetRaster.fontSizeRatio);
         if (isVisibleInClipSpace(x, y)) {
@@ -41,22 +40,10 @@ export async function scoreFill(
         }
     }
 
-    const avg = fillMatrix.reduce((a, b) => a + b) / fillMatrix.length;
-    const bestSize = Math.min(3, rowsNum, colsNum);
-    const best = [...fillMatrix].sort((s, t) => s - t).reverse()
-        .slice(0, bestSize)
-        .reduce((a, b) => a + b) / bestSize;
+    const sum = fillMatrix.reduce((a, b) => a + b);
 
-    const dev = Math.sqrt(
-        fillMatrix
-            // Such non-standard deviation (diff with best, not avg) gives better score
-            .map(a => (a - best) ** 2)
-            .reduce((a, b) => a + b)
-        / fillMatrix.length
-    );
-
-    const zerosCount = fillMatrix.filter(i => !i).length;
-    return avg - dev / fillMatrix.length / 2 - zerosCount * 1000;
+    const zerosCount = fillMatrix.filter(s => !s).length;
+    return sum / (zerosCount + 1);
 }
 
 // noinspection JSUnusedLocalSymbols

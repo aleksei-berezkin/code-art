@@ -30,9 +30,7 @@ export type SceneParams = {
 };
 
 export async function generateSceneParams(currentImgParams: ImgParams | undefined, source: Source, sizePx: Size, fontFace: string, fontSize: number, alphabetRaster: AlphabetRaster, workLimiter: WorkLimiter): Promise<SceneParams> {
-    const blurFactorPercentLog = 1.3 + Math.random();
-
-    const samplesCount = isMinified(source.spec.lang) ? 3 : 6;
+    const samplesCount = isMinified(source.spec.lang) ? 2 : 5;
     const {angles, pixelSpace, txMat, extensions, scrollFraction} = (await genAll(async function* () {
         for (let i = 0; i < samplesCount; i++) {
             const angles = generateAngles(isMinified(source.spec.lang));
@@ -157,7 +155,7 @@ export async function generateSceneParams(currentImgParams: ImgParams | undefine
             blur: {
                 type: 'slider' as const,
                 min: 1,
-                val: blurFactorPercentLog,
+                val: 1.3 + Math.random(),
                 max: 3,
                 unit: 'log10%' as const,
             },
@@ -187,7 +185,7 @@ export async function generateSceneParams(currentImgParams: ImgParams | undefine
             size: {
                 type: 'slider',
                 min: 10,
-                val: 100,
+                val: currentImgParams ? currentImgParams['output image'].size.val : 100,
                 max: 100,
                 unit: '%',
             },
