@@ -20,6 +20,7 @@ import { scoreFill } from './scoreFill';
 import { attributionPos } from './attributionPos';
 import { fitViewRatio, ratios } from './ratios';
 import { generate3DifferentBrightColors } from '../util/generate3DifferentBrightColors';
+import { genAll } from '../util/genAll';
 
 export type SceneParams = {
     pixelSpace: PixelSpace,
@@ -32,21 +33,19 @@ export async function generateSceneParams(currentImgParams: ImgParams | undefine
     const blurFactorPercentLog = 1.3 + Math.random();
 
     const samplesCount = isMinified(source.spec.lang) ? 3 : 6;
-    const {angles, pixelSpace, txMat, extensions, scrollFraction} = (await Promise.all(Array.from({length: samplesCount})
-        .map(async () => {
-            await workLimiter.next();
-
+    const {angles, pixelSpace, txMat, extensions, scrollFraction} = (await genAll(async function* () {
+        for (let i = 0; i < samplesCount; i++) {
             const angles = generateAngles(isMinified(source.spec.lang));
             const pixelSpace = makePixelSpace(sizePx);
             const txMat = getTxMax(pixelSpace, angles.x, angles.y, angles.z);
             const extensions = await calcExtensions(pixelSpace, angles.x, angles.y, angles.z, txMat, workLimiter);
-            const scrollFractions = generateScrollFractions(source);
 
-            return await Promise.all(scrollFractions.map(async (scrollFraction) => {
+            for (const scrollFraction of generateScrollFractions(source)) {
                 const score = await scoreFill(source, pixelSpace, extensions, txMat, scrollFraction, fontSize, alphabetRaster, workLimiter);
-                return {angles, pixelSpace, txMat, extensions, scrollFraction, score};
-            }));
-        })))
+                yield {angles, pixelSpace, txMat, extensions, scrollFraction, score};
+            }
+        }
+    }))
         .flatMap(p => p)
         .reduce((p, q) => p.score > q.score ? p : q);
 
