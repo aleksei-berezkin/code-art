@@ -80,9 +80,9 @@ async function _drawScene(source: Source, sceneParams: SceneParams, alphabetRast
     const sourceCodeDetails = sourceSpecs[sceneParams.imgParams.source.source.val];
     const parseResult = await parseCode(sourceCodeDetails.url, sourceCodeDetails.lang === 'js min line');
     const colorScheme = colorSchemes[sceneParams.imgParams['main color'].scheme.val as ColorSchemeName];
-    const codeTex = await drawCodeScene(source, colorScheme, parseResult, sceneParams, alphabetRaster, codeCanvasEl, alphabetCanvasEl, workLimiter);
+    const drawCodeResult = await drawCodeScene(source, colorScheme, parseResult, sceneParams, alphabetRaster, codeCanvasEl, alphabetCanvasEl, workLimiter);
     await delay();
-    const targetTex = await drawEffectsScene(sceneParams, colorScheme.background, codeTex, codeCanvasEl, workLimiter);
+    const targetTex = await drawEffectsScene(sceneParams, colorScheme.background, drawCodeResult, codeCanvasEl, workLimiter);
     await rasterizeAttribution(source.spec.credit, sceneParams.imgParams.font.size.val, attributionCanvasEl);
     await rasterizeAttribution('code-art.pictures', sceneParams.imgParams.font.size.val, selfAttrCanvasEl);
     await delay();

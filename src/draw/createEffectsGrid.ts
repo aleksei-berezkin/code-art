@@ -1,38 +1,94 @@
-import { setRect2d, rect2dSize } from './rect';
-import type { PixelSpace } from '../model/PixelSpace';
-import { getSceneBounds } from '../model/SceneBounds';
-import type { Extensions } from '../model/Extensions';
+import { rect2dSize, rect2dVerticesNum, setRect2d } from './rect';
+import type { SceneBounds } from '../model/SceneBounds';
 import type { WorkLimiter } from '../util/workLimiter';
 
-const cellSizeMultiplier = 4;
-const maxRectsNum = 2000;
+const maxSideCount = 1000;
+const rectsInArray = 3000;
+
+export type EffectsVertices = {
+    vertices: Float32Array,
+    verticesNum: number,
+}
 
 // Because w is non-linear of (x, y) we can't draw just one rect of (xMin, yMin)-(xMax, yMax).
-export async function createEffectsGrid(pixelSpace: PixelSpace,
-                                  extensions: Extensions,
-                                  fontSize: number,
-                                  workLimiter: WorkLimiter,
-) {
-    const bounds = getSceneBounds(pixelSpace, extensions);
-    let step = fontSize * cellSizeMultiplier;
-    for ( ; ; ) {
-        await workLimiter.next();
-        const rectsNum = Math.ceil((bounds.xMax + step - bounds.xMin) / step)
-                * Math.ceil((bounds.yMax + step - bounds.yMin) / step);
-        if (rectsNum > maxRectsNum) {
-            step *= 1.5;
-            continue
+export async function* createEffectsGrid(
+    sceneBounds: SceneBounds,
+    realTextBounds: SceneBounds,
+    fontSize: number,
+    workLimiter: WorkLimiter,
+): AsyncGenerator<EffectsVertices> {
+    const vertices = new Float32Array(rectsInArray * rect2dSize);
+    let rectsCount = 0;
+    function* pushRect(x1: number, y1: number, x2: number, y2: number) {
+        setRect2d(vertices, rectsCount * rect2dSize, x1, y1, x2, y2);
+        if (++rectsCount === rectsInArray) {
+            yield* flushRects();
         }
+    }
+    function* flushRects() {
+        if (rectsCount) {
+            yield {
+                vertices,
+                verticesNum: rectsCount * rect2dVerticesNum,
+            };
+            rectsCount = 0;
+        }
+    }
 
-        const vertices = new Float32Array(rectsNum * rect2dSize);
-        let count = 0;
-        for (let x = bounds.xMin; x < bounds.xMax + step; x += step) {
-            for (let y = bounds.yMin; y < bounds.yMax + step; y += step) {
-                await workLimiter.next();
-                setRect2d(vertices, count * rect2dSize, x, y, x + step, y + step);
-                count++;
-            }
+    for (const r of createOutsideTextRects(sceneBounds, realTextBounds)) {
+        await workLimiter.next();
+        yield* pushRect(...r);
+    }
+
+    const xCount = Math.min(maxSideCount, (realTextBounds.xMax - realTextBounds.xMin) / fontSize);
+    const yCount = Math.min(maxSideCount, (realTextBounds.yMax - realTextBounds.yMin) / fontSize);
+    for (const r of createRects(xCount, yCount, realTextBounds.xMin, realTextBounds.yMin, realTextBounds.xMax, realTextBounds.yMax)) {
+        await workLimiter.next();
+        yield* pushRect(...r)
+    }
+
+    yield* flushRects();
+}
+
+const outSideCnt = 6;
+function* createOutsideTextRects(o: SceneBounds, i: SceneBounds) {
+    const top = o.yMin < i.yMin;
+    const bottom = o.yMax > i.yMax;
+    const left = o.xMin < i.xMin;
+    const right = o.xMax > i.xMax;
+
+    if (top) {
+        if (left) {
+            yield* createRects(outSideCnt, outSideCnt, o.xMin, o.yMin, i.xMin, i.yMin);
         }
-        return vertices;
+        yield* createRects(outSideCnt, outSideCnt, i.xMin, o.yMin, i.xMax, i.yMin);
+        if (right) {
+            yield* createRects(outSideCnt, outSideCnt, i.xMax, o.yMin, o.xMax, i.yMin);
+        }
+    }
+    if (left) {
+        yield* createRects(outSideCnt, outSideCnt, o.xMin, i.yMin, i.xMin, i.yMax);
+    }
+    if (right) {
+        yield* createRects(outSideCnt, outSideCnt, i.xMax, i.yMin, o.xMax, i.yMax);
+    }
+    if (bottom) {
+        if (left) {
+            yield* createRects(outSideCnt, outSideCnt, o.xMin, i.yMax, i.xMin, o.yMax);
+        }
+        yield* createRects(outSideCnt, outSideCnt, i.xMin, i.yMax, i.xMax, o.yMax);
+        if (right) {
+            yield* createRects(outSideCnt, outSideCnt, i.xMax, i.yMax, o.xMax, o.yMax);
+        }
+    }
+}
+
+function* createRects(xCount: number, yCount: number, x1: number, y1: number, x2: number, y2: number) {
+    const wStep = (x2 - x1) / xCount;
+    const hStep = (y2 - y1) / yCount;
+    for (let i = 0; i < xCount; i++) {
+        for (let j = 0; j < yCount; j++) {
+            yield [x1 + i * wStep, y1 + j * hStep, x1 + (i + 1) * wStep, y1 + (j + 1) * hStep] as const;
+        }
     }
 }

@@ -31,7 +31,7 @@ export type SceneParams = {
 export async function generateSceneParams(currentImgParams: ImgParams | undefined, source: Source, sizePx: Size, fontFace: string, fontSize: number, alphabetRaster: AlphabetRaster, workLimiter: WorkLimiter): Promise<SceneParams> {
     const blurFactorPercentLog = 1.3 + Math.random();
 
-    const samplesCount = isMinified(source.spec.lang) ? 4 : 6;
+    const samplesCount = isMinified(source.spec.lang) ? 3 : 6;
     const {angles, pixelSpace, txMat, extensions, scrollFraction} = (await Promise.all(Array.from({length: samplesCount})
         .map(async () => {
             await workLimiter.next();
@@ -40,7 +40,6 @@ export async function generateSceneParams(currentImgParams: ImgParams | undefine
             const pixelSpace = makePixelSpace(sizePx);
             const txMat = getTxMax(pixelSpace, angles.x, angles.y, angles.z);
             const extensions = await calcExtensions(pixelSpace, angles.x, angles.y, angles.z, txMat, workLimiter);
-            // TODO more h options for non-minified; less for minified 
             const scrollFractions = generateScrollFractions(source);
 
             return await Promise.all(scrollFractions.map(async (scrollFraction) => {

@@ -84,7 +84,7 @@ function parse(text: string, insertWraps: boolean): ParseResult {
     const longestLines = lines
         .map(([start, end]) => end - start)
         .sort((l, m) => m - l)
-        .slice(0, 10);
+        .slice(0, 20);
     const lineLengthChars = longestLines.reduce((a, b) => a + b) / longestLines.length;
 
     return {

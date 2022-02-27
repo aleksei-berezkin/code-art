@@ -18,7 +18,14 @@ export function* iterateCode(pixelSpace: PixelSpace,
                              fontSize: number,
                              source: Source,
                              alphabetRaster: AlphabetRaster,
+                             options?: {
+                                 sample: number,
+                             },
 ): Generator<CodeLetter> {
+    if (options && (options.sample <= 0 || options.sample >= 1)) {
+        throw new Error(`sample=${options.sample}`);
+    }
+
     const lineHeight = Math.max(fontSize, (alphabetRaster.maxAscent + alphabetRaster.maxDescent) / alphabetRaster.fontSizeRatio);
     const charWidth = alphabetRaster.avgW / alphabetRaster.fontSizeRatio;
 
@@ -40,6 +47,10 @@ export function* iterateCode(pixelSpace: PixelSpace,
         const [lineStart, lineEnd] = source.parseResult.lines[line];
         let x = xMin;
         for (let pos = lineStart; pos < lineEnd; pos++) {
+            if (options?.sample && Math.random() > options.sample) {
+                continue;
+            }
+
             let letter = source.text[pos];
             if (letter === '\t' || !letter) {
                 letter = ' ';

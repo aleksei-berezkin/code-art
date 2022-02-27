@@ -2,7 +2,7 @@ import vertexShaderSource from '../shader/effectsVertex.shader';
 import fragmentShaderSource from '../shader/effectsFragment.shader';
 import { createProgram } from './createProgram';
 import { rect2dVertexSize } from './rect';
-import { uploadArrayToAttribute } from './uploadArrayToAttribute';
+import { createUploadToAttribute } from './createUploadToAttribute';
 import { createEmptyTexture } from './uploadTexture';
 import { createEffectsGrid } from './createEffectsGrid';
 import { hexToRgb, RGB } from '../model/RGB';
@@ -10,17 +10,18 @@ import { getSliderVal } from '../model/ImgParams';
 import { ceilToOdd } from '../util/ceilToOdd';
 import { dpr } from '../util/dpr';
 import type { SceneParams } from '../model/generateSceneParams';
-import { renderColorToTexture, renderToCanvas } from './renderColorToTexture';
+import { renderColorToTexture } from './renderColorToTexture';
 import { getOptics } from '../model/Optics';
-import { drawTriangles } from './drawTriangles';
 import type { WorkLimiter } from '../util/workLimiter';
+import type { DrawCodeResult } from './DrawCodeResult';
+import { getSceneBounds } from '../model/SceneBounds';
 
 const maxKernel = 25;
 
 export async function drawEffectsScene(
     sceneParams: SceneParams,
     bgColor: RGB,
-    inputTexture: WebGLTexture,
+    drawCodeResult: DrawCodeResult,
     codeCanvasEl: HTMLCanvasElement,
     workLimiter: WorkLimiter,
 ) {
@@ -37,11 +38,8 @@ export async function drawEffectsScene(
 
     const program = await createProgram(vertexShaderSource, fragmentShaderSourceProcessed, gl);
 
-    const gridVertices = await createEffectsGrid(sceneParams.pixelSpace, sceneParams.extensions, imgParams.font.size.val, workLimiter);
-    uploadArrayToAttribute('a_position', gridVertices, rect2dVertexSize, program, gl);
-
     gl.activeTexture(gl.TEXTURE1);
-    gl.bindTexture(gl.TEXTURE_2D, inputTexture);
+    gl.bindTexture(gl.TEXTURE_2D, drawCodeResult.targetTex);
 
     gl.useProgram(program);
 
@@ -102,7 +100,16 @@ export async function drawEffectsScene(
 
     await workLimiter.next();
 
-    await drawTriangles(gridVertices.length / rect2dVertexSize, gl);
+    const uploadToPosition = createUploadToAttribute('a_position', rect2dVertexSize, program, gl);
+    const sceneBounds = getSceneBounds(sceneParams.pixelSpace, sceneParams.extensions);
+    async function drawAllTriangles() {
+        for await (const {vertices, verticesNum} of createEffectsGrid(sceneBounds, drawCodeResult.realTextBounds, imgParams.font.size.val, workLimiter)) {
+            uploadToPosition(vertices);
+            gl.drawArrays(gl.TRIANGLES, 0, verticesNum);
+        }
+    }
+
+    await drawAllTriangles();
 
     // Blur mode
 
@@ -116,7 +123,7 @@ export async function drawEffectsScene(
 
     await workLimiter.next();
 
-    await drawTriangles(gridVertices.length / rect2dVertexSize, gl);
+    await drawAllTriangles();
 
     return targetTex;
 }

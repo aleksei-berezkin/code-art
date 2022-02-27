@@ -4,7 +4,7 @@ import fragmentShaderSource from '../shader/codeFragment.shader';
 import { createCodeSceneVertices } from './createCodeSceneVertices';
 import { rect2dVertexSize } from './rect';
 import type { Source } from '../model/Source';
-import { createUploadToAttribute } from './uploadArrayToAttribute';
+import { createUploadToAttribute } from './createUploadToAttribute';
 import { createEmptyTexture, uploadTexture } from './uploadTexture';
 import { rgbSize } from '../model/RGB';
 import type { SceneParams } from '../model/generateSceneParams';
@@ -15,6 +15,7 @@ import type { WorkLimiter } from '../util/workLimiter';
 import type { AlphabetRaster } from '../model/AlphabetRaster';
 import type { ParseResult } from '../model/ParseResult';
 import { dpr } from '../util/dpr';
+import type { DrawCodeResult } from './DrawCodeResult';
 
 // Renders to 0 tex unit
 export async function drawCodeScene(
@@ -26,7 +27,7 @@ export async function drawCodeScene(
     codeCanvasEl: HTMLCanvasElement,
     alphabetCanvasEl: HTMLCanvasElement,
     workLimiter: WorkLimiter,
-) {
+): Promise<DrawCodeResult> {
     const gl = codeCanvasEl.getContext('webgl2', {preserveDrawingBuffer: true});
     if (!gl) {
         const msg = 'WebGL2 is not supported'
@@ -60,6 +61,7 @@ export async function drawCodeScene(
     const uploadToGlyphTexPosition = createUploadToAttribute('a_glyphTexPosition', rect2dVertexSize, program, gl);
     const uploadToColor = createUploadToAttribute('a_color', rgbSize, program, gl);
 
+    let realTextBounds;
     for await (const vertices of createCodeSceneVertices(
         sceneParams.pixelSpace,
         sceneParams.extensions,
@@ -71,6 +73,7 @@ export async function drawCodeScene(
         parseResult,
         alphabetRaster,
         workLimiter,
+        b => realTextBounds = b,
     )) {
         uploadToPosition(vertices.position);
         uploadToGlyphTexPosition(vertices.glyphTexPosition);
@@ -78,6 +81,10 @@ export async function drawCodeScene(
         gl.drawArrays(gl.TRIANGLES, 0, vertices.verticesNum);
     }
 
+    if (!realTextBounds) throw new Error('Text bounds not set');
 
-    return targetTex;
+    return {
+        targetTex,
+        realTextBounds,
+    };
 }

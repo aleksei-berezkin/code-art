@@ -6,7 +6,6 @@ import { shortColorKeyToColorKey } from '../model/shortColorKeyToColorKey';
 import type { Mat4 } from '../util/matrices';
 import { applyTx } from '../util/applyTx';
 import { isVisibleInClipSpace } from '../util/isVisibleInClipSpace';
-import type { SceneBounds } from '../model/SceneBounds';
 import type { WorkLimiter } from '../util/workLimiter';
 import type { ScrollFraction } from '../model/ScrollFraction';
 import type { AlphabetRaster } from '../model/AlphabetRaster';
@@ -15,6 +14,7 @@ import { dpr } from '../util/dpr';
 import { RGB, rgbSize } from '../model/RGB';
 import type { PixelSpace } from '../model/PixelSpace';
 import type { Extensions } from '../model/Extensions';
+import type { SceneBounds } from '../model/SceneBounds';
 
 export type CodeSceneVertices = {
     // only (x, y); z is always = 0
@@ -39,6 +39,7 @@ export async function* createCodeSceneVertices(
     parseResult: ParseResult,
     alphabetRaster: AlphabetRaster,
     workLimiter: WorkLimiter,
+    setRealTextBounds: (b: SceneBounds) => void,
 ): AsyncGenerator<CodeSceneVertices> {
     // Same object reused
     const v: CodeSceneVertices = {
@@ -46,6 +47,13 @@ export async function* createCodeSceneVertices(
         glyphTexPosition: new Float32Array(verticesInArray * rect2dVertexSize),
         color: new Float32Array(verticesInArray * rgbSize),
         verticesNum: 0,
+    };
+
+    const realTextBounds = {
+        xMin: pixelSpace.xMin,
+        xMax: pixelSpace.xMax,
+        yMin: pixelSpace.yMin,
+        yMax: pixelSpace.yMax,
     };
 
     for (const codeLetter of iterateCode(pixelSpace, extensions, scrollFraction, fontSize, source, alphabetRaster)) {
@@ -65,6 +73,11 @@ export async function* createCodeSceneVertices(
         if (!isVisible(txMat, x1, y1, x2, y2)) {
             continue;
         }
+
+        if (x1 < realTextBounds.xMin) realTextBounds.xMin = x1;
+        if (x2 > realTextBounds.xMax) realTextBounds.xMax = x2;
+        if (y1 < realTextBounds.yMin) realTextBounds.yMin = y1;
+        if (y2 > realTextBounds.yMax) realTextBounds.yMax = y2;
 
         setRect2d(v.position, v.verticesNum * rect2dVertexSize, x1, y1, x2, y2);
 
@@ -87,6 +100,9 @@ export async function* createCodeSceneVertices(
     if (v.verticesNum) {
         yield v;
     }
+
+    // Because cannot capture generator return value with for-await
+    setRealTextBounds(realTextBounds);
 }
 
 function isVisible(txMat: Mat4, x1: number, y1: number, x2: number, y2: number) {

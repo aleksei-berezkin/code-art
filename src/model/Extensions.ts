@@ -57,7 +57,8 @@ type Side = 'top' | 'right' | 'bottom' | 'left';
 const allSides: Side[] = ['top', 'right', 'bottom', 'left'];
 
 const maxIterations = 800;
-const samplesNum = 90;
+const maxExtension = 1000;
+const samplesNum = 150;
 const enlargeFactor = .05;
 
 async function enlargeExtensionsBySimulation(pixelSpace: PixelSpace, extensionsWritable: Extensions, txMat: Mat4, workLimiter: WorkLimiter) {
@@ -78,6 +79,16 @@ async function enlargeExtensionsBySimulation(pixelSpace: PixelSpace, extensionsW
 }
 
 function runEdge(side: Side, pixelSpace: PixelSpace, currentExtensionsWritable: Extensions, txMat: Mat4) {
+    const component = side === 'top' ? 'yMin'
+        : side === 'right' ? 'xMax'
+        : side === 'bottom' ? 'yMax'
+        : side === 'left' ? 'xMin'
+        : undefined as never
+
+    if (currentExtensionsWritable[component] >= maxExtension) {
+        return false;
+    }
+
     const b = getSceneBounds(pixelSpace, currentExtensionsWritable);
     const [[x1, y1], [x2, y2]] = side === 'top' ? [[b.xMin, b.yMin], [b.xMax, b.yMin]]
         : side === 'right' ? [[b.xMax, b.yMin], [b.xMax, b.yMax]]
@@ -100,11 +111,6 @@ function runEdge(side: Side, pixelSpace: PixelSpace, currentExtensionsWritable: 
     }
 
     const visibleFraction = visibleCount / samplesNum;
-    const component = side === 'top' ? 'yMin'
-        : side === 'right' ? 'xMax'
-        : side === 'bottom' ? 'yMax'
-        : side === 'left' ? 'xMin'
-        : undefined as never
 
     currentExtensionsWritable[component] *= 1 + enlargeFactor * visibleFraction;
     return true;

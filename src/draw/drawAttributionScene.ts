@@ -3,7 +3,7 @@ import vertexShaderSource from '../shader/attributionVertex.shader';
 import fragmentShaderSource from '../shader/attributionFragment.shader';
 import { createProgram } from './createProgram';
 import { uploadTexture } from './uploadTexture';
-import { uploadArrayToAttribute } from './uploadArrayToAttribute';
+import { createUploadToAttribute } from './createUploadToAttribute';
 import { renderToCanvas } from './renderColorToTexture';
 import type { ColorScheme } from '../model/colorSchemes';
 import { dpr } from '../util/dpr';
@@ -29,7 +29,7 @@ export async function drawAttributionScene(
         .replaceAll('_K_SIZE_', String(kSize));
     const prog = await createProgram(vertexShaderSource, fragmentShaderSourceProcessed, gl);
 
-    uploadArrayToAttribute('a_position', new Float32Array([1, 1,   1, -1,   -1, 1,   -1, -1]), 2, prog, gl);
+    createUploadToAttribute('a_position', 2, prog, gl)(new Float32Array([1, 1,   1, -1,   -1, 1,   -1, -1]));
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, mainTexture);
