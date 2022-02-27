@@ -38,15 +38,12 @@ export type Vec4 = [
 ];
 
 export function mulVec(A: Mat4, v: Vec4): Vec4 {
-    const w = [];
-    for (let r = 0; r < size; r++) {
-        let s = 0;
-        for (let c = 0; c < size; c++) {
-            s += A[ix(r, c)] * v[c];
-        }
-        w.push(s);
-    }
-    return w as Vec4;
+    return [
+        A[ix(0, 0)] * v[0] + A[ix(0, 1)] * v[1] + A[ix(0, 2)] * v[2] + A[ix(0, 3)] * v[3],
+        A[ix(1, 0)] * v[0] + A[ix(1, 1)] * v[1] + A[ix(1, 2)] * v[2] + A[ix(1, 3)] * v[3],
+        A[ix(2, 0)] * v[0] + A[ix(2, 1)] * v[1] + A[ix(2, 2)] * v[2] + A[ix(2, 3)] * v[3],
+        A[ix(3, 0)] * v[0] + A[ix(3, 1)] * v[1] + A[ix(3, 2)] * v[2] + A[ix(3, 3)] * v[3],
+    ] as Vec4;
 }
 
 function ix(r: number, c: number) {
