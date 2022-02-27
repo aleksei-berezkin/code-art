@@ -7,6 +7,8 @@
         box-shadow: var(--menu-shadow);
         left: var(--pad-std);
         margin: 0;
+        max-height: calc(var(--main-h) - 3 * var(--pad-std) - var(--btn-size));
+        overflow-y: scroll;
         padding-top: var(--pad-std);
         position: absolute;
         transform: scale(0);
