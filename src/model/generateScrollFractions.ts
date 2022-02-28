@@ -5,7 +5,7 @@ import { isMinified } from './Lang';
 const vRange = .7;
 const vSize = 2;
 
-const hRange = .6;
+const hRange = .8;
 const minifiedHSize = 6;
 const nonMinifiedHSize = 32;
 

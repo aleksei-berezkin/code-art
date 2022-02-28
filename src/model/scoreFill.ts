@@ -9,8 +9,10 @@ import type { WorkLimiter } from '../util/workLimiter';
 import type { AlphabetRaster } from './AlphabetRaster';
 import type { PixelSpace } from './PixelSpace';
 import type { Extensions } from './Extensions';
+import { isMinified } from './Lang';
 
 const fontSizeToCellMultiplier = 2.7;
+const visibleLineStartsWeight = .6;
 
 export async function scoreFill(
     source: Source,
@@ -22,9 +24,11 @@ export async function scoreFill(
     alphabetRaster: AlphabetRaster,
     workLimiter: WorkLimiter,
 ) {
-    const rowsNum = Math.max(2, Math.ceil(pixelSpace.h / (fontSize * fontSizeToCellMultiplier)));
-    const colsNum = Math.max(2, Math.ceil(pixelSpace.w / (fontSize * fontSizeToCellMultiplier)));
+    const [rowsNum, colsNum] = [pixelSpace.h, pixelSpace.w]
+        .map(s => Math.max(2, Math.round(s / (fontSize * fontSizeToCellMultiplier))));
     const fillMatrix: number[] = new Array(rowsNum * colsNum).fill(0);
+    let visibleLineStarts = 0;
+    const lineNums: Set<number> = new Set();
     for (const c of iterateCode(pixelSpace, extensions, scrollFraction, fontSize, source, alphabetRaster)) {
         await workLimiter.next();
         const [x, y, w] = applyTx(txMat, c.x + alphabetRaster.avgW / 2 / alphabetRaster.fontSizeRatio, c.baseline + alphabetRaster.maxAscent / 2 / alphabetRaster.fontSizeRatio);
@@ -37,13 +41,22 @@ export async function scoreFill(
                     n - 1,
                 ));
             fillMatrix[row * colsNum + col] += 1 / w**2;
+            if (c.isFirstOnLine) {
+                visibleLineStarts++;
+            }
+            lineNums.add(c.line);
         }
     }
 
     const sum = fillMatrix.reduce((a, b) => a + b);
 
     const zerosCount = fillMatrix.filter(s => !s).length;
-    return sum / (zerosCount + 1);
+
+    const lineStartsFactor = isMinified(source.spec.lang)
+        ? 1
+        : visibleLineStartsWeight * visibleLineStarts / (lineNums.size || 1) + (1 - visibleLineStartsWeight);
+
+    return sum / (zerosCount + 1) * lineStartsFactor;
 }
 
 // noinspection JSUnusedLocalSymbols

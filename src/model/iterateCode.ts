@@ -6,7 +6,9 @@ import type { Extensions } from './Extensions';
 import { getSceneBounds } from './SceneBounds';
 
 type CodeLetter = {
+    line: number,
     pos: number,
+    isFirstOnLine: boolean,
     letter: string,
     x: number,
     baseline: number,
@@ -39,24 +41,28 @@ export function* iterateCode(pixelSpace: PixelSpace,
 
         const [lineStart, lineEnd] = source.parseResult.lines[line];
         let x = xMin;
+        let isFirstOnLine = true;
         for (let pos = lineStart; pos < lineEnd; pos++) {
-            let letter = source.text[pos];
-            if (letter === '\t' || !letter) {
-                letter = ' ';
-            } else if (letter.charCodeAt(0) < 32) {
+            const letter = source.text[pos];
+            if (letter !== '\t' && letter.charCodeAt(0) < 32) {
                 continue;
             }
 
-            const metrics = alphabetRaster.glyphs.get(letter)!;
+            const metrics = alphabetRaster.glyphs.get(letter === '\t' ? ' ' : letter)!;
 
-            if (letter !== ' ' && x + metrics.w >= bounds.xMin) {
-                const baseline = y + alphabetRaster.maxAscent / alphabetRaster.fontSizeRatio;
-                yield {
-                    pos,
-                    letter,
-                    x,
-                    baseline,
-                };
+            if (letter !== ' ' && letter !== '\t') {
+                if (x + metrics.w >= bounds.xMin) {
+                    const baseline = y + alphabetRaster.maxAscent / alphabetRaster.fontSizeRatio;
+                    yield {
+                        isFirstOnLine,
+                        line,
+                        pos,
+                        letter,
+                        x,
+                        baseline,
+                    };
+                }
+                isFirstOnLine = false;
             }
 
             x += metrics.w / alphabetRaster.fontSizeRatio;
