@@ -19,7 +19,7 @@ const impliedAspectRatio = 1.9;
  * Vertical view angle is 115 deg (like that of a human eye) so the following
  * equation is valid:
  * 
- * tan(155deg / 2) = (naturalHeight/2) / zBase
+ * tan(155deg / 2) = (impliedHeight/2) / zBase
  *
  * An object at z=+zBase (2*zBase distance from the camera) is twice smaller than that
  * at z=0, so w = (zBase + z) / zBase = 1 + z / zBase
