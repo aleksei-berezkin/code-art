@@ -204,6 +204,7 @@
             openDialog = undefined;
         } else {
             openDialog = 'menu';
+            window.ga('send', 'event', 'open-img-menu');
         }
     }
 
@@ -215,6 +216,7 @@
 
     function handleAboutClick() {
         openDialog = 'about';
+        window.ga('send', 'event', 'open-about');
     }
 
     function closeAbout() {
@@ -227,6 +229,7 @@
     onMount(async () => {
         await setCodeCanvasWH();
         await generateScene();
+        window.ga('send', 'event', 'generated-scene-on-mount');
     });
 
     let generateRotateDeg = 0;
@@ -234,6 +237,7 @@
         if (imgParams) {
             generateRotateDeg += 360;
             await generateScene();
+            window.ga('send', 'event', 'generated-scene');
         }
     }
 
