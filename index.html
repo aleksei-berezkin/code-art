@@ -10,15 +10,15 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Ubuntu:wght@300&family=Anonymous+Pro&family=B612+Mono&family=Courier+Prime&family=Cutive+Mono&family=Inconsolata&family=JetBrains+Mono&family=Noto+Sans+Mono&family=Nova+Mono&family=Share+Tech+Mono&family=Syne+Mono&family=Ubuntu+Mono&display=swap" rel="stylesheet">
 
-    <!-- Google Analytics -->
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JCT4HY96VE"></script>
     <script>
-        window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
-        ga('create', 'G-JCT4HY96VE', 'auto');
-        ga('send', 'pageview');
-    </script>
-    <script async src='https://www.google-analytics.com/analytics.js'></script>
-    <!-- End Google Analytics -->
-</head>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-JCT4HY96VE');
+    </script></head>
 <body>
     <script>
         (function() {
@@ -52,10 +52,6 @@
         })();
 
         function showStub(details) {
-            if (window.ga) {
-                ga('send', 'event', 'show-stub');
-            }
-
             window.isStubShown = true;
 
             var styles = document.getElementsByTagName('style');

@@ -145,9 +145,6 @@
 
     function toggleCredits() {
         creditsOpen = !creditsOpen;
-        if (creditsOpen) {
-            window.ga('send', 'event', 'open-credits');
-        }
     }
 
     function getDepLink(dep: string) {
