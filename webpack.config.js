@@ -10,6 +10,7 @@ const prod = mode === 'production';
 const DefinePlugin = require('webpack').DefinePlugin;
 const packageJson = require('./package.json');
 const appDeps = ['node', 'npm', ...Object.keys(packageJson.dependencies), ...Object.keys(packageJson.devDependencies)].sort();
+const appVersion = packageJson.version;
 
 module.exports = {
     entry: {
@@ -64,6 +65,7 @@ module.exports = {
     plugins: [
         new DefinePlugin({
             'window.appDeps': JSON.stringify(appDeps),
+            'window.appVersion': JSON.stringify(appVersion),
         }),
         new HtmlWebpackPlugin({
             template: './index.html',

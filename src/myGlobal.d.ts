@@ -6,5 +6,6 @@ declare module '*.shader' {
 declare interface Window {
     showStub: (details?: string) => void;
     isStubShown?: boolean;
-    appDeps: string[],  // webpack define
+    appDeps: string[],      // webpack define
+    appVersion: string,     // webpack define
 }

@@ -62,6 +62,11 @@
     p, li {
         line-height: 1.35em;
     }
+
+    .version {
+        color: #00000078;
+        text-align: center;
+    }
 </style>
 
 <section class='about' bind:this={rootEl}>
@@ -116,6 +121,7 @@
                 <li><a href='https://webgl2fundamentals.org/' target='_blank'>WebGL2 Fundamentals</a></li>
                 <li><a href='https://svgcrop.com/' target='_blank'>Crop SVG</a></li>
             </ul>
+            <div class='version'>App version: {window.appVersion}</div>
         {/if}
     </div>
 </section>
