@@ -30,7 +30,7 @@ export type SceneParams = {
 };
 
 export async function generateSceneParams(currentImgParams: ImgParams | undefined, source: Source, sizePx: Size, fontFace: string, fontSize: number, alphabetRaster: AlphabetRaster, workLimiter: WorkLimiter): Promise<SceneParams> {
-    const samplesCount = isMinified(source.spec.lang) ? 2 : 5;
+    const samplesCount = isMinified(source.spec.lang) ? 2 : 4;
     const {angles, pixelSpace, txMat, extensions, scrollFraction} = (await genAll(async function* () {
         for (let i = 0; i < samplesCount; i++) {
             const angles = generateAngles(isMinified(source.spec.lang));
