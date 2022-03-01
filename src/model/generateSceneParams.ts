@@ -104,16 +104,16 @@ export async function generateSceneParams(currentImgParams: ImgParams | undefine
         angle: {
             x: {
                 type: 'slider',
-                min: degToRad(-20),
+                min: degToRad(-30),
                 val: angles.x,
-                max: degToRad(20),
+                max: degToRad(30),
                 unit: 'rad',
             },
             y: {
                 type: 'slider',
-                min: degToRad(-20),
+                min: degToRad(-30),
                 val: angles.y,
-                max: degToRad(20),
+                max: degToRad(30),
                 unit: 'rad',
             },
             z: {
