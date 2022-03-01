@@ -130,7 +130,7 @@
                         <label for={toId(g, k)}>{k}</label>
                     </div>
 
-                    <div class='param-min'>{p.type === 'slider' ? getSliderLabel(p, 'min') : undefined}</div>
+                    <div class='param-min'>{p.type === 'slider' ? getSliderLabel(p, 'min') : ''}</div>
 
                     {#if p.type === 'slider'}
                         <!--suppress XmlDuplicatedId -->
@@ -161,7 +161,7 @@
                         <input id={toId(g, k)} data-g={g} data-k={k} type='color' value='{p.val}' on:change={handleColorChange}/>
                     {/if}
 
-                    <div class='param-max'>{p.type === 'slider' ? getSliderLabel(p, 'max') : undefined}</div>
+                    <div class='param-max'>{p.type === 'slider' ? getSliderLabel(p, 'max') : ''}</div>
                 {/each}
             </div>
         </div>
