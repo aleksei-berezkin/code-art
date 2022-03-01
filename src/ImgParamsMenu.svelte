@@ -88,16 +88,11 @@
         }
 
         .group-body {
-            grid-template-columns: auto 0 minmax(auto, var(--input-w)) 0;
-            column-gap: 0;
-        }
-
-        .param-label-wr {
-            padding-right: calc(var(--pad-gr));
+            grid-template-columns: auto minmax(auto, var(--input-w));
         }
 
         .param-min, .param-max {
-            visibility: hidden;
+            display: none;
         }
     }
 
@@ -135,11 +130,7 @@
                         <label for={toId(g, k)}>{k}</label>
                     </div>
 
-                    {#if p.type === 'slider'}
-                        <div class='param-min'>{getSliderLabel(p, 'min')}</div>
-                    {:else}
-                        <div></div>
-                    {/if}
+                    <div class='param-min'>{p.type === 'slider' ? getSliderLabel(p, 'min') : undefined}</div>
 
                     {#if p.type === 'slider'}
                         <!--suppress XmlDuplicatedId -->
@@ -170,11 +161,7 @@
                         <input id={toId(g, k)} data-g={g} data-k={k} type='color' value='{p.val}' on:change={handleColorChange}/>
                     {/if}
 
-                    {#if p.type === 'slider'}
-                        <div class='param-max'>{getSliderLabel(p, 'max')}</div>
-                    {:else}
-                        <div></div>
-                    {/if}
+                    <div class='param-max'>{p.type === 'slider' ? getSliderLabel(p, 'max') : undefined}</div>
                 {/each}
             </div>
         </div>
