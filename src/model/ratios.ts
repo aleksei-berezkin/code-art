@@ -1,4 +1,4 @@
-const _r = [[2, 1], [16, 9], [3, 2], [4, 3]];
+const _r = [[100, 42], [2, 1], [16, 9], [3, 2], [4, 3]];
 
 export const fitViewRatio = 'fit view';
 export const ratios = [
