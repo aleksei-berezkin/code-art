@@ -169,7 +169,7 @@
     import { drawRandomScene, drawScene } from './draw/drawScene';
     import { setTaskExecutorListeners, submitTask, submitTaskFast } from './util/submitTask';
     import About from './About.svelte';
-    import { fitViewRatio } from './model/ratios';
+    import { fitViewRatio, getFractionFromDisplayedRatio } from './model/ratios';
     import { delayToAnimationFrame } from './util/delay';
     import { dpr } from './util/dpr';
 
@@ -304,7 +304,7 @@
             codeCanvasEl.style.setProperty('--s', String(sizeFr));
 
             if (r !== fitViewRatio) {
-                codeCanvasEl.style.setProperty('--a', `calc(${r})`);
+                codeCanvasEl.style.setProperty('--a', `calc(${getFractionFromDisplayedRatio(r)})`);
             }
         }
     }

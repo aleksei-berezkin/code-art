@@ -18,7 +18,7 @@ import { isMinified } from './Lang';
 import { sourceSpecs } from './sourceSpecs';
 import { scoreFill } from './scoreFill';
 import { attributionPos } from './attributionPos';
-import { fitViewRatio, ratios } from './ratios';
+import { fitViewRatio, displayedRatios } from './ratios';
 import { generate3DifferentBrightColors } from '../util/generate3DifferentBrightColors';
 import { genAll } from '../util/genAll';
 
@@ -192,7 +192,7 @@ export async function generateSceneParams(currentImgParams: ImgParams | undefine
             ratio: {
                 type: 'choices',
                 val: currentImgParams ? currentImgParams['output image'].ratio.val : fitViewRatio,
-                choices: ratios,
+                choices: displayedRatios,
             },
             attribution: {
                 type: 'choices',
