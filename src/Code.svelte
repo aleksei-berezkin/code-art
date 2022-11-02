@@ -17,7 +17,7 @@
 
     .alphabet-canvas, .attribution-canvas, .self-attr-canvas {
         left: 0;
-        position: absolute;
+        position: fixed;
         transform: translateY(-150%);
         top: 0;
     }
