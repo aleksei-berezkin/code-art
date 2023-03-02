@@ -5,6 +5,7 @@ export const fontFaces = [
     'Courier Prime',
     'Cutive Mono',
     'B612 Mono',
+    'Fira Code',
     'Inconsolata',
     'JetBrains Mono',
     'Noto Sans Mono',
