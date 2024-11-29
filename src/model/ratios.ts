@@ -12,6 +12,6 @@ function toDisplayedRatio(w: number, h: number, name?: string) {
 }
 
 export function getFractionFromDisplayedRatio(s: string) {
-    const m = /[\d.]+ \/ [\d.].*/.exec(s)
-    return m ? m[0] : undefined;
+    const m = /([\d.]+ \/ [\d.]+).*/.exec(s)
+    return m ? m[1] : undefined;
 }
