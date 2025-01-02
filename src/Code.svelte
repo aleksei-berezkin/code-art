@@ -167,7 +167,7 @@
     import { onDestroy, onMount } from 'svelte';
     import Icon from './Icon.svelte';
     import { drawRandomScene, drawScene } from './draw/drawScene';
-    import { setTaskExecutorListeners, submitTask, submitTaskFast } from './util/submitTask';
+    import { setTaskExecutorListeners, submitTask } from './util/submitTask';
     import About from './About.svelte';
     import { fitViewRatio, getFractionFromDisplayedRatio } from './model/ratios';
     import { delayToAnimationFrame } from './util/delay';
@@ -238,7 +238,7 @@
     }
 
     async function generateScene() {
-        submitTaskFast(async () =>
+        submitTask(async () =>
             await drawRandomScene(
                 imgParams,
                 codeCanvasEl,
@@ -246,7 +246,8 @@
                 attributionCanvasEl,
                 selfAttrCanvasEl,
                 p => imgParams = p,
-            )
+            ),
+            true,
         );
     }
 

@@ -1,11 +1,9 @@
+import { delay } from './delay';
+
 type Cb = () => Promise<void>;
 
-export function submitTask(cb: Cb) {
-    _submit(cb, 200);
-}
-
-export function submitTaskFast(cb: Cb) {
-    _submit(cb, 20);
+export function submitTask(cb: Cb, fast?: boolean) {
+    _submit(cb, fast ? 50 : 200)
 }
 
 type LCb = () => void;
@@ -17,35 +15,29 @@ export function setTaskExecutorListeners(l: {onStart: LCb, onEnd: LCb}) {
 }
 
 let nextCb: Cb | undefined;
-let state: 'idle' | 'working' = 'idle';
-function _submit(cb: Cb, firstDelay: number) {
-    nextCb = cb;
-    if (state === 'idle') {
-        state = 'working';
-        setTimeout(() => {
-            onStart();
-            void task();
-        }, firstDelay);
+let pendingOrWorking = false
+
+async function _submit(cb: Cb, firstDelay: number) {
+    if (nextCb) return
+
+    nextCb = cb
+
+    if (pendingOrWorking) return
+
+    pendingOrWorking = true
+    onStart()
+
+    await delay(firstDelay)
+
+    while (nextCb) {
+        const cb = nextCb
+        nextCb = undefined
+
+        await cb()
+
+        if (nextCb) await delay(500)
     }
-}
 
-const nextDelay = 500;
-async function task() {
-    if (!nextCb) {
-        state = 'idle';
-        onEnd();
-        return;
-    }
-
-    const cb = nextCb;
-    nextCb = undefined;
-
-    await cb();
-
-    if (nextCb) {
-        setTimeout(task, nextDelay);
-    } else {
-        state = 'idle';
-        onEnd();
-    }
+    onEnd()
+    pendingOrWorking = false
 }
