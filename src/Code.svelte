@@ -226,7 +226,7 @@
     // In Safari sizes may be not ready on mount, that's why raf
     onMount(async () => {
         await setCodeCanvasWH();
-        await generateScene();
+        await generateScene(true);
     });
 
     let generateRotateDeg = 0;
@@ -237,7 +237,7 @@
         }
     }
 
-    async function generateScene() {
+    async function generateScene(initial?: boolean) {
         submitTask(async () =>
             await drawRandomScene(
                 imgParams,
@@ -247,7 +247,7 @@
                 selfAttrCanvasEl,
                 p => imgParams = p,
             ),
-            true,
+            initial,
         );
     }
 

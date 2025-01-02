@@ -1,11 +1,5 @@
 import { delay } from './delay';
 
-type Cb = () => Promise<void>;
-
-export function submitTask(cb: Cb, fast?: boolean) {
-    _submit(cb, fast ? 50 : 200)
-}
-
 type LCb = () => void;
 let onStart: LCb = () => {};
 let onEnd: LCb = () => {};
@@ -14,20 +8,23 @@ export function setTaskExecutorListeners(l: {onStart: LCb, onEnd: LCb}) {
     onEnd = l.onEnd;
 }
 
+type Cb = () => Promise<void>;
 let nextCb: Cb | undefined;
 let pendingOrWorking = false
+let localInitial = true
 
-async function _submit(cb: Cb, firstDelay: number) {
-    if (nextCb) return
+export async function submitTask(newCb: Cb, initial?: boolean) {
+    if (nextCb && !initial) return
 
-    nextCb = cb
+    nextCb = newCb
 
     if (pendingOrWorking) return
 
     pendingOrWorking = true
     onStart()
 
-    await delay(firstDelay)
+    await delay(localInitial ? 50 : 200)
+    localInitial = false
 
     while (nextCb) {
         const cb = nextCb
