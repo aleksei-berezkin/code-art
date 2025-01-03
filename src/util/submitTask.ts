@@ -11,30 +11,31 @@ export function setTaskExecutorListeners(l: {onStart: LCb, onEnd: LCb}) {
 type Cb = () => Promise<void>;
 let nextCb: Cb | undefined;
 let pendingOrWorking = false
-let localInitial = true
+
+let waitingInitial = true
 
 export async function submitTask(newCb: Cb, initial?: boolean) {
-    if (nextCb && !initial) return
+    if (waitingInitial && !initial || nextCb) return
 
     nextCb = newCb
 
     if (pendingOrWorking) return
 
     pendingOrWorking = true
+    waitingInitial = false
     onStart()
-
-    await delay(localInitial ? 50 : 200)
-    localInitial = false
-
+    
+    await delay(initial ? 50 : 200)
+    
     while (nextCb) {
         const cb = nextCb
         nextCb = undefined
-
+        
         await cb()
-
+        
         if (nextCb) await delay(500)
-    }
-
+        }
+    
     onEnd()
     pendingOrWorking = false
 }
