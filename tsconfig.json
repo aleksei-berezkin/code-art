@@ -1,12 +1,36 @@
 {
-    "extends": "@tsconfig/svelte/tsconfig.json",
-    "include": ["src/**/*", "src/node_modules/**/*"],
-    "exclude": ["node_modules/*", "__sapper__/*", "static/*"],
-    "compilerOptions": {
-        "esModuleInterop": true,
-        "lib": ["dom", "esnext"],
-        "module": "esnext",
-        "strict": true,
-        "target": "esnext"
-    }
+  "compilerOptions": {
+    "allowJs": true,
+    "esModuleInterop": true,
+    "incremental": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "lib": [
+      "dom",
+      "esnext"
+    ],
+    "module": "esnext",
+    "moduleResolution": "node",
+    "noEmit": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "esnext"
+  },
+  "exclude": [
+    "node_modules/*",
+    "__sapper__/*",
+    "static/*"
+  ],
+  "include": [
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    "**/*.ts",
+    "**/*.tsx"
+  ]
 }

@@ -1,0 +1,113 @@
+.menu-root {
+    background-color: #ffffffc0;
+    border-radius: var(--bord-r-std);
+    box-sizing: border-box;
+    box-shadow: var(--menu-shadow);
+    left: var(--pad-std);
+    margin: 0;
+    max-height: calc(var(--main-h) - 3 * var(--pad-std) - var(--btn-size));
+    overflow-y: scroll;
+    padding-top: var(--pad-std);
+    position: absolute;
+    transform: scale(0);
+    transform-origin: top left;
+    transition: transform var(--ic-tx), opacity var(--ic-tx);
+    top: calc(var(--pad-std) * 2 + var(--btn-size));
+
+    --pad-gr: calc(var(--pad-std) *.75);
+}
+
+.menu-root.open {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.group {
+    padding-bottom: var(--pad-gr);
+    padding-left: var(--pad-std);
+    padding-right: var(--pad-std);
+}
+
+.group-button:active {
+    color: unset;
+}
+
+.group-button-txt {
+    padding-left: .5em;
+    padding-right: 1em;
+}
+
+.group-body {
+    --label-w: 2.5rem;
+    --input-w: 12rem;
+
+    display: grid;
+    gap: calc(var(--pad-gr) * .75);
+    grid-template-columns: auto var(--label-w) var(--input-w) var(--label-w);
+    height: 0;
+    opacity: 0;
+    padding-left: calc(1.6em);
+    font-size: .9em;
+    transform: scale(0);
+    transform-origin: top left;
+    transition: transform var(--ic-tx);
+}
+
+.group-body.open {
+    height: auto;
+    opacity: 1;
+    padding-top: var(--pad-gr);
+    transform: scale(1);
+}
+
+.param-label-wr {
+    align-items: center;
+    display: flex;
+}
+
+.param-min {
+    text-align: right;
+}
+
+.input-slider {
+    margin: 0;
+    width: 100%;
+}
+
+.input-select {
+    font: inherit;
+    padding: 0.25em;
+    width: 100%;
+}
+
+@media (max-width: 510px) {
+    .menu-root {
+        max-width: calc(100vw - 2 * var(--pad-std));
+    }
+
+    .group-body {
+        grid-template-columns: auto minmax(auto, var(--input-w));
+    }
+
+    .param-min, .param-max {
+        display: none;
+    }
+}
+
+.footer-group {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: var(--pad-std);
+}
+
+.footer-about {
+    color: var(--link-c);
+    letter-spacing: .04em;
+    margin-top: calc(var(--pad-gr) * .7);
+    transition: color var(--link-tx);
+}
+
+.footer-about:hover {
+    color: var(--link-c-h);
+}

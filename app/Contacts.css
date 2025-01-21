@@ -1,0 +1,31 @@
+.contacts {
+    display: flex;
+}
+
+.contacts.light {
+    --c: #0006;
+    --C: #0009;
+}
+
+.contacts.dark {
+    --c: #00000098;
+    --C: #000e;
+}
+
+.link {
+    display: block;
+    text-decoration: none;
+    transition: color var(--link-tx);
+}
+
+.link:not(:last-child) {
+    margin-right: .65em;
+}
+
+.link, .link:visited {
+    color: var(--c);
+}
+
+.link:hover {
+    color: var(--C);
+}

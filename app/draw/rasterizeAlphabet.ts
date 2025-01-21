@@ -37,7 +37,7 @@ export async function rasterizeAlphabet(
         throw new Error(msg);
     }
 
-    const _fontSize = fontSize * dpr * fontSizeMultiplier;
+    const _fontSize = fontSize * dpr() * fontSizeMultiplier;
     const cssFontStr = `${_fontSize}px ${fontFace === defaultMonospace ? 'monospace' : ("'" + fontFace + "'")}`;
     const xMin = _fontSize * (spaceH - 1);
     const xMax = canvasEl.width - 1.5 *  _fontSize;

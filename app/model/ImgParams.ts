@@ -19,6 +19,8 @@ type ColorVal = {
     val: string,
 }
 
+export type ImgParamVal = SliderVal | ChoicesVal | ColorVal
+
 export type ImgParams = {
     angle: {
         x: SliderVal,

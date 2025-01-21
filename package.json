@@ -4,14 +4,18 @@
   "description": "",
   "main": "src/main.ts",
   "scripts": {
-    "analyze": "NODE_ENV=production webpack --config webpack.analyze.js",
-    "build": "npm-run-all clean webpack favicon og-image",
+    "__analyze": "NODE_ENV=production webpack --config webpack.analyze.js",
+    "__build": "npm-run-all clean webpack favicon og-image",
     "clean": "rm -rf ./dist",
     "favicon": "cp favicon.png ./dist",
     "og-image": "cp og-image.png ./dist",
-    "start": "webpack serve",
-    "validate": "svelte-check",
-    "webpack": "NODE_ENV=production webpack"
+    "__start": "webpack serve",
+    "__validate": "svelte-check",
+    "__webpack": "NODE_ENV=production webpack",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "analyze": "ANALYZE=true npm run build"
   },
   "repository": {
     "type": "git",
@@ -24,26 +28,18 @@
   },
   "homepage": "https://github.com/aleksei-berezkin/code-art#readme",
   "devDependencies": {
-    "@tsconfig/svelte": "^2.0.1",
-    "css-loader": "^6.5.1",
-    "html-webpack-plugin": "^5.5.0",
-    "mini-css-extract-plugin": "^2.4.5",
+    "@types/node": "22.10.6",
+    "@types/react": "^19.0.7",
     "npm-run-all": "^4.1.5",
-    "svelte-check": "^2.2.10",
-    "svelte-preprocess": "^4.9.8",
-    "ts-loader": "^9.2.6",
-    "typescript": "^4.5.2",
-    "webpack": "^5.64.2",
-    "webpack-bundle-analyzer": "^4.5.0",
-    "webpack-cli": "^4.9.1",
-    "webpack-dev-server": "^4.5.0"
+    "typescript": "^5.7.3"
   },
   "dependencies": {
+    "@next/bundle-analyzer": "^15.1.4",
     "acorn": "^8.6.0",
     "acorn-loose": "^8.2.1",
     "acorn-walk": "^8.2.0",
-    "svelte": "^3.44.2",
-    "svelte-loader": "^3.1.2",
-    "tslib": "^2.3.1"
+    "next": "^15.1.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   }
 }

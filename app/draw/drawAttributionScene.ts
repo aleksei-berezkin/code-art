@@ -1,6 +1,4 @@
 import type { SceneParams } from '../model/generateSceneParams';
-import vertexShaderSource from '../shader/attributionVertex.shader';
-import fragmentShaderSource from '../shader/attributionFragment.shader';
 import { createProgram } from './createProgram';
 import { uploadTexture } from './uploadTexture';
 import { createUploadToAttribute } from './createUploadToAttribute';
@@ -11,6 +9,7 @@ import { ceilToOdd } from '../util/ceilToOdd';
 import { delay } from '../util/delay';
 import type { AttributionPos } from '../model/attributionPos';
 import { noAttribution } from '../model/attributionPos';
+import { getShaderText } from './getShaderText';
 
 export async function drawAttributionScene(
     sceneParams: SceneParams,
@@ -22,12 +21,16 @@ export async function drawAttributionScene(
 ) {
     const gl = codeCanvasEl.getContext('webgl2')!;
 
-    const blurRadius = sceneParams.imgParams.font.size.val * dpr *.06;
+    const blurRadius = sceneParams.imgParams.font.size.val * dpr() *.06;
     const kSize = ceilToOdd(blurRadius * 2, 25);
 
-    const fragmentShaderSourceProcessed = fragmentShaderSource
+    const fragmentShaderSourceProcessed = (await getShaderText('attributionFragment'))
         .replaceAll('_K_SIZE_', String(kSize));
-    const program = await createProgram(vertexShaderSource, fragmentShaderSourceProcessed, gl);
+    const program = await createProgram(
+        (await getShaderText('attributionVertex')),
+        fragmentShaderSourceProcessed,
+        gl
+    );
 
     createUploadToAttribute('a_position', 2, program, gl)(new Float32Array([1, 1,   1, -1,   -1, 1,   -1, -1]));
 

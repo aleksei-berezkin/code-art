@@ -62,8 +62,8 @@ export async function* createCodeSceneVertices(
         const {pos, letter, x, baseline} = codeLetter;
         const m = alphabetRaster.glyphs.get(letter)!;
 
-        const ascent = Math.min(m.ascent + dpr, alphabetRaster.maxAscent);
-        const descent = Math.min(m.descent + dpr, alphabetRaster.maxDescent);
+        const ascent = Math.min(m.ascent + dpr(), alphabetRaster.maxAscent);
+        const descent = Math.min(m.descent + dpr(), alphabetRaster.maxDescent);
 
         const x1 = x;
         const y1 = baseline - ascent / alphabetRaster.fontSizeRatio;

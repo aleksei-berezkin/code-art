@@ -1,0 +1,122 @@
+main {
+    /* We can't use vh in mobile browsers because it may result in vertical scroll */
+    /* So we introduce like 'container-height' properties */
+    --main-h: 100%;
+    --main-w: 100%;
+
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+.alphabet-canvas, .attribution-canvas, .self-attr-canvas {
+    left: 0;
+    position: fixed;
+    transform: translateY(-150%);
+    top: 0;
+}
+
+.code-canvas {
+    --s: 1;
+    --outline-h: calc(var(--main-h) * var(--s));
+    --outline-w: calc(var(--main-w) * var(--s));
+
+    background-color: #707688;
+}
+
+.code-canvas.fit {
+    height: var(--outline-h);
+    width: var(--outline-w);
+}
+
+.code-canvas.aspect {
+    --a: calc(1 / 1);
+
+    height: calc(min(var(--outline-h), var(--outline-w) / var(--a)));
+    width: calc(min(var(--outline-w), var(--outline-h) * var(--a)));
+}
+
+.progress-svg {
+    --s: calc(min(120px, 200px + 15vw));
+
+    height: var(--s);
+    left: calc(50vw - var(--s) * .5);
+    position: absolute;
+    top: calc(50vh - var(--s) * .5);
+    stroke: #fff8;
+    width: var(--s);
+}
+
+.progress-circle {
+    animation: arc-anim 1.7s ease-in-out infinite, rotation-anim 1.7s linear infinite;
+    animation-delay: -.9s;
+    filter: drop-shadow(0 0 calc(min(1px + .1vw, 2px)) #fff9);
+    box-shadow: var(--btn-shadow);
+}
+
+/*
+ * l = 2 * pi * 20 = 125.66
+ */
+@keyframes arc-anim {
+    0% {
+        stroke-dashoffset: 0;
+        stroke-dasharray: .5, 125.66;
+    }
+    50% {
+        stroke-dashoffset: -18;
+        stroke-dasharray: 100, 125.66;
+    }
+    100% {
+        stroke-dashoffset: -125.66;
+        stroke-dasharray: 100, 125.66;
+    }
+}
+
+@keyframes rotation-anim {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.round-btn {
+    align-items: center;
+    background: #ffffffc0;
+    border-radius: 50%;
+    box-shadow: var(--btn-shadow);
+    color: #000d;
+    display: flex;
+    justify-content: center;
+    height: var(--btn-size);
+    position: absolute;
+    transition: background-color 250ms;
+    top: var(--pad-std);
+    width: var(--btn-size);
+}
+
+.round-btn.left {
+    left: var(--pad-std);
+}
+
+.round-btn.second-to-right {
+    right: calc(var(--pad-std) * 2 + var(--btn-size));
+}
+
+.round-btn.right {
+    right: var(--pad-std);
+}
+
+.round-btn:hover {
+    background: #ffffffe0;
+}
+
+.round-btn:active {
+    background: #fffffff8;
+}

@@ -12,7 +12,7 @@ export async function rasterizeAttribution(text: string, fontSize: number, canva
         return;
     }
 
-    const _fontSize = .8 * fontSize * dpr;
+    const _fontSize = .8 * fontSize * dpr();
     const fontCssStr = `300 ${_fontSize}px 'Ubuntu'`;
     await document.fonts.load(fontCssStr, text)
 

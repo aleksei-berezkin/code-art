@@ -1,5 +1,3 @@
-import vertexShaderSource from '../shader/effectsVertex.shader';
-import fragmentShaderSource from '../shader/effectsFragment.shader';
 import { createProgram } from './createProgram';
 import { rect2dVertexSize } from './rect';
 import { createUploadToAttribute } from './createUploadToAttribute';
@@ -15,6 +13,7 @@ import { getOptics } from '../model/Optics';
 import type { WorkLimiter } from '../util/workLimiter';
 import type { DrawCodeResult } from './DrawCodeResult';
 import { getSceneBounds } from '../model/SceneBounds';
+import { getShaderText } from './getShaderText';
 
 const maxKernel = 25;
 
@@ -29,14 +28,14 @@ export async function drawEffectsScene(
 
     const { imgParams } = sceneParams;
     const glowRadius = getSliderVal(imgParams.font.size) * getSliderVal(imgParams.glow.radius) / 2;
-    const glowKSize = ceilToOdd(glowRadius * .65 * dpr, maxKernel);
-    const blurKSize = ceilToOdd(2.65 * imgParams.fade.blur.val * dpr, maxKernel);
+    const glowKSize = ceilToOdd(glowRadius * .65 * dpr(), maxKernel);
+    const blurKSize = ceilToOdd(2.65 * imgParams.fade.blur.val * dpr(), maxKernel);
     const loopSize = Math.max(glowKSize, blurKSize);
 
-    const fragmentShaderSourceProcessed = fragmentShaderSource
+    const fragmentShaderSourceProcessed = (await getShaderText('effectsFragment'))
         .replaceAll('_LOOP_SZ_', String(loopSize))
 
-    const program = await createProgram(vertexShaderSource, fragmentShaderSourceProcessed, gl);
+    const program = await createProgram(await getShaderText('effectsVertex'), fragmentShaderSourceProcessed, gl);
 
     gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, drawCodeResult.targetTex);

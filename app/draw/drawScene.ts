@@ -91,8 +91,8 @@ async function _drawScene(source: Source, sceneParams: SceneParams, alphabetRast
 
 function getPixelSpaceSize(canvasEl: HTMLCanvasElement): Size {
     return {
-        w: canvasEl.width / dpr,
-        h: canvasEl.height / dpr,
+        w: canvasEl.width / dpr(),
+        h: canvasEl.height / dpr(),
     };
 }
 

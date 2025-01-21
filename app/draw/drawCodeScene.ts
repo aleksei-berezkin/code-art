@@ -1,6 +1,4 @@
 import { createProgram } from './createProgram';
-import vertexShaderSource from '../shader/codeVertex.shader';
-import fragmentShaderSource from '../shader/codeFragment.shader';
 import { createCodeSceneVertices } from './createCodeSceneVertices';
 import { rect2dVertexSize } from './rect';
 import type { Source } from '../model/Source';
@@ -16,6 +14,7 @@ import type { AlphabetRaster } from '../model/AlphabetRaster';
 import type { ParseResult } from '../model/ParseResult';
 import { dpr } from '../util/dpr';
 import type { DrawCodeResult } from './DrawCodeResult';
+import { getShaderText } from './getShaderText';
 
 // Renders to 0 tex unit
 export async function drawCodeScene(
@@ -35,7 +34,7 @@ export async function drawCodeScene(
         throw new Error(msg);
     }
 
-    const program = await createProgram(vertexShaderSource, fragmentShaderSource, gl);
+    const program = await createProgram(await getShaderText('codeVertex'), await getShaderText('codeFragment'), gl);
 
     uploadTexture(1, alphabetCanvasEl, gl);
 
@@ -43,7 +42,7 @@ export async function drawCodeScene(
 
     gl.uniform1i(gl.getUniformLocation(program, 'u_letters'), 1);
 
-    gl.uniform1f(gl.getUniformLocation(program, 'u_lettersTexRatio'), alphabetRaster.fontSizeRatio / dpr);
+    gl.uniform1f(gl.getUniformLocation(program, 'u_lettersTexRatio'), alphabetRaster.fontSizeRatio / dpr());
 
     gl.uniformMatrix4fv(gl.getUniformLocation(program, 'u_tx'), false, sceneParams.txMat);
 

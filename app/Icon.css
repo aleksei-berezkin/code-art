@@ -1,0 +1,45 @@
+.ic {
+    --ic-h-sm: 20px;
+    --ic-f-md: 1.2;
+    --ic-f-lg: 1.6;
+
+    fill: currentColor;
+    stroke: none;
+    transition: transform var(--ic-tx) ease-out;
+    vertical-align: bottom;
+}
+
+.ic.arrow-down {
+    --ic-h-sm: 7.41px;
+    vertical-align: baseline;
+}
+
+.ic.sm {
+    height: var(--ic-h-sm);
+}
+
+.ic.md {
+    height: calc(var(--ic-h-sm) * var(--ic-f-md));
+}
+
+.ic.lg {
+    height: calc(var(--ic-h-sm) * var(--ic-f-lg));
+}
+
+
+.ic:not(.arrow-down) {
+    vertical-align: bottom;
+}
+
+.ic.arrow-down {
+    vertical-align: baseline;
+}
+
+.ic.sm.arrow-down {
+    height: 7.41px;
+    width: 12px;
+}
+
+.ic.scale-to-0 {
+    transform: scale(0);
+}
