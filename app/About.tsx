@@ -71,8 +71,8 @@ export function About({ closeDialog }: { closeDialog: () => void }) {
                     <h3>Software deps</h3>
                     <ul>
                         {
-                            window.appDeps?.map(dep =>
-                                <li><a href={getDepLink(dep)} target='_blank'>{dep}</a></li>
+                            codeArtDeps.map(dep =>
+                                <li key={dep}><a href={getDepLink(dep)} target='_blank'>{dep}</a></li>
                             )
                         }
                     </ul>
@@ -81,12 +81,15 @@ export function About({ closeDialog }: { closeDialog: () => void }) {
                         <li><a href='https://webgl2fundamentals.org/' target='_blank'>WebGL2 Fundamentals</a></li>
                         <li><a href='https://svgcrop.com/' target='_blank'>Crop SVG</a></li>
                     </ul>
-                    <div className='version'>App version: {window.appVersion}</div>
+                    <div className='version'>App version: {codeArtVersion}</div>
                 </>
             }
         </div>
     </section>
 }
+
+declare const codeArtDeps: string[]
+declare const codeArtVersion: string
 
 function getDepLink(dep: string) {
     if (dep === 'node') {

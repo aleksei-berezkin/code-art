@@ -1,7 +1,7 @@
 {
   "name": "code-art",
   "version": "0.0.13",
-  "description": "",
+  "description": "Abstract artworks for your creations",
   "main": "src/main.ts",
   "scripts": {
     "__analyze": "NODE_ENV=production webpack --config webpack.analyze.js",
