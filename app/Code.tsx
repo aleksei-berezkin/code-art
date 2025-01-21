@@ -87,7 +87,9 @@ export function Code() {
         );
     }
 
-    async function onParamsUpdate(_: any, updatedSize: boolean) {
+    async function onParamsUpdate(newParams: ImgParams, updatedSize: boolean) {
+        setImgParams({...newParams})
+
         submitTask(async () => {
             if (imgParams) {
                 if (updatedSize) {
@@ -179,8 +181,8 @@ export function Code() {
         })
     }, [])
 
- 
- return <main ref={mainRef}>
+
+    return <main ref={mainRef}>
         <canvas className='alphabet-canvas' ref={alphabetCanvasRef} width='2048' />
         <canvas className='attribution-canvas' ref={attributionCanvasRef}/>
         <canvas className='self-attr-canvas' ref={selfAttrCanvasRef} />

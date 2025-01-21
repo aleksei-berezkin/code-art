@@ -13,13 +13,15 @@ const contacts = {
 }
 
 export function Contacts({ size, color }: { size: IconSize, color: 'light' | 'dark' }) {
-    return <section role='contentinfo' className={`contacts ${color}`}>
+    return <ul className={`contacts ${size} ${color}`}>
         {
             typedEntries(contacts).map(([pic, url]) =>
-                <a href={url} target='_blank' className='link'>
-                    <Icon pic={pic} size={size}/>
-                </a>
+                <li key={url}>
+                    <a key={url} href={url} target='_blank' className='link'>
+                        <Icon pic={pic} size={size}/>
+                    </a>
+                </li>
             )
         }
-    </section>
+    </ul>
 }

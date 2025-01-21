@@ -1,0 +1,68 @@
+.about {
+    --m: .9rem;
+
+    background-color: #ffffffe0;
+    border-radius: var(--bord-r-std);
+    box-sizing: border-box;
+    box-shadow: var(--menu-shadow);
+    left: 50%;
+    position: absolute;
+    transform: translateX(-50%);
+    top: var(--pad-std);
+    width: calc(min(80vw, 520px));
+}
+
+.about .close-wr {
+    color: var(--link-c);
+    position: absolute;
+    padding: calc(var(--pad-std) * .75);
+    top: 0;
+    transition: color var(--link-tx);
+    right: 0;
+}
+
+.about .close-wr:hover {
+    color: var(--link-c-h);
+}
+
+.about .credits-text {
+    padding-left: var(--m);
+}
+
+.about .scroll-container {
+    box-sizing: border-box;
+    max-height: calc(var(--main-h) - 2 * var(--pad-std));
+    overflow: scroll;
+    padding: var(--pad-std);
+}
+
+.about h1 {
+    margin-top: 0;
+}
+
+.about h1, h2, h3, p, ul {
+    margin-top: var(--m);
+    margin-bottom: var(--m);
+}
+
+.about h1 {
+    margin-top: 0;
+    font-size: 1.7rem;
+}
+
+.about ul:last-child {
+    margin-bottom: 0;
+}
+
+.about h2 {
+    font-size: 1.35rem;
+}
+
+.about p, li {
+    line-height: 1.35em;
+}
+
+.about .version {
+    color: #00000078;
+    text-align: center;
+}

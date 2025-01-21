@@ -6,7 +6,7 @@ import { Contacts } from './Contacts';
 import { createCloseBehavior } from './util/createCloseBehavior';
 import { noAttribution } from './model/attributionPos';
 import { sourceSpecs } from './model/sourceSpecs';
-import { useRef, useState, FormEvent, MouseEvent, useEffect } from 'react';
+import React, { useRef, useState, FormEvent, MouseEvent, useEffect } from 'react';
 import { typedEntries } from './util/typedEntries';
 
 
@@ -79,7 +79,7 @@ export function ImgParamsMenu({imgParams, menuOpen, paramsUpdated, closeMenu, cl
         <div>
         {
             typedEntries(imgParams).map(([g, ps]) =>
-                <div className='group' role='region' aria-label={`Controls group: ${g}`}>
+                <div key={g} className='group' role='region' aria-label={`Controls group: ${g}`}>
                     <button className='group-button' aria-label={`Toggle group visibility: ${g}`} data-g={g} onClick={handleToggleGroup}>
                         <Icon pic='arrow-down' size='sm' rotateDeg={openGroups.includes(g) ? -180 : 0}/>
                         <span className='group-button-txt'>{g}</span>
@@ -87,50 +87,51 @@ export function ImgParamsMenu({imgParams, menuOpen, paramsUpdated, closeMenu, cl
 
                     <div className={`group-body ${openGroups.includes(g) ? 'open' : ''}`}>
                     {
-                        Object.entries(ps).map(([k, p]: [string, ImgParamVal]) => <>
-                            <div className='param-label-wr'>
-                                <label htmlFor={toId(g, k)}>{k}</label>
-                            </div>
+                        Object.entries(ps).map(([k, p]: [string, ImgParamVal]) =>
+                            <React.Fragment key={k}>
+                                <div className='param-label-wr'>
+                                    <label htmlFor={toId(g, k)}>{k}</label>
+                                </div>
 
-                            <div className='param-min'>{p.type === 'slider' ? getSliderLabel(p, 'min') : ''}</div>
+                                <div className='param-min'>{p.type === 'slider' ? getSliderLabel(p, 'min') : ''}</div>
 
-                            {
-                                p.type === 'slider' &&
-                                <input className='input-slider' id={toId(g, k)}
-                                    data-g={g} data-k={k}
-                                    type='range' min='{p.min}' max='{p.max}' step='any'
-                                    value='{p.val}'
-                                    onInput={handleSliderChange}
-                                    title="{getSliderLabel(p, 'val')}"
-                                />
-                            }
+                                {
+                                    p.type === 'slider' &&
+                                    <input className='input-slider' id={toId(g, k)}
+                                        data-g={g} data-k={k}
+                                        type='range' min={p.min} max={p.max} step='any'
+                                        value={p.val}
+                                        onInput={handleSliderChange}
+                                        title={getSliderLabel(p, 'val')}
+                                    />
+                                }
 
-                            {
-                                p.type === 'choices' &&
-                                <select className='input-select' id={toId(g, k)} data-g={g} data-k={k} onChange={handleChoiceChange}>
-                                    {
-                                        p.choices.map(choice => 
-                                            p.val === choice
-                                                ? <option value={choice} selected>{choice}</option>
-                                                : <option value={choice}>{choice}</option>
-                                        )
-                                    }
-                                </select>
-                            }
+                                {
+                                    p.type === 'choices' &&
+                                    <select className='input-select' id={toId(g, k)} data-g={g} data-k={k} onChange={handleChoiceChange} value={p.val}>
+                                        {
+                                            p.choices.map(choice =>
+                                                <option key={choice} value={choice}>{choice}</option>
+                                            )
+                                        }
+                                    </select>
+                                }
 
-                            {
-                                p.type === 'color' &&
-                                <input id={toId(g, k)} data-g={g} data-k={k} type='color' value='{p.val}' onChange={handleColorChange}/>
-                            }
+                                {
+                                    p.type === 'color' &&
+                                    <input id={toId(g, k)} data-g={g} data-k={k} type='color' value={p.val} onChange={handleColorChange}/>
+                                }
 
-                            <div className='param-max'>{p.type === 'slider' ? getSliderLabel(p, 'max') : ''}</div>
-                        </>)
+                                <div className='param-max'>{p.type === 'slider' ? getSliderLabel(p, 'max') : ''}</div>
+                            </React.Fragment>
+                        )
                     }
                     </div>
                 </div>
             )
         }
         </div>
+
         <div className='footer-group'>
             <Contacts size='sm' color='light'/>
             <button className='footer-about' onClick={clickedAbout}>about</button>
