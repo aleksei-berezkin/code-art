@@ -24,8 +24,7 @@
   },
   "exclude": [
     "node_modules/*",
-    "__sapper__/*",
-    "static/*"
+    "public/*"
   ],
   "include": [
     "next-env.d.ts",

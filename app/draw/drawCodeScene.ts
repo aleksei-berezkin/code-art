@@ -1,3 +1,6 @@
+import codeFragmentShader from '../shader/codeFragment.shader'
+import codeVertexShader from '../shader/codeVertex.shader'
+
 import { createProgram } from './createProgram';
 import { createCodeSceneVertices } from './createCodeSceneVertices';
 import { rect2dVertexSize } from './rect';
@@ -14,7 +17,6 @@ import type { AlphabetRaster } from '../model/AlphabetRaster';
 import type { ParseResult } from '../model/ParseResult';
 import { dpr } from '../util/dpr';
 import type { DrawCodeResult } from './DrawCodeResult';
-import { getShaderText } from './getShaderText';
 
 // Renders to 0 tex unit
 export async function drawCodeScene(
@@ -34,7 +36,7 @@ export async function drawCodeScene(
         throw new Error(msg);
     }
 
-    const program = await createProgram(await getShaderText('codeVertex'), await getShaderText('codeFragment'), gl);
+    const program = await createProgram(codeVertexShader, codeFragmentShader, gl);
 
     uploadTexture(1, alphabetCanvasEl, gl);
 

@@ -1,3 +1,6 @@
+import attributionFragmentShader from '../shader/attributionFragment.shader'
+import attributionVertexShader from '../shader/attributionVertex.shader'
+
 import type { SceneParams } from '../model/generateSceneParams';
 import { createProgram } from './createProgram';
 import { uploadTexture } from './uploadTexture';
@@ -9,7 +12,6 @@ import { ceilToOdd } from '../util/ceilToOdd';
 import { delay } from '../util/delay';
 import type { AttributionPos } from '../model/attributionPos';
 import { noAttribution } from '../model/attributionPos';
-import { getShaderText } from './getShaderText';
 
 export async function drawAttributionScene(
     sceneParams: SceneParams,
@@ -24,10 +26,10 @@ export async function drawAttributionScene(
     const blurRadius = sceneParams.imgParams.font.size.val * dpr() *.06;
     const kSize = ceilToOdd(blurRadius * 2, 25);
 
-    const fragmentShaderSourceProcessed = (await getShaderText('attributionFragment'))
+    const fragmentShaderSourceProcessed = attributionFragmentShader
         .replaceAll('_K_SIZE_', String(kSize));
     const program = await createProgram(
-        (await getShaderText('attributionVertex')),
+        attributionVertexShader,
         fragmentShaderSourceProcessed,
         gl
     );

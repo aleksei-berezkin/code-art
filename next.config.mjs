@@ -21,6 +21,12 @@ const nextConfig = {
           'codeArtVersion': JSON.stringify(packageJson.version),
         })
       )
+      config.module.rules.push(
+        {
+          test: /\.shader/,
+          type: 'asset/source',
+        }
+      )
       return config
     }
 }
