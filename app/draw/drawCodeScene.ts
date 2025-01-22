@@ -31,9 +31,7 @@ export async function drawCodeScene(
 ): Promise<DrawCodeResult> {
     const gl = codeCanvasEl.getContext('webgl2', {preserveDrawingBuffer: true});
     if (!gl) {
-        const msg = 'WebGL2 is not supported'
-        window.showStub(msg);
-        throw new Error(msg);
+        throw new Error('WebGL2 is not supported')
     }
 
     const program = await createProgram(codeVertexShader, codeFragmentShader, gl);

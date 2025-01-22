@@ -32,9 +32,7 @@ export async function rasterizeAlphabet(
     
     const ctx = canvasEl.getContext('2d');
     if (!ctx) {
-        const msg = 'cannot create 2d context';
-        window.showStub(msg);
-        throw new Error(msg);
+        throw new Error('cannot create WebGL 2d context')
     }
 
     const _fontSize = fontSize * dpr() * fontSizeMultiplier;
@@ -59,9 +57,7 @@ export async function rasterizeAlphabet(
         ctx.fillText(letter, x, baseline);
         const tm = ctx.measureText(letter);
         if (tm.actualBoundingBoxAscent == null || tm.actualBoundingBoxDescent == null || tm.width == null) {
-            const msg = 'text metrics not fully supported';
-            window.showStub(msg);
-            throw new Error(msg);
+            throw new Error('TextMetrics are not fully supported')
         }
 
         glyphs.set(
