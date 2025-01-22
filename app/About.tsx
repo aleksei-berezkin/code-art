@@ -1,28 +1,28 @@
 import './About.css';
 
-import { createRef, useEffect, useState } from 'react';
+import { createRef, useState } from 'react';
 import { Contacts } from './Contacts';
 import { Icon } from './Icon';
 import { fontFacesForRandomScenes } from './model/fontFaces';
 import { sourceSpecs } from './model/sourceSpecs';
-import { createCloseBehavior } from './util/createCloseBehavior';
+import { useStore } from './store';
 
-export function About({ closeDialog }: { closeDialog: () => void }) {
+export function About() {
     const rootRef = createRef<HTMLElement>()
-    useEffect(() => {
-        const closeBehavior = createCloseBehavior()
-        closeBehavior.attachDeferred(rootRef.current!, closeDialog)
-        return () => closeBehavior.detach()
-    }, [closeDialog])
 
     const [creditsOpen, setCreditsOpen] = useState(false)
+
+    const isOpen = useStore(state => state.openDialog === 'about')
+    const setOpenDialog = useStore(state => state.setOpenDialog)
+
+    if (!isOpen) return undefined
 
     function toggleCredits() {
         setCreditsOpen(!creditsOpen)
     }
     
-    return <section className='about' ref={rootRef}>
-        <button className='close-wr' onClick={closeDialog}>
+    return <section className='about dialog-layer' ref={rootRef}>
+        <button className='close-wr' onClick={() => setOpenDialog(undefined)}>
             <Icon pic='close'/>
         </button>
         <div className='scroll-container'>

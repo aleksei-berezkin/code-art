@@ -1,24 +1,29 @@
 import './ImgParamsMenu.css'
+
 import { getSliderLabel, ImgParams, ImgParamVal, ParamGroup } from './model/ImgParams';
 import { Icon } from './Icon';
 import { getFromSelfOrParentDataset } from './util/getFromSelfOrParentDataset';
 import { Contacts } from './Contacts';
-import { createCloseBehavior } from './util/createCloseBehavior';
 import { noAttribution } from './model/attributionPos';
 import { sourceSpecs } from './model/sourceSpecs';
-import React, { useRef, useState, FormEvent, MouseEvent, useEffect } from 'react';
+import React, { useRef, useState, FormEvent, MouseEvent } from 'react';
 import { typedEntries } from './util/typedEntries';
+import { useStore } from './store';
 
 
-export function ImgParamsMenu({imgParams, menuOpen, paramsUpdated, closeMenu, clickedAbout} : {
-    imgParams: ImgParams,
-    menuOpen: boolean,
+export function ImgParamsMenu({paramsUpdated} : {
     paramsUpdated: (params: ImgParams, updatedSize: boolean) => void,
-    closeMenu: () => void,
-    clickedAbout: () => void,
 }) {
 
+    const isOpen = useStore(state => state.openDialog === 'menu')
+    const setOpenDialog = useStore(state => state.setOpenDialog)
+
+    const imgParams = useStore(state => state.imgParams)
     const [openGroups, setOpenGroups] = useState<ParamGroup[]>([]);
+
+    const menuRootRef = useRef<HTMLElement>(null)
+
+    if (!isOpen || !imgParams) return undefined
 
     function handleToggleGroup(e: MouseEvent) {
         const g = getFromSelfOrParentDataset(e.target as HTMLElement, 'g') as ParamGroup
@@ -28,19 +33,7 @@ export function ImgParamsMenu({imgParams, menuOpen, paramsUpdated, closeMenu, cl
         setOpenGroups(newOpenGroups)
     }
 
-    const menuRootRef = useRef<HTMLElement>(null);
-
-    useEffect(() => {
-        const closeBehavior = createCloseBehavior()
-        if (menuOpen && !closeBehavior.isAttached()) {
-            closeBehavior.attachDeferred(menuRootRef.current!, closeMenu)
-        } else if (!menuOpen) {
-            closeBehavior.detach()
-        }
-        return () => closeBehavior.detach()
-    }, [menuOpen])
-
-    function handleSliderChange(e: FormEvent) {
+    const handleSliderChange = (e: FormEvent) => {
         const inputEl = (e.target as HTMLInputElement);
         const g = inputEl.dataset.g as ParamGroup
         const k = inputEl.dataset.k!;
@@ -48,7 +41,7 @@ export function ImgParamsMenu({imgParams, menuOpen, paramsUpdated, closeMenu, cl
         paramsUpdated(imgParams, isUpdatedSize(g, k))
     }
 
-    function handleChoiceChange(e: FormEvent) {
+    const handleChoiceChange = (e: FormEvent) => {
         const selectEl = (e.target as HTMLSelectElement);
         const g = selectEl.dataset.g as ParamGroup
         const k = selectEl.dataset.k!
@@ -62,12 +55,12 @@ export function ImgParamsMenu({imgParams, menuOpen, paramsUpdated, closeMenu, cl
         paramsUpdated(imgParams, isUpdatedSize(g, k))
     }
 
-    function isUpdatedSize(g: ParamGroup, k: string) {
+    const isUpdatedSize = (g: ParamGroup, k: string) => {
         return (imgParams as any)[g][k] === imgParams['output image'].ratio
             || (imgParams as any)[g][k] === imgParams['output image'].size
     }
 
-    function handleColorChange(e: FormEvent) {
+    const handleColorChange = (e: FormEvent) => {
         const inputEl = (e.target as HTMLInputElement)
         const g = inputEl.dataset.g as ParamGroup
         const k = inputEl.dataset.k!;
@@ -75,7 +68,7 @@ export function ImgParamsMenu({imgParams, menuOpen, paramsUpdated, closeMenu, cl
         paramsUpdated(imgParams, false);
     }
 
-    return <aside className={`menu-root ${menuOpen ? 'open' : ''}`} aria-label='Image params' ref={menuRootRef}>
+    return <aside className={`menu-root ${isOpen ? 'open' : ''} dialog-layer`} aria-label='Image params' ref={menuRootRef}>
         <div>
         {
             typedEntries(imgParams).map(([g, ps]) =>
@@ -134,7 +127,7 @@ export function ImgParamsMenu({imgParams, menuOpen, paramsUpdated, closeMenu, cl
 
         <div className='footer-group'>
             <Contacts size='sm' color='light'/>
-            <button className='footer-about' onClick={clickedAbout}>about</button>
+            <button className='footer-about' onClick={() => setOpenDialog('about')}>about</button>
         </div>
     </aside>
 }

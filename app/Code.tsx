@@ -11,7 +11,8 @@ import { getSliderVal, ImgParams } from './model/ImgParams';
 import { ImgParamsMenu } from './ImgParamsMenu';
 import { Icon } from './Icon';
 import { setTaskExecutorListeners, submitTask } from './util/submitTask';
-import { useEffect, useRef, useState } from 'react';
+import { MouseEvent, useEffect, useRef, useState } from 'react';
+import { useStore } from './store';
 
 export function Code() {
     const mainRef = useRef<HTMLElement>(null);
@@ -33,28 +34,25 @@ export function Code() {
     const selfAttrCanvasRef = useRef<HTMLCanvasElement>(null)
     const codeCanvasRef = useRef<HTMLCanvasElement>(null)
 
-    const [openDialog, setOpenDialog] = useState<'menu' | 'about' | undefined>(undefined);
-    const [imgParams, setImgParams] = useState<ImgParams | undefined>(undefined);
 
-    function handleImgParamsClick() {
-        if (openDialog === 'menu')
-            setOpenDialog(undefined)
-        else
-            setOpenDialog('menu')
+    const openDialog = useStore(state => state.openDialog)
+    const setOpenDialog = useStore(state => state.setOpenDialog)
+
+    const imgParams = useStore(state => state.imgParams)
+    const setImgParams = useStore(state => state.setImgParams)
+
+    function handleRootClick(e: MouseEvent) {
+        let current = e.target as Element | null
+        while (current) {
+            if (current.classList.contains('dialog-layer')) return
+            current = current.parentElement
+        }
+        setOpenDialog(undefined)
     }
 
-    function closeImgParams() {
-        if (openDialog === 'menu')
-            setOpenDialog(undefined)
-    }
-
-    function handleAboutClick() {
-        setOpenDialog('about')
-    }
-
-    function closeAbout() {
-        if (openDialog === 'about')
-            setOpenDialog(undefined)
+    function handleImgParamsButtonClick(e: MouseEvent) {
+        setOpenDialog(openDialog === 'menu' ? undefined : 'menu')
+        e.stopPropagation()
     }
 
     // In Safari sizes may be not ready on mount, that's why raf
@@ -182,13 +180,13 @@ export function Code() {
     }, [])
 
 
-    return <main ref={mainRef}>
+    return <main ref={mainRef} onClick={handleRootClick}>
         <canvas className='alphabet-canvas' ref={alphabetCanvasRef} width='2048' />
         <canvas className='attribution-canvas' ref={attributionCanvasRef}/>
         <canvas className='self-attr-canvas' ref={selfAttrCanvasRef} />
         <canvas className={`code-canvas ${codeCanvasModifier}`} ref={codeCanvasRef} />
 
-        <button className='round-btn left' onClick={handleImgParamsClick}>
+        <button className='round-btn left' onClick={handleImgParamsButtonClick}>
             <Icon pic={(openDialog === 'menu') ? 'close' : 'menu'}/>
         </button>
         <button className='round-btn second-to-right' onClick={handleGenerateClick}>
@@ -198,16 +196,7 @@ export function Code() {
             <Icon pic={downloading ? 'pending' : 'download'}/>
         </button>
 
-        {
-            imgParams &&
-            <ImgParamsMenu
-                imgParams={imgParams}
-                menuOpen={openDialog === 'menu'}
-                paramsUpdated={onParamsUpdate}
-                closeMenu={closeImgParams}
-                clickedAbout={handleAboutClick}
-            />
-        }
+        <ImgParamsMenu paramsUpdated={onParamsUpdate} />
 
         {
             progress &&
@@ -216,10 +205,7 @@ export function Code() {
             </svg>
         }
 
-        {
-            openDialog === 'about'
-            && <About closeDialog={closeAbout}/>
-        }
+        <About/>
     </main>
 }
 
