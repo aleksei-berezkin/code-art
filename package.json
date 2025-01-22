@@ -4,9 +4,7 @@
   "description": "Abstract artworks for your creations",
   "main": "src/main.ts",
   "scripts": {
-    "clean": "rm -rf ./dist",
-    "favicon": "cp favicon.png ./dist",
-    "og-image": "cp og-image.png ./dist",
+    "clean": "rm -rf ./out",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
