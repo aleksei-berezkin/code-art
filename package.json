@@ -2,7 +2,7 @@
   "name": "code-art",
   "version": "0.0.13",
   "description": "Abstract artworks for your creations",
-  "main": "src/main.ts",
+  "main": "app/layout.tsx",
   "scripts": {
     "clean": "rm -rf ./out",
     "dev": "next dev",
