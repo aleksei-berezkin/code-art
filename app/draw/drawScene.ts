@@ -2,14 +2,12 @@ import { pickRandom } from '../util/pickRandom';
 import { getSource, Source } from '../model/Source';
 import { rasterizeAlphabet } from './rasterizeAlphabet';
 import { generateSceneParams, SceneParams } from '../model/generateSceneParams';
-import { dpr } from '../util/dpr';
 import type { ImgParams } from '../model/ImgParams';
 import { drawCodeScene } from './drawCodeScene';
 import { drawEffectsScene } from './drawEffectsScene';
 import { makePixelSpace } from '../model/PixelSpace';
 import { getSliderVal } from '../model/ImgParams';
 import { getTxMax } from '../model/getTxMax';
-import type { Size } from '../model/Size';
 import { delay } from '../util/delay';
 import { parseCode } from '../parse/parseCode';
 import type { ColorSchemeName } from '../model/colorSchemes';
@@ -21,6 +19,8 @@ import { fontFacesForRandomScenes } from '../model/fontFaces';
 import { sourceSpecs } from '../model/sourceSpecs';
 import { rasterizeAttribution } from './rasterizeAttribution';
 import { drawAttributionScene } from './drawAttributionScene';
+import { calcOptimalFontSize } from './calcOptimalFontSize';
+import { getPixelSpaceSize } from './getPixelSpaceSize';
 
 export async function drawRandomScene(
     currentImgParams: ImgParams | undefined,
@@ -35,7 +35,7 @@ export async function drawRandomScene(
 
     const sizePixelSpace = getPixelSpaceSize(codeCanvasEl);
     const fontFace = pickRandom(fontFacesForRandomScenes);
-    const fontSize = currentImgParams ? getSliderVal(currentImgParams.font.size) : calcFontSize(sizePixelSpace);
+    const fontSize = currentImgParams ? getSliderVal(currentImgParams.font.size) : calcOptimalFontSize(sizePixelSpace);
 
     const workLimiter = createWorkLimiter();
     const alphabetRaster = await rasterizeAlphabet(source, alphabetCanvasEl, fontFace, fontSize, workLimiter);
@@ -52,16 +52,11 @@ export async function drawScene(
     alphabetCanvasEl: HTMLCanvasElement,
     attributionCanvasEl: HTMLCanvasElement,
     selfAttrCanvasEl: HTMLCanvasElement,
-    calcFontSizeBasedOnSize: boolean,
-    onParamsUpdate: () => void,
 ) {
     const source = await getSource(imgParams.source['source'].val);
 
     const sizePixelSpace = getPixelSpaceSize(codeCanvasEl);
-    if (calcFontSizeBasedOnSize) {
-        imgParams.font.size.val = calcFontSize(sizePixelSpace);
-        onParamsUpdate();
-    }
+    // imgParams.font.size.val = calcFontSize(sizePixelSpace);
 
     const workLimiter = createWorkLimiter();
     const alphabetRaster = await rasterizeAlphabet(source, alphabetCanvasEl, imgParams.font.face.val, getSliderVal(imgParams.font.size), workLimiter);
@@ -87,15 +82,4 @@ async function _drawScene(source: Source, sceneParams: SceneParams, alphabetRast
     await rasterizeAttribution('code-art.pictures', sceneParams.imgParams.font.size.val, selfAttrCanvasEl);
     await delay();
     await drawAttributionScene(sceneParams, targetTex, colorScheme, codeCanvasEl, attributionCanvasEl, selfAttrCanvasEl);
-}
-
-function getPixelSpaceSize(canvasEl: HTMLCanvasElement): Size {
-    return {
-        w: canvasEl.width / dpr(),
-        h: canvasEl.height / dpr(),
-    };
-}
-
-function calcFontSize(sizePx: Size) {
-    return Math.min(36, 18 + sizePx.w / 1280 * 18);
 }

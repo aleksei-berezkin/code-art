@@ -7,12 +7,14 @@ import { delayToAnimationFrame } from './util/delay';
 import { dpr } from './util/dpr';
 import { drawRandomScene, drawScene } from './draw/drawScene';
 import { fitViewRatio, getFractionFromDisplayedRatio } from './model/ratios';
-import { getSliderVal, ImgParams } from './model/ImgParams';
+import { getSliderVal } from './model/ImgParams';
 import { ImgParamsMenu } from './ImgParamsMenu';
 import { Icon } from './Icon';
 import { setTaskExecutorListeners, submitTask } from './util/submitTask';
-import { MouseEvent, useEffect, useRef, useState } from 'react';
+import { MouseEvent, RefObject, useEffect, useRef, useState } from 'react';
 import { useStore } from './store';
+import { calcOptimalFontSize } from './draw/calcOptimalFontSize';
+import { getPixelSpaceSize } from './draw/getPixelSpaceSize';
 
 export function Code() {
     const mainRef = useRef<HTMLElement>(null);
@@ -34,12 +36,7 @@ export function Code() {
     const selfAttrCanvasRef = useRef<HTMLCanvasElement>(null)
     const codeCanvasRef = useRef<HTMLCanvasElement>(null)
 
-
-    const openDialog = useStore(state => state.openDialog)
     const setOpenDialog = useStore(state => state.setOpenDialog)
-
-    const imgParams = useStore(state => state.imgParams)
-    const setImgParams = useStore(state => state.setImgParams)
 
     function handleRootClick(e: MouseEvent) {
         let current = e.target as Element | null
@@ -50,108 +47,62 @@ export function Code() {
         setOpenDialog(undefined)
     }
 
+    const fitOrAspectClass = useStore(state => !state.imgParams || state.imgParams['output image'].ratio.val === fitViewRatio ? 'fit' : 'aspect')
+
+
+    return <main ref={mainRef} onClick={handleRootClick}>
+        <canvas className='alphabet-canvas' ref={alphabetCanvasRef} width='2048' />
+        <canvas className='attribution-canvas' ref={attributionCanvasRef}/>
+        <canvas className='self-attr-canvas' ref={selfAttrCanvasRef} />
+        <canvas className={`code-canvas ${fitOrAspectClass}`} ref={codeCanvasRef} />
+
+        <ImgParamsMenuButton/>
+        <ImgParamsMenu/>
+        <GenerateButton/>
+        <DownloadButton codeCanvasRef={codeCanvasRef}/>
+        <Progress/>
+        <About/>
+        <DrawingComponent
+            alphabetCanvasRef={alphabetCanvasRef}
+            attributionCanvasRef={attributionCanvasRef}
+            selfAttrCanvasRef={selfAttrCanvasRef}
+            codeCanvasRef={codeCanvasRef}
+        />
+    </main>
+}
+
+function ImgParamsMenuButton() {
+    const openDialog = useStore(state => state.openDialog)
+    const setOpenDialog = useStore(state => state.setOpenDialog)
+
     function handleImgParamsButtonClick(e: MouseEvent) {
         setOpenDialog(openDialog === 'menu' ? undefined : 'menu')
         e.stopPropagation()
     }
 
-    // In Safari sizes may be not ready on mount, that's why raf
-    useEffect( () => {
-        (async () => {
-            await setCodeCanvasWH()
-            await generateScene(true);
-        })()
-    }, [])
+    return <button className='round-btn left' onClick={handleImgParamsButtonClick}>
+        <Icon pic={(openDialog === 'menu') ? 'close' : 'menu'}/>
+    </button>
+}
 
-    const [generateRotateDeg, setGenerateRotateDeg] = useState(0)
+function GenerateButton() {
+    const generateCounter = useStore(state => state.generateCounter)
+    const incGenerateCounter = useStore(state => state.incGenerateCounter)
+
+    const imgParams = useStore(state => state.imgParams)
+
     async function handleGenerateClick() {
         if (imgParams) {
-            setGenerateRotateDeg(generateRotateDeg + 360)
-            await generateScene()
+            incGenerateCounter()
         }
     }
 
-    async function generateScene(initial?: boolean) {
-        submitTask(async () =>
-            await drawRandomScene(
-                imgParams,
-                codeCanvasRef.current!,
-                alphabetCanvasRef.current!,
-                attributionCanvasRef.current!,
-                selfAttrCanvasRef.current!,
-                setImgParams,
-            ),
-            initial,
-        );
-    }
+    return <button className='round-btn second-to-right' onClick={handleGenerateClick}>
+        <Icon pic='reload' rotateDeg={generateCounter * 360}/>
+    </button>
+}
 
-    async function onParamsUpdate(newParams: ImgParams, updatedSize: boolean) {
-        setImgParams({...newParams})
-
-        submitTask(async () => {
-            if (imgParams) {
-                if (updatedSize) {
-                    updateCodeCanvasStyle();
-                    await setCodeCanvasWH();
-                }
-                await drawScene(
-                    imgParams,
-                    codeCanvasRef.current!,
-                    alphabetCanvasRef.current!,
-                    attributionCanvasRef.current!,
-                    selfAttrCanvasRef.current!,
-                    updatedSize,
-                    () => setImgParams({...imgParams}),
-                );
-            }
-        });
-    }
-
-    useEffect(() => {
-        async function drawOnResize() {
-            submitTask(async () => {
-                if (imgParams) {
-                    updateCodeCanvasStyle()
-                    await setCodeCanvasWH()
-                    await drawScene(
-                        imgParams,
-                        codeCanvasRef.current!,
-                        alphabetCanvasRef.current!,
-                        attributionCanvasRef.current!,
-                        selfAttrCanvasRef.current!,
-                        true,
-                        () => setImgParams({...imgParams}),
-                    );
-                }
-            });
-        }
-        window.addEventListener('resize', drawOnResize)
-        return () => window.removeEventListener('resize', drawOnResize)
-    }, [imgParams])
-
-    const [codeCanvasModifier, setCodeCanvasModifier] = useState<'fit' | 'aspect'>('fit')
-
-    async function updateCodeCanvasStyle() {
-        if (imgParams) {
-            const r = imgParams['output image'].ratio.val;
-            setCodeCanvasModifier(r === fitViewRatio ? 'fit' : 'aspect')
-
-            const sizeFr = getSliderVal(imgParams['output image'].size);
-            codeCanvasRef.current!.style.setProperty('--s', String(sizeFr));
-
-            if (r !== fitViewRatio) {
-                codeCanvasRef.current!.style.setProperty('--a', `calc(${getFractionFromDisplayedRatio(r)})`);
-            }
-        }
-    }
-
-    async function setCodeCanvasWH() {
-        await delayToAnimationFrame(); // Make sure layout happened
-        const canvasRect = codeCanvasRef.current!.getBoundingClientRect();
-        codeCanvasRef.current!.width = canvasRect.width * dpr();
-        codeCanvasRef.current!.height = canvasRect.height * dpr();
-    }
-
+function DownloadButton({codeCanvasRef}: {codeCanvasRef: RefObject<HTMLCanvasElement | null>}) {
     const [downloading, setDownloading] = useState(false)
     function handleDownloadClick() {
         if (!downloading) {
@@ -171,6 +122,118 @@ export function Code() {
         }
     }
 
+    return <button className='round-btn right' onClick={handleDownloadClick}>
+        <Icon pic={downloading ? 'pending' : 'download'}/>
+    </button>
+}
+
+function DrawingComponent({
+    alphabetCanvasRef,
+    attributionCanvasRef,
+    selfAttrCanvasRef,
+    codeCanvasRef
+}: {
+    alphabetCanvasRef: RefObject<HTMLCanvasElement | null>,
+    attributionCanvasRef: RefObject<HTMLCanvasElement | null>,
+    selfAttrCanvasRef: RefObject<HTMLCanvasElement | null>,
+    codeCanvasRef: RefObject<HTMLCanvasElement | null>,
+}) {
+    const imgParams = useStore(state => state.imgParams)
+    const setImgParams = useStore(state => state.setImgParams)
+
+    const drawCounter = useStore(state => state.drawCounter)
+    const generateCounter = useStore(state => state.generateCounter)
+
+    const prevDrawCounter = useRef(drawCounter)
+    const prevGenerateCounter = useRef(generateCounter)
+
+    useEffect(() => {
+        if (!imgParams) {
+            // Initial render
+            (async () => {
+                await setCodeCanvasWH()
+                await generateScene(true)
+            })()
+        } else if (drawCounter !== prevDrawCounter.current) {
+            drawSceneWithParams()
+        } else if (generateCounter !== prevGenerateCounter.current) {
+            generateScene()
+        }
+
+        prevDrawCounter.current = drawCounter
+        prevGenerateCounter.current = generateCounter
+    }, [imgParams, drawCounter, generateCounter])
+
+    async function setCodeCanvasWH() {
+        // Make sure layout happened
+        // In Safari sizes may be not ready on mount, raf helps
+        await delayToAnimationFrame()
+        const canvasRect = codeCanvasRef.current!.getBoundingClientRect()
+        codeCanvasRef.current!.width = canvasRect.width * dpr()
+        codeCanvasRef.current!.height = canvasRect.height * dpr()
+    }
+
+    async function generateScene(initial?: boolean) {
+        submitTask(async () =>
+            await drawRandomScene(
+                imgParams,
+                codeCanvasRef.current!,
+                alphabetCanvasRef.current!,
+                attributionCanvasRef.current!,
+                selfAttrCanvasRef.current!,
+                setImgParams,
+            ),
+            initial,
+        )
+    }
+
+    async function drawSceneWithParams() {
+        submitTask(async () => {
+            updateCodeCanvasStyle();
+            await setCodeCanvasWH();
+            await drawScene(
+                imgParams!,
+                codeCanvasRef.current!,
+                alphabetCanvasRef.current!,
+                attributionCanvasRef.current!,
+                selfAttrCanvasRef.current!,
+            );
+        });
+    }
+
+    const incDrawCounter = useStore(state => state.incDrawCounter)
+
+    useEffect(() => {
+        function resizeListener() {
+            if (imgParams) {
+                // TODO also resize on output image size change
+                imgParams.font.size.val = calcOptimalFontSize(getPixelSpaceSize(codeCanvasRef.current!))
+                setImgParams({...imgParams})
+                incDrawCounter()
+            }
+        }
+
+        window.addEventListener('resize', resizeListener)
+        return () => window.removeEventListener('resize', resizeListener)
+    }, [imgParams])
+
+    async function updateCodeCanvasStyle() {
+        if (imgParams) {
+            const r = imgParams['output image'].ratio.val;
+
+            const sizeFr = getSliderVal(imgParams['output image'].size);
+            codeCanvasRef.current!.style.setProperty('--s', String(sizeFr));
+
+            if (r !== fitViewRatio) {
+                codeCanvasRef.current!.style.setProperty('--a', `calc(${getFractionFromDisplayedRatio(r)})`);
+            }
+        }
+    }
+
+    return <></>
+}
+
+function Progress() {
     const [progress, setProgress] = useState(false)
     useEffect(() => {
         setTaskExecutorListeners({
@@ -179,33 +242,9 @@ export function Code() {
         })
     }, [])
 
+    if (!progress) return undefined
 
-    return <main ref={mainRef} onClick={handleRootClick}>
-        <canvas className='alphabet-canvas' ref={alphabetCanvasRef} width='2048' />
-        <canvas className='attribution-canvas' ref={attributionCanvasRef}/>
-        <canvas className='self-attr-canvas' ref={selfAttrCanvasRef} />
-        <canvas className={`code-canvas ${codeCanvasModifier}`} ref={codeCanvasRef} />
-
-        <button className='round-btn left' onClick={handleImgParamsButtonClick}>
-            <Icon pic={(openDialog === 'menu') ? 'close' : 'menu'}/>
-        </button>
-        <button className='round-btn second-to-right' onClick={handleGenerateClick}>
-            <Icon pic='reload' rotateDeg={generateRotateDeg}/>
-        </button>
-        <button className='round-btn right' onClick={handleDownloadClick}>
-            <Icon pic={downloading ? 'pending' : 'download'}/>
-        </button>
-
-        <ImgParamsMenu paramsUpdated={onParamsUpdate} />
-
-        {
-            progress &&
-            <svg className='progress-svg' viewBox='-26 -26 52 52'>
-                <circle className='progress-circle' fill='none' cx='0' cy='0' r='20' strokeWidth='4'/>
-            </svg>
-        }
-
-        <About/>
-    </main>
+    return <svg className='progress-svg' viewBox='-26 -26 52 52'>
+        <circle className='progress-circle' fill='none' cx='0' cy='0' r='20' strokeWidth='4'/>
+    </svg>
 }
-

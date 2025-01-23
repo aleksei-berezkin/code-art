@@ -31,6 +31,7 @@
     "acorn": "^8.6.0",
     "acorn-loose": "^8.2.1",
     "acorn-walk": "^8.2.0",
+    "immer": "^10.1.1",
     "next": "^15.1.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

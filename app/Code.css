@@ -35,7 +35,7 @@ main {
 }
 
 .code-canvas.aspect {
-    --a: calc(1 / 1);
+    --a: calc(var(--outline-w) / var(--outline-h));
 
     height: calc(min(var(--outline-h), var(--outline-w) / var(--a)));
     width: calc(min(var(--outline-w), var(--outline-h) * var(--a)));
