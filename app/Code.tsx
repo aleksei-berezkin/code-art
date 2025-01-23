@@ -47,14 +47,11 @@ export function Code() {
         setOpenDialog(undefined)
     }
 
-    const fitOrAspectClass = useStore(state => !state.imgParams || state.imgParams['output image'].ratio.val === fitViewRatio ? 'fit' : 'aspect')
-
-
     return <main ref={mainRef} onClick={handleRootClick}>
         <canvas className='alphabet-canvas' ref={alphabetCanvasRef} width='2048' />
         <canvas className='attribution-canvas' ref={attributionCanvasRef}/>
         <canvas className='self-attr-canvas' ref={selfAttrCanvasRef} />
-        <canvas className={`code-canvas ${fitOrAspectClass}`} ref={codeCanvasRef} />
+        <CodeCanvas codeCanvasRef={codeCanvasRef}/>
 
         <ImgParamsMenuButton/>
         <ImgParamsMenu/>
@@ -69,6 +66,21 @@ export function Code() {
             codeCanvasRef={codeCanvasRef}
         />
     </main>
+}
+
+function CodeCanvas({codeCanvasRef}: {codeCanvasRef: RefObject<HTMLCanvasElement | null>}) {
+    const ratio = useStore(state => state.imgParams ? state.imgParams['output image'].ratio.val : undefined)
+    const sizeFr = useStore(state => state.imgParams ? getSliderVal(state.imgParams['output image'].size) : undefined)
+
+    const fitOrAspectClass = !ratio || ratio === fitViewRatio ? 'fit' : 'aspect'
+
+    return <canvas
+                className={`code-canvas ${fitOrAspectClass}`}
+                style={{
+                    '--s': sizeFr && String(sizeFr),
+                    '--a': ratio && ratio !== fitViewRatio && `calc(${getFractionFromDisplayedRatio(ratio)})`,
+                } as any}
+                ref={codeCanvasRef} />
 }
 
 function ImgParamsMenuButton() {
@@ -127,6 +139,22 @@ function DownloadButton({codeCanvasRef}: {codeCanvasRef: RefObject<HTMLCanvasEle
     </button>
 }
 
+function Progress() {
+    const [progress, setProgress] = useState(false)
+    useEffect(() => {
+        setTaskExecutorListeners({
+            onStart: () => setProgress(true),
+            onEnd: () => setProgress(false),
+        })
+    }, [])
+
+    if (!progress) return undefined
+
+    return <svg className='progress-svg' viewBox='-26 -26 52 52'>
+        <circle className='progress-circle' fill='none' cx='0' cy='0' r='20' strokeWidth='4'/>
+    </svg>
+}
+
 function DrawingComponent({
     alphabetCanvasRef,
     attributionCanvasRef,
@@ -149,11 +177,7 @@ function DrawingComponent({
 
     useEffect(() => {
         if (!imgParams) {
-            // Initial render
-            (async () => {
-                await setCodeCanvasWH()
-                await generateScene(true)
-            })()
+            generateScene(true)
         } else if (drawCounter !== prevDrawCounter.current) {
             drawSceneWithParams()
         } else if (generateCounter !== prevGenerateCounter.current) {
@@ -164,17 +188,11 @@ function DrawingComponent({
         prevGenerateCounter.current = generateCounter
     }, [imgParams, drawCounter, generateCounter])
 
-    async function setCodeCanvasWH() {
-        // Make sure layout happened
-        // In Safari sizes may be not ready on mount, raf helps
-        await delayToAnimationFrame()
-        const canvasRect = codeCanvasRef.current!.getBoundingClientRect()
-        codeCanvasRef.current!.width = canvasRect.width * dpr()
-        codeCanvasRef.current!.height = canvasRect.height * dpr()
-    }
-
     async function generateScene(initial?: boolean) {
-        submitTask(async () =>
+        submitTask(async () => {
+            if (initial)
+                await updateCodeCanvasSize()
+
             await drawRandomScene(
                 imgParams,
                 codeCanvasRef.current!,
@@ -182,15 +200,14 @@ function DrawingComponent({
                 attributionCanvasRef.current!,
                 selfAttrCanvasRef.current!,
                 setImgParams,
-            ),
-            initial,
-        )
+            )
+        }, initial)
     }
 
     async function drawSceneWithParams() {
         submitTask(async () => {
-            updateCodeCanvasStyle();
-            await setCodeCanvasWH();
+            await updateCodeCanvasSize();
+            // TODO recalculate font size if canvas changed
             await drawScene(
                 imgParams!,
                 codeCanvasRef.current!,
@@ -204,47 +221,18 @@ function DrawingComponent({
     const incDrawCounter = useStore(state => state.incDrawCounter)
 
     useEffect(() => {
-        function resizeListener() {
-            if (imgParams) {
-                // TODO also resize on output image size change
-                imgParams.font.size.val = calcOptimalFontSize(getPixelSpaceSize(codeCanvasRef.current!))
-                setImgParams({...imgParams})
-                incDrawCounter()
-            }
-        }
-
-        window.addEventListener('resize', resizeListener)
-        return () => window.removeEventListener('resize', resizeListener)
+        window.addEventListener('resize',  incDrawCounter)
+        return () => window.removeEventListener('resize', incDrawCounter)
     }, [imgParams])
 
-    async function updateCodeCanvasStyle() {
-        if (imgParams) {
-            const r = imgParams['output image'].ratio.val;
-
-            const sizeFr = getSliderVal(imgParams['output image'].size);
-            codeCanvasRef.current!.style.setProperty('--s', String(sizeFr));
-
-            if (r !== fitViewRatio) {
-                codeCanvasRef.current!.style.setProperty('--a', `calc(${getFractionFromDisplayedRatio(r)})`);
-            }
-        }
+    async function updateCodeCanvasSize() {
+        // Make sure layout happened
+        // In Safari sizes may be not ready on mount, raf helps
+        await delayToAnimationFrame()
+        const canvasRect = codeCanvasRef.current!.getBoundingClientRect()
+        codeCanvasRef.current!.width = canvasRect.width * dpr()
+        codeCanvasRef.current!.height = canvasRect.height * dpr()
     }
 
     return <></>
-}
-
-function Progress() {
-    const [progress, setProgress] = useState(false)
-    useEffect(() => {
-        setTaskExecutorListeners({
-            onStart: () => setProgress(true),
-            onEnd: () => setProgress(false),
-        })
-    }, [])
-
-    if (!progress) return undefined
-
-    return <svg className='progress-svg' viewBox='-26 -26 52 52'>
-        <circle className='progress-circle' fill='none' cx='0' cy='0' r='20' strokeWidth='4'/>
-    </svg>
 }
