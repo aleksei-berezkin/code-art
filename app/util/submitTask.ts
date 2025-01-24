@@ -34,8 +34,8 @@ export async function submitTask(newCb: Cb, initial?: boolean) {
         await cb()
         
         if (nextCb) await delay(500)
-        }
-    
+    }
+
     onEnd()
     pendingOrWorking = false
 }

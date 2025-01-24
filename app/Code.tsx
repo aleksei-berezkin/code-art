@@ -15,8 +15,10 @@ import { MouseEvent, RefObject, useEffect, useRef, useState } from 'react';
 import { useStore } from './store';
 import { calcOptimalFontSize } from './draw/calcOptimalFontSize';
 import { getPixelSpaceSize } from './draw/getPixelSpaceSize';
+import { produce } from 'immer';
 
 export function Code() {
+    console.log('Code rendered')
     const mainRef = useRef<HTMLElement>(null);
     useEffect(() => {
         function setMainSizeVars() {
@@ -206,16 +208,22 @@ function DrawingComponent({
 
     async function drawSceneWithParams() {
         submitTask(async () => {
-            await updateCodeCanvasSize();
-            // TODO recalculate font size if canvas changed
+            const sizeChanged = await updateCodeCanvasSize();
+            if (sizeChanged) {
+                const newFontSize = calcOptimalFontSize(getPixelSpaceSize(codeCanvasRef.current!))
+                setImgParams(produce(imgParams!, draft => {
+                    draft.font.size.val = newFontSize
+                }))
+            }
+
             await drawScene(
                 imgParams!,
                 codeCanvasRef.current!,
                 alphabetCanvasRef.current!,
                 attributionCanvasRef.current!,
                 selfAttrCanvasRef.current!,
-            );
-        });
+            )
+        })
     }
 
     const incDrawCounter = useStore(state => state.incDrawCounter)
@@ -229,9 +237,22 @@ function DrawingComponent({
         // Make sure layout happened
         // In Safari sizes may be not ready on mount, raf helps
         await delayToAnimationFrame()
+
+        const prevWidth = codeCanvasRef.current!.width
+        const prevHeight = codeCanvasRef.current!.height
+
         const canvasRect = codeCanvasRef.current!.getBoundingClientRect()
-        codeCanvasRef.current!.width = canvasRect.width * dpr()
-        codeCanvasRef.current!.height = canvasRect.height * dpr()
+
+        const newWidth = canvasRect.width * dpr()
+        const newHeight = canvasRect.height * dpr()
+
+        if (prevWidth !== newWidth || prevHeight !== newHeight) {
+            codeCanvasRef.current!.width = newWidth
+            codeCanvasRef.current!.height = newHeight
+            return true
+        }
+
+        return false
     }
 
     return <></>
