@@ -18,7 +18,6 @@ import { getPixelSpaceSize } from './draw/getPixelSpaceSize';
 import { produce } from 'immer';
 
 export function Code() {
-    console.log('Code rendered')
     const mainRef = useRef<HTMLElement>(null);
     useEffect(() => {
         function setMainSizeVars() {
@@ -59,8 +58,11 @@ export function Code() {
         <ImgParamsMenu/>
         <GenerateButton/>
         <DownloadButton codeCanvasRef={codeCanvasRef}/>
+
         <Progress/>
+
         <About/>
+
         <DrawingComponent
             alphabetCanvasRef={alphabetCanvasRef}
             attributionCanvasRef={attributionCanvasRef}
@@ -88,36 +90,38 @@ function CodeCanvas({codeCanvasRef}: {codeCanvasRef: RefObject<HTMLCanvasElement
 function ImgParamsMenuButton() {
     const openDialog = useStore(state => state.openDialog)
     const setOpenDialog = useStore(state => state.setOpenDialog)
+    const transform = useButtonScaleTransform()
 
-    function handleImgParamsButtonClick(e: MouseEvent) {
+    function handleClick() {
         setOpenDialog(openDialog === 'menu' ? undefined : 'menu')
-        e.stopPropagation()
     }
 
-    return <button className='round-btn left' onClick={handleImgParamsButtonClick}>
-        <Icon pic={(openDialog === 'menu') ? 'close' : 'menu'}/>
-    </button>
+    return (
+        <button className='round-btn left dialog-layer' onClick={ handleClick } style={{transform}}>
+            <Icon pic={(openDialog === 'menu') ? 'close' : 'menu'}/>
+        </button>
+    )
 }
+
+const useButtonScaleTransform = () => useStore(state => `scale(${state.imgParams ? 1 : 0})`)
+
 
 function GenerateButton() {
     const generateCounter = useStore(state => state.generateCounter)
     const incGenerateCounter = useStore(state => state.incGenerateCounter)
+    const transform = useButtonScaleTransform()
 
-    const imgParams = useStore(state => state.imgParams)
-
-    async function handleGenerateClick() {
-        if (imgParams) {
-            incGenerateCounter()
-        }
-    }
-
-    return <button className='round-btn second-to-right' onClick={handleGenerateClick}>
-        <Icon pic='reload' rotateDeg={generateCounter * 360}/>
-    </button>
+    return (
+        <button className='round-btn second-to-right' onClick={incGenerateCounter} style={{transform}}>
+            <Icon pic='reload' rotateDeg={generateCounter * 360}/>
+        </button>
+    )
 }
 
 function DownloadButton({codeCanvasRef}: {codeCanvasRef: RefObject<HTMLCanvasElement | null>}) {
     const [downloading, setDownloading] = useState(false)
+    const transform = useButtonScaleTransform()
+
     function handleDownloadClick() {
         if (!downloading) {
             setDownloading(true)
@@ -136,13 +140,16 @@ function DownloadButton({codeCanvasRef}: {codeCanvasRef: RefObject<HTMLCanvasEle
         }
     }
 
-    return <button className='round-btn right' onClick={handleDownloadClick}>
-        <Icon pic={downloading ? 'pending' : 'download'}/>
-    </button>
+    return (
+        <button className='round-btn right' onClick={handleDownloadClick} style={{transform}}>
+            <Icon pic={downloading ? 'pending' : 'download'}/>
+        </button>
+    )
 }
 
 function Progress() {
     const [progress, setProgress] = useState(false)
+
     useEffect(() => {
         setTaskExecutorListeners({
             onStart: () => setProgress(true),
@@ -152,9 +159,11 @@ function Progress() {
 
     if (!progress) return undefined
 
-    return <svg className='progress-svg' viewBox='-26 -26 52 52'>
-        <circle className='progress-circle' fill='none' cx='0' cy='0' r='20' strokeWidth='4'/>
-    </svg>
+    return (
+        <svg className='progress-svg' viewBox='-26 -26 52 52'>
+            <circle className='progress-circle' fill='none' cx='0' cy='0' r='20' strokeWidth='4'/>
+        </svg>
+    )
 }
 
 function DrawingComponent({
@@ -168,33 +177,39 @@ function DrawingComponent({
     selfAttrCanvasRef: RefObject<HTMLCanvasElement | null>,
     codeCanvasRef: RefObject<HTMLCanvasElement | null>,
 }) {
+    const incGenerateCounter = useStore(state => state.incGenerateCounter)
+    const incDrawCounter = useStore(state => state.incDrawCounter)
+
+    useEffect(() => {
+        incGenerateCounter()
+        window.addEventListener('resize',  incDrawCounter)
+
+        return () => window.removeEventListener('resize', incDrawCounter)
+    }, [])
+
+    const generateCounter = useStore(state => state.generateCounter)
+    const drawCounter = useStore(state => state.drawCounter)
+
+    const prevGenerateCounter = useRef(generateCounter)
+    const prevDrawCounter = useRef(drawCounter)
+
+    useEffect(() => {
+        if (generateCounter !== prevGenerateCounter.current) {
+            generateScene()
+        } else if (drawCounter !== prevDrawCounter.current) {
+            drawSceneWithParams()
+        }
+
+        prevGenerateCounter.current = generateCounter
+        prevDrawCounter.current = drawCounter
+    }, [generateCounter, drawCounter])
+
     const imgParams = useStore(state => state.imgParams)
     const setImgParams = useStore(state => state.setImgParams)
 
-    const drawCounter = useStore(state => state.drawCounter)
-    const generateCounter = useStore(state => state.generateCounter)
-
-    const prevDrawCounter = useRef(drawCounter)
-    const prevGenerateCounter = useRef(generateCounter)
-
-    useEffect(() => {
-        if (!imgParams) {
-            generateScene(true)
-        } else if (drawCounter !== prevDrawCounter.current) {
-            drawSceneWithParams()
-        } else if (generateCounter !== prevGenerateCounter.current) {
-            generateScene()
-        }
-
-        prevDrawCounter.current = drawCounter
-        prevGenerateCounter.current = generateCounter
-    }, [imgParams, drawCounter, generateCounter])
-
-    async function generateScene(initial?: boolean) {
+    async function generateScene() {
         submitTask(async () => {
-            if (initial)
-                await updateCodeCanvasSize()
-
+            await updateCodeCanvasSize()
             await drawRandomScene(
                 imgParams,
                 codeCanvasRef.current!,
@@ -203,13 +218,15 @@ function DrawingComponent({
                 selfAttrCanvasRef.current!,
                 setImgParams,
             )
-        }, initial)
+        })
     }
 
     async function drawSceneWithParams() {
+        if (!imgParams) return
+
         submitTask(async () => {
-            const sizeChanged = await updateCodeCanvasSize();
-            if (sizeChanged) {
+            const canvasSizeChanged = await updateCodeCanvasSize()
+            if (canvasSizeChanged) {
                 const newFontSize = calcOptimalFontSize(getPixelSpaceSize(codeCanvasRef.current!))
                 setImgParams(produce(imgParams!, draft => {
                     draft.font.size.val = newFontSize
@@ -217,7 +234,7 @@ function DrawingComponent({
             }
 
             await drawScene(
-                imgParams!,
+                imgParams,
                 codeCanvasRef.current!,
                 alphabetCanvasRef.current!,
                 attributionCanvasRef.current!,
@@ -225,13 +242,6 @@ function DrawingComponent({
             )
         })
     }
-
-    const incDrawCounter = useStore(state => state.incDrawCounter)
-
-    useEffect(() => {
-        window.addEventListener('resize',  incDrawCounter)
-        return () => window.removeEventListener('resize', incDrawCounter)
-    }, [imgParams])
 
     async function updateCodeCanvasSize() {
         // Make sure layout happened
@@ -255,5 +265,5 @@ function DrawingComponent({
         return false
     }
 
-    return <></>
+    return undefined
 }

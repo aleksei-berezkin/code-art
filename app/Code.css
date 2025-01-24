@@ -96,7 +96,7 @@ main {
     justify-content: center;
     height: var(--btn-size);
     position: absolute;
-    transition: background-color 250ms;
+    transition: background-color 250ms, transform 250ms;
     top: var(--pad-std);
     width: var(--btn-size);
 }

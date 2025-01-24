@@ -1,32 +1,31 @@
 import { delay } from './delay';
 
-type LCb = () => void;
-let onStart: LCb = () => {};
-let onEnd: LCb = () => {};
-export function setTaskExecutorListeners(l: {onStart: LCb, onEnd: LCb}) {
+type ListenerCb = () => void;
+let onStart: ListenerCb = () => {};
+let onEnd: ListenerCb = () => {};
+export function setTaskExecutorListeners(l: {onStart: ListenerCb, onEnd: ListenerCb}) {
     onStart = l.onStart;
     onEnd = l.onEnd;
 }
 
 type Cb = () => Promise<void>;
 let nextCb: Cb | undefined;
-let pendingOrWorking = false
+let working = false
 
-let waitingInitial = true
+let counter = 0
 
-export async function submitTask(newCb: Cb, initial?: boolean) {
-    if (waitingInitial && !initial || nextCb) return
+export async function submitTask(newCb: Cb) {
+    if (nextCb) return
 
     nextCb = newCb
 
-    if (pendingOrWorking) return
+    if (working) return
 
-    pendingOrWorking = true
-    waitingInitial = false
+    working = true
     onStart()
-    
-    await delay(initial ? 50 : 200)
-    
+
+    await delay(counter++ ? 200 : 50)
+
     while (nextCb) {
         const cb = nextCb
         nextCb = undefined
@@ -37,5 +36,5 @@ export async function submitTask(newCb: Cb, initial?: boolean) {
     }
 
     onEnd()
-    pendingOrWorking = false
+    working = false
 }
