@@ -1,8 +1,6 @@
 import type { ParseRequestData, ParseResponseData } from './parseProtocol';
 import type { ParseResult } from '../model/ParseResult';
 
-const worker = new Worker(new URL('./parseWorker', import.meta.url));
-
 export async function parseCode(url: string, insertWraps: boolean) {
     const key = JSON.stringify([url, insertWraps]);
     if (parseResultCache.has(key)) {
@@ -20,11 +18,17 @@ async function parseInWorker(url: string, insertWraps: boolean): Promise<ParseRe
     const reqData: ParseRequestData = {url, insertWraps};
     return new Promise(resolve => {
         // One at a time
-        worker.onmessage = function (resp: {data: ParseResponseData}) {
+        getWorker().onmessage = function (resp: {data: ParseResponseData}) {
             if (resp.data.url === url) {
                 resolve(resp.data.parseResult);
             }
         };
-        worker.postMessage(reqData);
+        getWorker().postMessage(reqData);
     });
 }
+
+function getWorker() {
+    return worker ??= new Worker(new URL('./parseWorker', import.meta.url))
+}
+
+let worker: Worker

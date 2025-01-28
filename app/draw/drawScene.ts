@@ -1,7 +1,7 @@
 import { pickRandom } from '../util/pickRandom';
-import { getSource, Source } from '../model/Source';
+import { getSource, type Source } from '../model/Source';
 import { rasterizeAlphabet } from './rasterizeAlphabet';
-import { generateSceneParams, SceneParams } from '../model/generateSceneParams';
+import { generateSceneParams, type SceneParams } from '../model/generateSceneParams';
 import type { ImgParams } from '../model/ImgParams';
 import { drawCodeScene } from './drawCodeScene';
 import { drawEffectsScene } from './drawEffectsScene';
@@ -13,7 +13,7 @@ import { parseCode } from '../parse/parseCode';
 import type { ColorSchemeName } from '../model/colorSchemes';
 import { colorSchemes } from '../model/colorSchemes';
 import { calcExtensions } from '../model/Extensions';
-import { createWorkLimiter, WorkLimiter } from '../util/workLimiter';
+import { createWorkLimiter, type WorkLimiter } from '../util/workLimiter';
 import type { AlphabetRaster } from '../model/AlphabetRaster';
 import { fontFacesForRandomScenes } from '../model/fontFaces';
 import { sourceSpecs } from '../model/sourceSpecs';

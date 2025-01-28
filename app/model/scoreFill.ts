@@ -59,7 +59,7 @@ export async function scoreFill(
     return sum / (zerosCount + 1) * lineStartsFactor;
 }
 
-// noinspection JSUnusedLocalSymbols
+// @ts-ignore
 function log(fillMatrix: number[], rowsNum: number, colsNum: number) {
     console.log(
         Array.from({length: rowsNum})

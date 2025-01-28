@@ -6,7 +6,7 @@ import { rect2dVertexSize } from './rect';
 import { createUploadToAttribute } from './createUploadToAttribute';
 import { createEmptyTexture } from './uploadTexture';
 import { createEffectsGrid } from './createEffectsGrid';
-import { hexToRgb, RGB } from '../model/RGB';
+import { hexToRgb, type RGB } from '../model/RGB';
 import { getSliderVal } from '../model/ImgParams';
 import { ceilToOdd } from '../util/ceilToOdd';
 import { dpr } from '../util/dpr';

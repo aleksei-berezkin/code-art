@@ -8,7 +8,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "analyze": "ANALYZE=true npm run build"
+    "analyze": "ANALYZE=true npm run build",
+    "preview": "serve out -p 3000"
   },
   "repository": {
     "type": "git",
@@ -24,6 +25,7 @@
     "@types/node": "22.10.6",
     "@types/react": "^19.0.7",
     "npm-run-all": "^4.1.5",
+    "serve": "^14.2.4",
     "typescript": "^5.7.3"
   },
   "dependencies": {

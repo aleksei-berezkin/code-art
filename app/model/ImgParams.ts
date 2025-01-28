@@ -1,6 +1,6 @@
-type Unit = 'rad' | '%' | 'log10' | 'log10%';
+export type Unit = 'rad' | '%' | 'log10' | 'log10%'
 
-export type SliderVal = {
+export type SliderParam = {
     type: 'slider',
     min: number,
     val: number,
@@ -8,77 +8,73 @@ export type SliderVal = {
     unit?: Unit,
 }
 
-type ChoicesVal = {
+export type ChoicesParam = {
     type: 'choices',
     val: string,
     choices: string[],
 }
 
-type ColorVal = {
+export type ColorParam = {
     type: 'color',
     val: string,
 }
 
-export type ImgParamVal = SliderVal | ChoicesVal | ColorVal
+export type ImgParam = SliderParam | ChoicesParam | ColorParam
 
 export type ImgParams = {
     angle: {
-        x: SliderVal,
-        y: SliderVal,
-        z: SliderVal,
+        x: SliderParam,
+        y: SliderParam,
+        z: SliderParam,
     },
     scroll: {
-        v: SliderVal,
-        h: SliderVal,
+        v: SliderParam,
+        h: SliderParam,
     },
     font: {
-        face: ChoicesVal,
-        size: SliderVal,
+        face: ChoicesParam,
+        size: SliderParam,
     },
     source: {
-        source: ChoicesVal,
+        source: ChoicesParam,
     },
     'main color': {
-        scheme: ChoicesVal,
-        brightness: SliderVal,
+        scheme: ChoicesParam,
+        brightness: SliderParam,
     },
     glow: {
-        radius: SliderVal,
-        brightness: SliderVal,
-        recolor: SliderVal,
-        to: ColorVal,
+        radius: SliderParam,
+        brightness: SliderParam,
+        recolor: SliderParam,
+        to: ColorParam,
     },
     fade: {
-        blur: SliderVal,
-        fade: SliderVal,
-        recolor: SliderVal,
-        near: ColorVal,
-        far: ColorVal,
+        blur: SliderParam,
+        fade: SliderParam,
+        recolor: SliderParam,
+        near: ColorParam,
+        far: ColorParam,
     },
     'output image': {
-        ratio: ChoicesVal,
-        size: SliderVal,
-        attribution: ChoicesVal,
+        ratio: ChoicesParam,
+        size: SliderParam,
+        attribution: ChoicesParam,
     },
 }
 
-export type ParamGroup = keyof ImgParams;
+export type GroupName = keyof ImgParams
 
-export function getSliderLabel(sv: SliderVal, which: 'min' | 'val' | 'max') {
-    const u = sv.unit;
-    const v = sv[which];
-    let s;
-    if (u === 'rad') {
-        s = `${roundTo2(v / Math.PI * 180)}\u00B0`;
-    } else if (u === '%') {
-        s = `${roundTo2(v)}%`;
-    } else if (u === 'log10') {
-        s = String(roundTo2(10 ** v));
-    } else if (u === 'log10%') {
-        s = `${roundTo2(10 ** v)}%`;
-    } else {
-        s = String(roundTo2(v));
-    }
+export type Group = {
+    [key: string]: ImgParam
+}
+
+export function getSliderLabel(val: number, unit: Unit | undefined) {
+    const s = unit === 'rad' ? `${roundTo2(val / Math.PI * 180)}\u00B0`
+        : unit === '%' ? `${roundTo2(val)}%`
+        : unit === 'log10' ? String(roundTo2(10 ** val))
+        : unit === 'log10%' ? `${roundTo2(10 ** val)}%`
+        : String(roundTo2(val))
+
     return s.replace(/-/, '\u2212');
 }
 
@@ -86,7 +82,7 @@ function roundTo2(n: number) {
     return Math.round(n * 100) / 100;
 }
 
-export function getSliderVal(sv: SliderVal) {
+export function getSliderVal(sv: SliderParam) {
     const u = sv.unit;
     const v = sv.val;
     if (u === 'rad') {

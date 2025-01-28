@@ -1,6 +1,6 @@
 import { parseCode } from '../parse/parseCode';
 import type { ParseResult } from './ParseResult';
-import { SourceSpec, sourceSpecs } from './sourceSpecs';
+import { type SourceSpec, sourceSpecs } from './sourceSpecs';
 
 export type Source = {
     name: string,

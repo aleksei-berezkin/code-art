@@ -11,7 +11,7 @@ import type { ScrollFraction } from '../model/ScrollFraction';
 import type { AlphabetRaster } from '../model/AlphabetRaster';
 import type { ParseResult } from '../model/ParseResult';
 import { dpr } from '../util/dpr';
-import { RGB, rgbSize } from '../model/RGB';
+import { type RGB, rgbSize } from '../model/RGB';
 import type { PixelSpace } from '../model/PixelSpace';
 import type { Extensions } from '../model/Extensions';
 import type { SceneBounds } from '../model/SceneBounds';
