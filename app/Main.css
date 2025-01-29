@@ -89,14 +89,12 @@
     --btn-shadow-color: rgb(60 64 67 / 55%);
     --tx: 250ms;
 
-    align-items: center;
     background: #ffffffc0;
     border-radius: 50%;
     box-shadow: 3px 0 6px 0px var(--btn-shadow-color), -1px 4px 8px 1px var(--btn-shadow-color);
     color: #000d;
-    display: flex;
-    justify-content: center;
     height: var(--btn-size);
+    overflow: hidden;
     position: absolute;
     transition: background-color var(--tx), box-shadow var(--tx), color var(--tx), transform var(--tx);
     top: var(--pad-std);
@@ -123,5 +121,43 @@
 }
 
 .main > .round-btn:active {
-    background: #fffffff8;
+    --btn-shadow-color: rgb(180 184 187 / 55%);
+
+    background: #fff;
+    color: #000;
+}
+
+.main > .round-btn > .menu-btn-wrapper {
+    align-items: center;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    left: 0;
+    position: absolute;
+    top: 0;
+    transition: opacity var(--tx), transform var(--tx);
+    width: 100%;
+}
+
+.main > .round-btn > .menu-btn-wrapper.hidden {
+    opacity: 0;
+    transform: scale(.25);
+}
+
+.main > .round-btn > .generate-icon-wrapper {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    transition: transform var(--tx);
+}
+
+.main > .round-btn > .download-slider {
+    align-items: center;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    height: 200%;
+    justify-content: space-around;
+    position: absolute;
+    width: 100%;
 }

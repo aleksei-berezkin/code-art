@@ -51,7 +51,9 @@ function GroupComponent({groupName}: {groupName: string}) {
     return (
         <div className='group' role='region' aria-label={`Controls group: ${groupName}`}>
             <button className='group-button' aria-label={`Toggle group visibility: ${groupName}`} onClick={handleToggleGroup}>
-                <Icon pic='arrow-down' size='sm' rotateDeg={isOpen ? -180 : 0}/>
+                <div className={`arrow-down-wrapper ${isOpen ? 'open' : ''}`}>
+                    <Icon pic='arrow-down' size='sm'/>
+                </div>
                 <span className='group-button-txt'>{groupName}</span>
             </button>
 

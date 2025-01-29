@@ -1,3 +1,5 @@
+/* Global */
+
 html {
     background-color: #384048;
     color: #333;
@@ -41,4 +43,15 @@ button {
     margin: 0;
     padding: 0;
     text-align: left;
+}
+
+/* Util */
+
+.arrow-down-wrapper {
+    display: inline-block;
+    transition: transform var(--ic-tx);
+}
+
+.arrow-down-wrapper.open {
+    transform: rotate(-180deg);
 }

@@ -3,7 +3,7 @@
 import './Main.css'
 
 import { About } from './About';
-import { delayToAnimationFrame } from './util/delay';
+import { delay, delayToAnimationFrame } from './util/delay';
 import { dpr } from './util/dpr';
 import { drawRandomScene, drawScene } from './draw/drawScene';
 import { fitViewRatio, getFractionFromDisplayedRatio } from './model/ratios';
@@ -81,64 +81,76 @@ function CodeCanvas({codeCanvasRef}: {codeCanvasRef: RefObject<HTMLCanvasElement
 }
 
 function ImgParamsMenuButton() {
-    const openDialog = useStore(state => state.openDialog)
+    const isOpen = useStore(state => state.openDialog === 'menu')
     const setOpenDialog = useStore(state => state.setOpenDialog)
-    const transform = useButtonScaleTransform()
 
     function handleClick() {
-        setOpenDialog(openDialog === 'menu' ? undefined : 'menu')
+        setOpenDialog(isOpen ? undefined : 'menu')
     }
 
     return (
-        <button className='round-btn left dialog-layer' onClick={ handleClick } style={{transform}}>
-            <Icon pic={(openDialog === 'menu') ? 'close' : 'menu'}/>
+        <button className='round-btn left dialog-layer' onClick={ handleClick } style={{transform: useButtonScaleTransform()}}>
+            <div className={`menu-btn-wrapper ${isOpen ? 'hidden' : ''}`}>
+                <Icon pic='menu'/>
+            </div>
+            <div className={`menu-btn-wrapper ${isOpen ? '' : 'hidden'}`}>
+                <Icon pic='close'/>
+            </div>
         </button>
     )
 }
-
-const useButtonScaleTransform = () => useStore(state => `scale(${state.imgParams ? 1 : 0})`)
 
 
 function GenerateButton() {
     const generateCounter = useStore(state => state.generateCounter)
     const incGenerateCounter = useStore(state => state.incGenerateCounter)
-    const transform = useButtonScaleTransform()
-
     return (
-        <button className='round-btn second-to-right' onClick={incGenerateCounter} style={{transform}}>
-            <Icon pic='reload' rotateDeg={Math.max(1 /* Skip 1st generation */, generateCounter) * 360}/>
+        <button className='round-btn second-to-right' onClick={incGenerateCounter} style={{transform: useButtonScaleTransform()}}>
+            <div className='generate-icon-wrapper' style={{transform: `rotate(${Math.max(1 /* Skip 1st generation */, generateCounter) * 360}deg)`}}>
+                <Icon pic='reload' />
+            </div>
         </button>
     )
 }
 
 function DownloadButton({codeCanvasRef}: {codeCanvasRef: RefObject<HTMLCanvasElement | null>}) {
-    const [downloading, setDownloading] = useState(false)
-    const transform = useButtonScaleTransform()
-
     function handleDownloadClick() {
-        if (!downloading) {
-            setDownloading(true)
-            codeCanvasRef.current!.toBlob(blob => {
-                const a = document.createElement('a')
-                const objUrl = URL.createObjectURL(blob!)
-                a.href = objUrl
-                a.download = 'CodeArt.png'
-                a.click();
-                setTimeout(
-                    () => setDownloading(false),
-                    1200,
-                )
-                setTimeout(() => URL.revokeObjectURL(objUrl), 5000)
-            });
-        }
+        codeCanvasRef.current!.toBlob(blob => {
+            const a = document.createElement('a')
+            const objUrl = URL.createObjectURL(blob!)
+            a.href = objUrl
+            a.download = 'CodeArt.png'
+            a.click();
+            setTimeout(() => URL.revokeObjectURL(objUrl), 10_000)
+        })
+        runAnimation()
+    }
+
+    const [sliding, setSliding] = useState(false)
+    const animationDuration = 300
+
+    async function runAnimation() {
+        if (sliding) return
+
+        setSliding(true)
+        await delay(animationDuration)
+        setSliding(false)
     }
 
     return (
-        <button className='round-btn right' onClick={handleDownloadClick} style={{transform}}>
-            <Icon pic={downloading ? 'pending' : 'download'}/>
+        <button className='round-btn right' onClick={handleDownloadClick} style={{transform: useButtonScaleTransform()}}>
+            <div className='download-slider' style={{
+                top: sliding ? 0 : '-100%',
+                transition: sliding ? `top ${animationDuration}ms` : undefined,
+            }}>
+                <Icon pic='download'/>
+                <Icon pic='download'/>
+            </div>
         </button>
     )
 }
+
+const useButtonScaleTransform = () => useStore(state => `scale(${state.imgParams ? 1 : 0})`)
 
 function Progress() {
     const [progress, setProgress] = useState(false)

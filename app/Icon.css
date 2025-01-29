@@ -5,7 +5,6 @@
 
     fill: currentColor;
     stroke: none;
-    transition: transform var(--ic-tx) ease-out;
     vertical-align: bottom;
 }
 
@@ -38,8 +37,4 @@
 .ic.sm.arrow-down {
     height: 7.41px;
     width: 12px;
-}
-
-.ic.scale-to-0 {
-    transform: scale(0);
 }

@@ -35,7 +35,7 @@ export function About() {
             </p>
             <h2>Any feedback is welcome</h2>
             <Contacts size='md' color='dark'/>
-            <h2><button onClick={toggleCredits}><Icon pic='arrow-down' rotateDeg={creditsOpen ? -180 : 0}/><span className='credits-text'>Credits</span></button></h2>
+            <h2><button onClick={toggleCredits}><div className={`arrow-down-wrapper ${creditsOpen ? 'open' : ''}`}><Icon pic='arrow-down'/></div><span className='credits-text'>Credits</span></button></h2>
             {
                 creditsOpen &&
                 <>
