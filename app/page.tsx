@@ -1,7 +1,7 @@
 import './page.css'
 
-import { Code } from './Code'
+import { Main } from './Main'
 
 export default function Page() {
-    return <Code/>
+    return <Main/>
 }

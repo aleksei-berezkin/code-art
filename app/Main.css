@@ -1,4 +1,4 @@
-main {
+.main {
     /* We can't use vh in mobile browsers because it may result in vertical scroll */
     /* So we introduce like 'container-height' properties */
     --main-h: 100%;
@@ -14,14 +14,14 @@ main {
     width: 100%;
 }
 
-.alphabet-canvas, .attribution-canvas, .self-attr-canvas {
+.main > .alphabet-canvas, .main > .attribution-canvas, .main > .self-attr-canvas {
     left: 0;
     position: fixed;
     transform: translateY(-150%);
     top: 0;
 }
 
-.code-canvas {
+.main > .code-canvas {
     --s: 1;
     --outline-h: calc(var(--main-h) * var(--s));
     --outline-w: calc(var(--main-w) * var(--s));
@@ -29,19 +29,19 @@ main {
     background-color: #707688;
 }
 
-.code-canvas.fit {
+.main > .code-canvas.fit {
     height: var(--outline-h);
     width: var(--outline-w);
 }
 
-.code-canvas.aspect {
+.main > .code-canvas.aspect {
     --a: calc(var(--outline-w) / var(--outline-h));
 
     height: calc(min(var(--outline-h), var(--outline-w) / var(--a)));
     width: calc(min(var(--outline-w), var(--outline-h) * var(--a)));
 }
 
-.progress-svg {
+.main > .progress-svg {
     --s: calc(min(120px, 200px + 15vw));
 
     height: var(--s);
@@ -52,9 +52,8 @@ main {
     width: var(--s);
 }
 
-.progress-circle {
-    animation: arc-anim 1.7s ease-in-out infinite, rotation-anim 1.7s linear infinite;
-    animation-delay: -.9s;
+.main .progress-circle {
+    animation: arc-anim 1.4s ease-in-out infinite, rotation-anim 1.4s linear infinite;
     filter: drop-shadow(0 0 calc(min(1px + .1vw, 2px)) #fff9);
     box-shadow: var(--btn-shadow);
 }
@@ -65,15 +64,15 @@ main {
 @keyframes arc-anim {
     0% {
         stroke-dashoffset: 0;
-        stroke-dasharray: .5, 125.66;
+        stroke-dasharray: .7, 125;
     }
     50% {
-        stroke-dashoffset: -18;
-        stroke-dasharray: 100, 125.66;
+        stroke-dashoffset: -12;
+        stroke-dasharray: 101, 125;
     }
     100% {
-        stroke-dashoffset: -125.66;
-        stroke-dasharray: 100, 125.66;
+        stroke-dashoffset: -125;
+        stroke-dasharray: .7, 125;
     }
 }
 
@@ -86,37 +85,43 @@ main {
     }
 }
 
-.round-btn {
+.main > .round-btn {
+    --btn-shadow-color: rgb(60 64 67 / 55%);
+    --tx: 250ms;
+
     align-items: center;
     background: #ffffffc0;
     border-radius: 50%;
-    box-shadow: var(--btn-shadow);
+    box-shadow: 3px 0 6px 0px var(--btn-shadow-color), -1px 4px 8px 1px var(--btn-shadow-color);
     color: #000d;
     display: flex;
     justify-content: center;
     height: var(--btn-size);
     position: absolute;
-    transition: background-color 250ms, transform 250ms;
+    transition: background-color var(--tx), box-shadow var(--tx), color var(--tx), transform var(--tx);
     top: var(--pad-std);
     width: var(--btn-size);
 }
 
-.round-btn.left {
+.main > .round-btn.left {
     left: var(--pad-std);
 }
 
-.round-btn.second-to-right {
+.main > .round-btn.second-to-right {
     right: calc(var(--pad-std) * 2 + var(--btn-size));
 }
 
-.round-btn.right {
+.main > .round-btn.right {
     right: var(--pad-std);
 }
 
-.round-btn:hover {
+.main > .round-btn:hover {
+    --btn-shadow-color: rgb(160 164 167 / 55%);
+
     background: #ffffffe0;
+    color: #000;
 }
 
-.round-btn:active {
+.main > .round-btn:active {
     background: #fffffff8;
 }

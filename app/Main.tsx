@@ -1,6 +1,6 @@
 'use client'
 
-import './Code.css'
+import './Main.css'
 
 import { About } from './About';
 import { delayToAnimationFrame } from './util/delay';
@@ -16,7 +16,7 @@ import { useStore } from './store';
 import { calcOptimalFontSize } from './draw/calcOptimalFontSize';
 import { getPixelSpaceSize } from './draw/getPixelSpaceSize';
 
-export function Code() {
+export function Main() {
     const mainRef = useRef<HTMLElement>(null);
     useEffect(() => {
         function setMainSizeVars() {
@@ -48,7 +48,7 @@ export function Code() {
         setOpenDialog(undefined)
     }
 
-    return <main ref={mainRef} onClick={handleRootClick}>
+    return <main className='main' ref={mainRef} onClick={handleRootClick}>
         <canvas className='alphabet-canvas' ref={alphabetCanvasRef} width='2048' />
         <canvas className='attribution-canvas' ref={attributionCanvasRef}/>
         <canvas className='self-attr-canvas' ref={selfAttrCanvasRef} />
