@@ -30,8 +30,8 @@
 
 .main > .code-canvas.fit {
     height: var(--outline-h);
-    left: 0;
-    top: 0;
+    left: calc(50% - calc(var(--outline-w) * .5));
+    top: calc(50% - calc(var(--outline-h) * .5));
     width: var(--outline-w);
 }
 
@@ -55,6 +55,7 @@
     top: calc(50vh - var(--s) * .5);
     stroke: #fff8;
     width: var(--s);
+    transition: opacity var(--main-tx);
 }
 
 .main .progress-circle {

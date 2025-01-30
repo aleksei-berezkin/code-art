@@ -7,7 +7,9 @@ export const useStore = create<{
     imgParams: ImgParams | undefined,
     generateCounter: number,
     drawCounter: number,
+
     currentCanvas: 0 | 1,
+    progress: boolean,
 
     setOpenDialog: (openDialog: 'menu' | 'about' | undefined) => void,
     setImgParams: (imgParams: ImgParams | undefined) => void,
@@ -15,6 +17,7 @@ export const useStore = create<{
     updateImgParamsAndIncDrawCounter: (recipe: (draft: ImgParams) => void) => void,
 
     setCurrentCanvas: (currentCanvas: 0 | 1) => void,
+    setProgress: (progress: boolean) => void,
 
     // Only incrementing a counter triggers a draw
     incGenerateCounter: () => void,
@@ -25,6 +28,7 @@ export const useStore = create<{
     generateCounter: 0,
     drawCounter: 0,
     currentCanvas: 0,
+    progress: false,
 
     setOpenDialog: openDialog => set({openDialog}),
     setImgParams: imgParams => set({imgParams}),
@@ -41,6 +45,7 @@ export const useStore = create<{
     ),
 
     setCurrentCanvas: currentCanvas => set({currentCanvas}),
+    setProgress: progress => set({progress}),
 
     incGenerateCounter: () => set(state => ({generateCounter: state.generateCounter + 1})),
     incDrawCounter: () => set(state => ({drawCounter: state.drawCounter + 1})),

@@ -10,7 +10,7 @@ import { fitViewRatio, getFractionFromDisplayedRatio } from './model/ratios';
 import { getSliderVal } from './model/ImgParams';
 import { ImgParamsMenu } from './ImgParamsMenu';
 import { Icon } from './Icon';
-import { setTaskExecutorListeners, submitTask } from './util/submitTask';
+import { submitTask } from './util/submitTask';
 import { type MouseEvent, type RefObject, useEffect, useRef, useState } from 'react';
 import { useStore } from './store';
 import { calcOptimalFontSize } from './draw/calcOptimalFontSize';
@@ -158,20 +158,23 @@ function DownloadButton({codeCanvasRef}: {codeCanvasRef: RefObject<HTMLCanvasEle
 const useButtonScaleTransform = () => useStore(state => `scale(${state.imgParams ? 1 : 0})`)
 
 function Progress() {
-    const [progress, setProgress] = useState(false)
+    const opaque = useStore(state => state.progress)
+    const [running, setRunning] = useState(false)
 
     useEffect(() => {
-        setTaskExecutorListeners({
-            onStart: () => setProgress(true),
-            onEnd: () => setProgress(false),
-        })
-    }, [])
-
-    if (!progress) return undefined
+        if (opaque && !running) {
+            setRunning(true)
+        } else if (!opaque && running) {
+            const timerId = setTimeout(() => {
+                setRunning(false)
+            }, 500)
+            return () => clearTimeout(timerId)
+        }
+    }, [opaque, running])
 
     return (
-        <svg className='progress-svg' viewBox='-26 -26 52 52'>
-            <circle className='progress-circle' fill='none' cx='0' cy='0' r='20' strokeWidth='4'/>
+        <svg className='progress-svg' viewBox='-26 -26 52 52' style={{opacity: opaque ? 1 : 0}}>
+            <circle className='progress-circle' fill='none' cx='0' cy='0' r='20' strokeWidth='4' style={{animationPlayState: running ? 'running' : 'paused'}}/>
         </svg>
     )
 }
