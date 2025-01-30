@@ -3,11 +3,9 @@
     /* So we introduce like 'container-height' properties */
     --main-h: 100%;
     --main-w: 100%;
+    --main-tx: 250ms;
 
-    align-items: center;
     display: flex;
-    flex-direction: column;
-    justify-content: center;
     height: 100%;
     margin: 0;
     padding: 0;
@@ -26,19 +24,26 @@
     --outline-h: calc(var(--main-h) * var(--s));
     --outline-w: calc(var(--main-w) * var(--s));
 
-    background-color: #707688;
+    position: absolute;
+    transition: opacity var(--main-tx);
 }
 
 .main > .code-canvas.fit {
     height: var(--outline-h);
+    left: 0;
+    top: 0;
     width: var(--outline-w);
 }
 
 .main > .code-canvas.aspect {
     --a: calc(var(--outline-w) / var(--outline-h));
+    --height: calc(min(var(--outline-h), var(--outline-w) / var(--a)));
+    --width: calc(min(var(--outline-w), var(--outline-h) * var(--a)));
 
-    height: calc(min(var(--outline-h), var(--outline-w) / var(--a)));
-    width: calc(min(var(--outline-w), var(--outline-h) * var(--a)));
+    height: var(--height);
+    left: calc(50% - calc(var(--width) * .5));
+    top: calc(50% - calc(var(--height) * .5));
+    width: var(--width);
 }
 
 .main > .progress-svg {
@@ -87,7 +92,6 @@
 
 .main > .round-btn {
     --btn-shadow-color: rgb(60 64 67 / 55%);
-    --tx: 250ms;
 
     background: #ffffffc0;
     border-radius: 50%;
@@ -96,7 +100,7 @@
     height: var(--btn-size);
     overflow: hidden;
     position: absolute;
-    transition: background-color var(--tx), box-shadow var(--tx), color var(--tx), transform var(--tx);
+    transition: background-color var(--main-tx), box-shadow var(--main-tx), color var(--main-tx), transform var(--main-tx);
     top: var(--pad-std);
     width: var(--btn-size);
 }
@@ -135,7 +139,7 @@
     left: 0;
     position: absolute;
     top: 0;
-    transition: opacity var(--tx), transform var(--tx);
+    transition: opacity var(--main-tx), transform var(--main-tx);
     width: 100%;
 }
 
@@ -148,7 +152,7 @@
     align-items: center;
     display: flex;
     justify-content: center;
-    transition: transform var(--tx);
+    transition: transform var(--main-tx);
 }
 
 .main > .round-btn > .download-slider {

@@ -80,6 +80,7 @@ export function About() {
                     <ul>
                         <li><a href='https://webgl2fundamentals.org/' target='_blank'>WebGL2 Fundamentals</a></li>
                         <li><a href='https://svgcrop.com/' target='_blank'>Crop SVG</a></li>
+                        <li><a href='https://online-convert.com/' target='_blank'>Online converter</a></li>
                     </ul>
                     <div className='version'>App version: {codeArtVersion}</div>
                 </>

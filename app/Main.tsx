@@ -34,9 +34,10 @@ export function Main() {
     const alphabetCanvasRef = useRef<HTMLCanvasElement>(null)
     const attributionCanvasRef = useRef<HTMLCanvasElement>(null)
     const selfAttrCanvasRef = useRef<HTMLCanvasElement>(null)
-    const codeCanvasRef = useRef<HTMLCanvasElement>(null)
+    const codeCanvas0Ref = useRef<HTMLCanvasElement>(null)
+    const codeCanvas1Ref = useRef<HTMLCanvasElement>(null)
 
-    useDrawing(alphabetCanvasRef, attributionCanvasRef, selfAttrCanvasRef, codeCanvasRef)
+    useDrawing(alphabetCanvasRef, attributionCanvasRef, selfAttrCanvasRef, codeCanvas0Ref, codeCanvas1Ref)
 
     const setOpenDialog = useStore(state => state.setOpenDialog)
     function handleRootClick(e: MouseEvent) {
@@ -52,12 +53,14 @@ export function Main() {
         <canvas className='alphabet-canvas' ref={alphabetCanvasRef} width='2048' />
         <canvas className='attribution-canvas' ref={attributionCanvasRef}/>
         <canvas className='self-attr-canvas' ref={selfAttrCanvasRef} />
-        <CodeCanvas codeCanvasRef={codeCanvasRef}/>
+
+        <CodeCanvas index={0} codeCanvasRef={codeCanvas0Ref}/>
+        <CodeCanvas index={1} codeCanvasRef={codeCanvas1Ref}/>
 
         <ImgParamsMenuButton/>
         <ImgParamsMenu/>
         <GenerateButton/>
-        <DownloadButton codeCanvasRef={codeCanvasRef}/>
+        <DownloadButton codeCanvasRef={codeCanvas1Ref}/>
 
         <Progress/>
 
@@ -65,9 +68,10 @@ export function Main() {
     </main>
 }
 
-function CodeCanvas({codeCanvasRef}: {codeCanvasRef: RefObject<HTMLCanvasElement | null>}) {
+function CodeCanvas({index, codeCanvasRef}: {index: 0 | 1, codeCanvasRef: RefObject<HTMLCanvasElement | null>}) {
     const ratio = useStore(state => state.imgParams ? state.imgParams['output image'].ratio.val : undefined)
     const sizeFr = useStore(state => state.imgParams ? getSliderVal(state.imgParams['output image'].size) : undefined)
+    const opaque = useStore(state => !!state.imgParams && (!index || state.currentCanvas))
 
     const fitOrAspectClass = !ratio || ratio === fitViewRatio ? 'fit' : 'aspect'
 
@@ -76,6 +80,7 @@ function CodeCanvas({codeCanvasRef}: {codeCanvasRef: RefObject<HTMLCanvasElement
                 style={{
                     '--s': sizeFr && String(sizeFr),
                     '--a': ratio && ratio !== fitViewRatio && `calc(${getFractionFromDisplayedRatio(ratio)})`,
+                    'opacity': opaque ? 1 : 0,
                 } as any}
                 ref={codeCanvasRef} />
 }
@@ -175,7 +180,8 @@ function useDrawing(
     alphabetCanvasRef: RefObject<HTMLCanvasElement | null>,
     attributionCanvasRef: RefObject<HTMLCanvasElement | null>,
     selfAttrCanvasRef: RefObject<HTMLCanvasElement | null>,
-    codeCanvasRef: RefObject<HTMLCanvasElement | null>,
+    codeCanvas0Ref: RefObject<HTMLCanvasElement | null>,
+    codeCanvas1Ref: RefObject<HTMLCanvasElement | null>,
 ) {
     const incGenerateCounter = useStore(state => state.incGenerateCounter)
     const incDrawCounter = useStore(state => state.incDrawCounter)
@@ -206,23 +212,32 @@ function useDrawing(
 
     function submitDrawRandomScene() {
         submitTask(async () => {
-            await updateCodeCanvasSize()
+            const [nextIndex, nextCanvas] = getNextCanvas()
+
+            await updateCodeCanvasSize(nextCanvas)
+
             await drawRandomScene(
                 useStore.getState().imgParams,
-                codeCanvasRef.current!,
+                nextCanvas,
                 alphabetCanvasRef.current!,
                 attributionCanvasRef.current!,
                 selfAttrCanvasRef.current!,
                 useStore.getState().setImgParams,
             )
+
+            useStore.getState().setCurrentCanvas(nextIndex)
         })
     }
 
     function submitDrawScene() {
         submitTask(async () => {
-            const canvasSizeChanged = await updateCodeCanvasSize()
+            if (!useStore.getState().imgParams) return
+
+            const [nextIndex, nextCanvas] = getNextCanvas()
+
+            const canvasSizeChanged = await updateCodeCanvasSize(nextCanvas)
             if (canvasSizeChanged) {
-                const newFontSize = calcOptimalFontSize(getPixelSpaceSize(codeCanvasRef.current!))
+                const newFontSize = calcOptimalFontSize(getPixelSpaceSize(nextCanvas))
                 useStore.getState().updateImgParams(draft => {
                     draft.font.size.val = newFontSize
                 })
@@ -230,30 +245,38 @@ function useDrawing(
 
             await drawScene(
                 useStore.getState().imgParams!,
-                codeCanvasRef.current!,
+                nextCanvas,
                 alphabetCanvasRef.current!,
                 attributionCanvasRef.current!,
                 selfAttrCanvasRef.current!,
             )
+
+            useStore.getState().setCurrentCanvas(nextIndex)
         })
     }
 
-    async function updateCodeCanvasSize() {
+    function getNextCanvas(): [0 | 1, HTMLCanvasElement] {
+        const index = useStore.getState().currentCanvas ? 0 : 1
+        const canvas = (index ? codeCanvas1Ref : codeCanvas0Ref).current!
+        return [index, canvas]
+    }
+
+    async function updateCodeCanvasSize(codeCanvas: HTMLCanvasElement) {
         // Make sure layout happened
         // In Safari sizes may be not ready on mount, raf helps
         await delayToAnimationFrame()
 
-        const prevWidth = codeCanvasRef.current!.width
-        const prevHeight = codeCanvasRef.current!.height
+        const prevWidth = codeCanvas.width
+        const prevHeight = codeCanvas.height
 
-        const canvasRect = codeCanvasRef.current!.getBoundingClientRect()
+        const canvasRect = codeCanvas.getBoundingClientRect()
 
         const newWidth = canvasRect.width * dpr()
         const newHeight = canvasRect.height * dpr()
 
         if (prevWidth !== newWidth || prevHeight !== newHeight) {
-            codeCanvasRef.current!.width = newWidth
-            codeCanvasRef.current!.height = newHeight
+            codeCanvas.width = newWidth
+            codeCanvas.height = newHeight
             return true
         }
 

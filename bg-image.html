@@ -1,0 +1,27 @@
+<html lang="en">
+<head>
+    <title>Code Art Bg Image (because backdrop-filter is still buggy)</title>
+    <style>
+        body {
+            align-items: center;
+            display: flex;
+            justify-content: center;
+        }
+        .img {
+            background-image: url('./public/og-image.png');
+            background-repeat: no-repeat;
+            height: 630px;
+            width: 1200px;
+        }
+        .filter {
+            backdrop-filter: blur(100px);
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class='img'>
+        <div class='filter'></div>
+    </div>
+</body>
