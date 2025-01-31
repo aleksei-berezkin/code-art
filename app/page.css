@@ -31,6 +31,7 @@ a, a:visited {
     color: var(--link-c);
     font-family: unset;
     text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
 a:hover {
@@ -47,6 +48,7 @@ button {
     margin: 0;
     padding: 0;
     text-align: left;
+    -webkit-tap-highlight-color: transparent;
 }
 
 /* Util */
