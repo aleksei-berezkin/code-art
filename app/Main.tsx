@@ -57,12 +57,12 @@ export function Main() {
         <CodeCanvas index={0} codeCanvasRef={codeCanvas0Ref}/>
         <CodeCanvas index={1} codeCanvasRef={codeCanvas1Ref}/>
 
+        <Progress/>
+
         <ImgParamsMenuButton/>
         <ImgParamsMenu/>
         <GenerateButton/>
         <DownloadButton codeCanvasRef={codeCanvas1Ref}/>
-
-        <Progress/>
 
         <About/>
     </main>
@@ -83,6 +83,28 @@ function CodeCanvas({index, codeCanvasRef}: {index: 0 | 1, codeCanvasRef: RefObj
                     'opacity': opaque ? 1 : 0,
                 } as any}
                 ref={codeCanvasRef} />
+}
+
+function Progress() {
+    const opaque = useStore(state => state.progress)
+    const [running, setRunning] = useState(false)
+
+    useEffect(() => {
+        if (opaque && !running) {
+            setRunning(true)
+        } else if (!opaque && running) {
+            const timerId = setTimeout(() => {
+                setRunning(false)
+            }, 500)
+            return () => clearTimeout(timerId)
+        }
+    }, [opaque, running])
+
+    return (
+        <svg className='progress-svg' viewBox='-26 -26 52 52' style={{opacity: opaque ? 1 : 0}}>
+            <circle className='progress-circle' fill='none' cx='0' cy='0' r='20' strokeWidth='4' style={{animationPlayState: running ? 'running' : 'paused'}}/>
+        </svg>
+    )
 }
 
 function ImgParamsMenuButton() {
@@ -156,28 +178,6 @@ function DownloadButton({codeCanvasRef}: {codeCanvasRef: RefObject<HTMLCanvasEle
 }
 
 const useButtonScaleTransform = () => useStore(state => `scale(${state.imgParams ? 1 : 0})`)
-
-function Progress() {
-    const opaque = useStore(state => state.progress)
-    const [running, setRunning] = useState(false)
-
-    useEffect(() => {
-        if (opaque && !running) {
-            setRunning(true)
-        } else if (!opaque && running) {
-            const timerId = setTimeout(() => {
-                setRunning(false)
-            }, 500)
-            return () => clearTimeout(timerId)
-        }
-    }, [opaque, running])
-
-    return (
-        <svg className='progress-svg' viewBox='-26 -26 52 52' style={{opacity: opaque ? 1 : 0}}>
-            <circle className='progress-circle' fill='none' cx='0' cy='0' r='20' strokeWidth='4' style={{animationPlayState: running ? 'running' : 'paused'}}/>
-        </svg>
-    )
-}
 
 function useDrawing(
     alphabetCanvasRef: RefObject<HTMLCanvasElement | null>,
