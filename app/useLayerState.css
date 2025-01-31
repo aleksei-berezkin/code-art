@@ -1,0 +1,20 @@
+body {
+    --layer-tx: 250ms;
+}
+
+.layer-fade-in {
+    opacity: 0;
+    scale: .97;
+}
+
+.layer-open {
+    opacity: 1;
+    transition: opacity var(--layer-tx), scale var(--layer-tx);
+}
+
+.layer-fade-out {
+    opacity: 0;
+    filter: blur(6px);
+    scale: 1.03;
+    transition: filter var(--layer-tx), opacity var(--layer-tx), scale var(--layer-tx);
+}

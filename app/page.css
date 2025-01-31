@@ -30,13 +30,15 @@ html, body {
 a, a:visited {
     color: var(--link-c);
     font-family: unset;
-    text-decoration: none;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    transition: text-decoration-color var(--ic-tx), color var(--ic-tx);
     -webkit-tap-highlight-color: transparent;
 }
 
 a:hover {
     color: var(--link-c-h);
-    text-decoration: underline;
+    text-decoration-color: var(--link-c-h);
 }
 
 button {

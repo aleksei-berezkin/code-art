@@ -1,6 +1,6 @@
 import './ImgParamsMenu.css'
 
-import React, { useState, type ChangeEvent } from 'react'
+import React, { useRef, type ChangeEvent } from 'react'
 
 import { type ImgParamsSimple, type ImgParamsSimpleSlice, useStore } from './store'
 import { useShallow } from 'zustand/react/shallow'
@@ -11,9 +11,13 @@ import { Icon } from './Icon'
 import { Contacts } from './Contacts'
 import { noAttribution } from './model/attributionPos'
 import { sourceSpecs } from './model/sourceSpecs'
+import { useLayerState } from './useLayerState'
+import { useElementHeight } from './useElementHeight'
 
 
 export function ImgParamsMenu() {
+    const rootRef = useRef<HTMLElement>(null)
+    
     const isOpen = useStore(state => state.openDialog === 'menu')
     const setOpenDialog = useStore(state => state.setOpenDialog)
 
@@ -21,12 +25,14 @@ export function ImgParamsMenu() {
         imgParams ? Object.keys(imgParams) as GroupName[] : undefined
     ))
 
-    if (!isOpen || !groupNames) return undefined
+    const layerState = useLayerState(isOpen)
 
-    return <aside className={`menu-root ${isOpen ? 'open' : ''} dialog-layer`} aria-label='Image params'>
+    if (layerState === 'layer-hidden') return undefined
+
+    return <aside className={`img-params-menu dialog-layer ${layerState}`} aria-label='Image params' ref={rootRef}>
         <div>
         {
-            groupNames.map(groupName =>
+            groupNames!.map(groupName =>
                 <GroupComponent key={groupName} groupName={groupName} />
             )
         }
@@ -40,13 +46,16 @@ export function ImgParamsMenu() {
 }
 
 function GroupComponent({groupName}: {groupName: string}) {
-    const [isOpen, setOpen] = useState(false)
+    const isOpen = useStore(state => state.openGroups.includes(groupName))
     const paramNames = useStore(useShallow(({imgParams}: ImgParamsSimpleSlice) =>
         Object.keys(imgParams![groupName])
 ))
     function handleToggleGroup() {
-        setOpen(!isOpen)
+        useStore.getState().toggleGroup(groupName)
     }
+
+    const groupBodyInnerRef = useRef<HTMLDivElement>(null)
+    const groupHeight = useElementHeight(isOpen, groupBodyInnerRef, 'auto' /* On mount with open group */)
 
     return (
         <div className='group' role='region' aria-label={`Controls group: ${groupName}`}>
@@ -57,18 +66,20 @@ function GroupComponent({groupName}: {groupName: string}) {
                 <span className='group-button-txt'>{groupName}</span>
             </button>
 
-            <div className={`group-body ${isOpen ? 'open' : ''}`}>
-            {
-                paramNames.map(paramName =>
-                    <Parameter key={paramName} groupName={groupName} paramName={paramName} />
-                )
-            }
+            <div className={`group-body ${isOpen ? 'open' : ''}`} style={{height: isOpen ? groupHeight : '0'}}>
+                <div className='group-body-inner' ref={groupBodyInnerRef}>
+                {
+                    paramNames.map(paramName =>
+                        <Parameter key={paramName} groupName={groupName} paramName={paramName} isOpen={isOpen}/>
+                    )
+                }
+                </div>
             </div>
         </div>
     )
 }
 
-function Parameter({groupName, paramName}: ParamProps) {
+function Parameter({groupName, paramName, isOpen}: ParamProps) {
     const paramType = useStore(({imgParams}: ImgParamsSimpleSlice) =>
         imgParams![groupName][paramName].type
     )
@@ -79,23 +90,23 @@ function Parameter({groupName, paramName}: ParamProps) {
         </div>
 
         {
-            <SliderParamLabel groupName={groupName} paramName={paramName} bound='min' />
+            <SliderParamLabel groupName={groupName} paramName={paramName} bound='min' isOpen={isOpen}/>
         }
 
         {
-            paramType === 'slider' && <SliderParamComponent groupName={groupName} paramName={paramName} />
+            paramType === 'slider' && <SliderParamComponent groupName={groupName} paramName={paramName} isOpen={isOpen}/>
         }
 
         {
-            paramType === 'choices' && <ChoicesParamComponent groupName={groupName} paramName={paramName} />
+            paramType === 'choices' && <ChoicesParamComponent groupName={groupName} paramName={paramName} isOpen={isOpen}/>
         }
 
         {
-            paramType === 'color' && <ColorParamComponent groupName={groupName} paramName={paramName} />
+            paramType === 'color' && <ColorParamComponent groupName={groupName} paramName={paramName} isOpen={isOpen}/>
         }
 
         {
-            <SliderParamLabel groupName={groupName} paramName={paramName} bound='max' />
+            <SliderParamLabel groupName={groupName} paramName={paramName} bound='max' isOpen={isOpen}/>
         }
     </>
 }
@@ -115,7 +126,7 @@ function SliderParamLabel<Bound extends 'min' | 'max'>({groupName, paramName, bo
     )
 }
 
-function SliderParamComponent({groupName, paramName} : ParamProps) {
+function SliderParamComponent({groupName, paramName, isOpen} : ParamProps) {
     const {min, max, val, unit} = useStore(useShallow(({imgParams}: ImgParamsSimpleSlice) =>
         imgParams![groupName][paramName] as SliderParam
     ))
@@ -129,26 +140,26 @@ function SliderParamComponent({groupName, paramName} : ParamProps) {
     }
 
     return (
-        <input className='input-slider' id={getParamInputId(groupName, paramName)}
+        <input
+            className='input-slider'
+            id={getParamInputId(groupName, paramName)}
+            onInput={handleSliderChange}
+            tabIndex={isOpen ? undefined : -1}
+            title={getSliderLabel(val, unit)}
             type='range' min={min} max={max} step='any'
             value={val}
-            onInput={handleSliderChange}
-            title={getSliderLabel(val, unit)}
         />
     )
 }
 
 
-function ChoicesParamComponent({groupName, paramName}: ParamProps) {
+function ChoicesParamComponent({groupName, paramName, isOpen}: ParamProps) {
     const val = useStore(({imgParams}: ImgParamsSimpleSlice) =>
         (imgParams![groupName][paramName] as ChoicesParam).val
     )
     const choices = useStore(useShallow(({imgParams}: ImgParamsSimpleSlice) =>
         (imgParams![groupName][paramName] as ChoicesParam).choices
     ))
-    const currentSourceSelection = useStore(({imgParams}) =>
-        imgParams!.source.source.val
-    )
 
     const updateImgParamsAndIncDrawCounter = useStore(state => state.updateImgParamsAndIncDrawCounter)
 
@@ -158,7 +169,7 @@ function ChoicesParamComponent({groupName, paramName}: ParamProps) {
             && e.target.value === noAttribution
         ) {
             alert('Please make sure to give attribution both to code-art.pictures and to '
-                + sourceSpecs[currentSourceSelection].credit
+                + sourceSpecs[useStore.getState().imgParams!.source.source.val].credit
             )
         }
 
@@ -168,7 +179,13 @@ function ChoicesParamComponent({groupName, paramName}: ParamProps) {
     }
 
     return (
-        <select className='input-select' id={getParamInputId(groupName, paramName)} onChange={handleChoiceChange} value={val}>
+        <select
+            className='input-select'
+            id={getParamInputId(groupName, paramName)}
+            onChange={handleChoiceChange}
+            tabIndex={isOpen ? undefined : -1}
+            value={val}
+        >
         {
             choices.map(choice =>
                 <option key={choice} value={choice}>{choice}</option>
@@ -178,7 +195,7 @@ function ChoicesParamComponent({groupName, paramName}: ParamProps) {
     )
 }
 
-function ColorParamComponent({groupName, paramName}: ParamProps) {
+function ColorParamComponent({groupName, paramName, isOpen}: ParamProps) {
     const val = useStore(({imgParams}: ImgParamsSimpleSlice) =>
         (imgParams![groupName][paramName] as ColorParam).val
     )
@@ -193,15 +210,17 @@ function ColorParamComponent({groupName, paramName}: ParamProps) {
 
     return <input
         id={getParamInputId(groupName, paramName)}
+        onChange={handleColorChange}
+        tabIndex={isOpen ? undefined : -1}
         type='color'
         value={val}
-        onChange={handleColorChange}
     />
 }
 
 type ParamProps = {
     groupName: string,
     paramName: string,
+    isOpen: boolean,
 }
 
 function getParamInputId(g: string, p: string) {

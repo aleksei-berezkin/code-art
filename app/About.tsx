@@ -6,23 +6,24 @@ import { Icon } from './Icon';
 import { fontFacesForRandomScenes } from './model/fontFaces';
 import { sourceSpecs } from './model/sourceSpecs';
 import { useStore } from './store';
+import { useLayerState } from './useLayerState';
+import { useElementHeight } from './useElementHeight';
 
 export function About() {
-    const rootRef = createRef<HTMLElement>()
+    const layerState = useLayerState(useStore(state => state.openDialog === 'about'))
 
+    const creditsInnerRef = createRef<HTMLDivElement>()
     const [creditsOpen, setCreditsOpen] = useState(false)
-
-    const isOpen = useStore(state => state.openDialog === 'about')
-    const setOpenDialog = useStore(state => state.setOpenDialog)
-
-    if (!isOpen) return undefined
+    const creditsHeight = useElementHeight(creditsOpen, creditsInnerRef)
 
     function toggleCredits() {
         setCreditsOpen(!creditsOpen)
     }
-    
-    return <section className='about dialog-layer' ref={rootRef}>
-        <button className='close-wr' onClick={() => setOpenDialog(undefined)}>
+
+    if (layerState === 'layer-hidden') return undefined
+
+    return <section className={`about dialog-layer ${layerState}`}>
+        <button className='close-wr' onClick={() => useStore.getState().setOpenDialog(undefined)}>
             <Icon pic='close'/>
         </button>
         <div className='scroll-container'>
@@ -37,53 +38,54 @@ export function About() {
             <Contacts size='md' color='dark'/>
             <h2><button onClick={toggleCredits}><div className={`arrow-down-wrapper ${creditsOpen ? 'open' : ''}`}><Icon pic='arrow-down'/></div><span className='credits-text'>Credits</span></button></h2>
             {
-                creditsOpen &&
-                <>
-                    <h3>Color schemes</h3>
-                    <ul>
-                        <li><a href='https://code.visualstudio.com/'>VS Code</a></li>
-                        <li><a href='https://plugins.jetbrains.com/plugin/12275-dracula-theme'>IntelliJ Darkula</a></li>
-                        <li><a href='https://www.google.com/chrome/'>Chrome browser</a></li>
-                    </ul>
-                    <h3>Fonts</h3>
-                    <p>Free fonts from <a href='https://fonts.google.com/' target='_blank'>Google collection</a></p>
-                    <ul>
-                        {
-                            [...fontFacesForRandomScenes, 'Roboto', 'Ubuntu'].sort().map(f =>
-                                <li key={f}><a href={`https://fonts.google.com/specimen/${f.replace(' ', '+')}`} target='_blank'>{f}</a></li>
-                            )
-                        }
-                    </ul>
-                    <h3>SVG pics</h3>
-                    <ul>
-                        <li><a href='https://fonts.google.com/icons'>Google Fonts Icons</a></li>
-                        <li><a href='https://mui.com/components/material-icons/' target='_blank'>Material Icons</a></li>
-                        <li><a href='https://worldvectorlogo.com/ru/logo/devto' target='_blank'>DEV logo</a> from <a href='https://worldvectorlogo.com/'>worldvectorlogo</a></li>
-                    </ul>
-                    <h3>Rendered code</h3>
-                    <ul>
-                        {
-                            Object.entries(sourceSpecs).map(([k, s]) =>
-                                <li key={k}><a href={s.url} target='_blank'>{k}</a></li>
-                            )
-                        }
-                    </ul>
-                    <h3>Software deps</h3>
-                    <ul>
-                        {
-                            codeArtDeps.map(dep =>
-                                <li key={dep}><a href={getDepLink(dep)} target='_blank'>{dep}</a></li>
-                            )
-                        }
-                    </ul>
-                    <h3>Misc</h3>
-                    <ul>
-                        <li><a href='https://webgl2fundamentals.org/' target='_blank'>WebGL2 Fundamentals</a></li>
-                        <li><a href='https://svgcrop.com/' target='_blank'>Crop SVG</a></li>
-                        <li><a href='https://online-convert.com/' target='_blank'>Online converter</a></li>
-                    </ul>
-                    <div className='version'>App version: {codeArtVersion}</div>
-                </>
+                <div className='credits' style={{height: creditsHeight}}>
+                    <div className='credits-inner' ref={creditsInnerRef} >
+                        <h3>Color schemes</h3>
+                        <ul>
+                            <li><a href='https://code.visualstudio.com/'>VS Code</a></li>
+                            <li><a href='https://plugins.jetbrains.com/plugin/12275-dracula-theme'>IntelliJ Darkula</a></li>
+                            <li><a href='https://www.google.com/chrome/'>Chrome browser</a></li>
+                        </ul>
+                        <h3>Fonts</h3>
+                        <p>Free fonts from <a href='https://fonts.google.com/' target='_blank'>Google collection</a></p>
+                        <ul>
+                            {
+                                [...fontFacesForRandomScenes, 'Roboto', 'Ubuntu'].sort().map(f =>
+                                    <li key={f}><a href={`https://fonts.google.com/specimen/${f.replace(' ', '+')}`} target='_blank'>{f}</a></li>
+                                )
+                            }
+                        </ul>
+                        <h3>SVG pics</h3>
+                        <ul>
+                            <li><a href='https://fonts.google.com/icons'>Google Fonts Icons</a></li>
+                            <li><a href='https://mui.com/components/material-icons/' target='_blank'>Material Icons</a></li>
+                            <li><a href='https://worldvectorlogo.com/ru/logo/devto' target='_blank'>DEV logo</a> from <a href='https://worldvectorlogo.com/'>worldvectorlogo</a></li>
+                        </ul>
+                        <h3>Rendered code</h3>
+                        <ul>
+                            {
+                                Object.entries(sourceSpecs).map(([k, s]) =>
+                                    <li key={k}><a href={s.url} target='_blank'>{k}</a></li>
+                                )
+                            }
+                        </ul>
+                        <h3>Software deps</h3>
+                        <ul>
+                            {
+                                codeArtDeps.map(dep =>
+                                    <li key={dep}><a href={getDepLink(dep)} target='_blank'>{dep}</a></li>
+                                )
+                            }
+                        </ul>
+                        <h3>Misc</h3>
+                        <ul>
+                            <li><a href='https://webgl2fundamentals.org/' target='_blank'>WebGL2 Fundamentals</a></li>
+                            <li><a href='https://svgcrop.com/' target='_blank'>Crop SVG</a></li>
+                            <li><a href='https://online-convert.com/' target='_blank'>Online converter</a></li>
+                        </ul>
+                        <div className='version'>App version: {codeArtVersion}</div>
+                    </div>
+                </div>
             }
         </div>
     </section>

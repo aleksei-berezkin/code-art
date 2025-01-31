@@ -4,7 +4,11 @@ import { produce } from 'immer'
 
 export const useStore = create<{
     openDialog: 'menu' | 'about' | undefined,
+
     imgParams: ImgParams | undefined,
+
+    openGroups: string[],
+
     generateCounter: number,
     drawCounter: number,
 
@@ -12,9 +16,12 @@ export const useStore = create<{
     progress: boolean,
 
     setOpenDialog: (openDialog: 'menu' | 'about' | undefined) => void,
+
     setImgParams: (imgParams: ImgParams | undefined) => void,
     updateImgParams: (recipe: (draft: ImgParams) => void) => void,
     updateImgParamsAndIncDrawCounter: (recipe: (draft: ImgParams) => void) => void,
+
+    toggleGroup: (groupName: string) => void,
 
     setCurrentCanvas: (currentCanvas: 0 | 1) => void,
     setProgress: (progress: boolean) => void,
@@ -24,7 +31,11 @@ export const useStore = create<{
     incDrawCounter: () => void,
 }>(set => ({
     openDialog: undefined,
+
     imgParams: undefined,
+
+    openGroups: [],
+
     generateCounter: 0,
     drawCounter: 0,
     currentCanvas: 0,
@@ -43,6 +54,12 @@ export const useStore = create<{
             drawCounter: state.drawCounter + 1,
         })
     ),
+
+    toggleGroup: groupName => set(({openGroups}) => ({
+        openGroups: openGroups.includes(groupName)
+            ? openGroups.filter(g => g !== groupName)
+            : [...openGroups, groupName],
+    })),
 
     setCurrentCanvas: currentCanvas => set({currentCanvas}),
     setProgress: progress => set({progress}),

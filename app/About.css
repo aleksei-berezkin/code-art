@@ -1,15 +1,15 @@
 .about {
     --m: .9rem;
+    --w: calc(min(80vw, 520px));
 
     background-color: #ffffffe0;
     border-radius: var(--bord-r-std);
     box-sizing: border-box;
     box-shadow: var(--menu-shadow);
-    left: 50%;
+    left: calc(50% - var(--w) * .5);
     position: absolute;
-    transform: translateX(-50%);
     top: var(--pad-std);
-    width: calc(min(80vw, 520px));
+    width: var(--w);
 }
 
 .about .close-wr {
@@ -27,6 +27,17 @@
 
 .about .credits-text {
     padding-left: var(--m);
+}
+
+.about .credits {
+    height: 0;
+    overflow: hidden;
+    transition: var(--main-tx);
+}
+
+.about .credits-inner > *:first-child {
+    /* Otherwise this margin would be outside credits-inner */
+    margin-top: 0;
 }
 
 .about .scroll-container {
