@@ -1,6 +1,6 @@
 {
   "name": "code-art",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "description": "Abstract artworks for your creations",
   "main": "app/layout.tsx",
   "scripts": {
