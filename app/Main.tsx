@@ -260,7 +260,7 @@ function useDrawing(
     }
 
     function getNextCanvas(): [0 | 1, HTMLCanvasElement] {
-        const index = 0;//useStore.getState().currentCanvas ? 0 : 1
+        const index = useStore.getState().currentCanvas ? 0 : 1
         const canvas = (index ? codeCanvas1Ref : codeCanvas0Ref).current!
         return [index, canvas]
     }
