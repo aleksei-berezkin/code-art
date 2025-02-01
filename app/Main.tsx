@@ -62,7 +62,7 @@ export function Main() {
         <ImgParamsMenuButton/>
         <ImgParamsMenu/>
         <GenerateButton/>
-        <DownloadButton codeCanvasRef={codeCanvas1Ref}/>
+        <DownloadButton codeCanvas0Ref={codeCanvas0Ref} codeCanvas1Ref={codeCanvas1Ref}/>
 
         <About/>
     </main>
@@ -140,9 +140,10 @@ function GenerateButton() {
     )
 }
 
-function DownloadButton({codeCanvasRef}: {codeCanvasRef: RefObject<HTMLCanvasElement | null>}) {
+function DownloadButton({codeCanvas0Ref, codeCanvas1Ref}: {codeCanvas0Ref: RefObject<HTMLCanvasElement | null>, codeCanvas1Ref: RefObject<HTMLCanvasElement | null>}) {
     function handleDownloadClick() {
-        codeCanvasRef.current!.toBlob(blob => {
+        const canvas = (useStore.getState().currentCanvas ? codeCanvas1Ref : codeCanvas0Ref).current!
+        canvas.toBlob(blob => {
             const a = document.createElement('a')
             const objUrl = URL.createObjectURL(blob!)
             a.href = objUrl
@@ -259,7 +260,7 @@ function useDrawing(
     }
 
     function getNextCanvas(): [0 | 1, HTMLCanvasElement] {
-        const index = useStore.getState().currentCanvas ? 0 : 1
+        const index = 0;//useStore.getState().currentCanvas ? 0 : 1
         const canvas = (index ? codeCanvas1Ref : codeCanvas0Ref).current!
         return [index, canvas]
     }

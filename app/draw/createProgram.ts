@@ -6,25 +6,20 @@ type CachedProgram = {
     vertexShader: WebGLShader,
     fragmentShaderSource: string,
     fragmentShader: WebGLShader,
+    gl: WebGL2RenderingContext,
 }
 
 const cachedPrograms: CachedProgram[] = [];
-const maxCachedPrograms = 3;
 
 export async function createProgram(vertexShaderSource: string, fragmentShaderSource: string, gl: WebGL2RenderingContext) {
-    const cachedIndex = cachedPrograms.findIndex(p => p.vertexShaderSource === vertexShaderSource && p.fragmentShaderSource === fragmentShaderSource);
-    if (cachedIndex !== -1) {
-        try {
-            const cachedProgram = cachedPrograms[cachedIndex];
-            // Old program won't work for new gl context which is possible to happen in hot-reload
-            if (gl.getProgramParameter(cachedProgram.program, gl.LINK_STATUS)) {
-                cachedPrograms
-                    .splice(cachedIndex, 1)
-                    .forEach(p => cachedPrograms.push(p));
-                return cachedProgram.program;
-            }
-        } catch (_ignored) {
+    const cachedProgram = cachedPrograms.find(p => p.vertexShaderSource === vertexShaderSource && p.fragmentShaderSource === fragmentShaderSource && p.gl === gl)
+    if (cachedProgram) {
+        const {program} = cachedProgram
+        if (gl.getProgramParameter(cachedProgram.program, gl.LINK_STATUS)) {
+            return program
         }
+
+        cachedPrograms.splice(cachedPrograms.indexOf(cachedProgram), 1)
     }
 
     const program = gl.createProgram();
@@ -57,14 +52,8 @@ export async function createProgram(vertexShaderSource: string, fragmentShaderSo
             vertexShader,
             fragmentShaderSource,
             fragmentShader,
+            gl,
         });
-        cachedPrograms
-            .splice(0, cachedPrograms.length - maxCachedPrograms)
-            .forEach(cachedProgram => {
-                gl.deleteShader(cachedProgram.vertexShader);
-                gl.deleteShader(cachedProgram.fragmentShader);
-                gl.deleteProgram(cachedProgram.program);
-            });
         return program;
     }
 
