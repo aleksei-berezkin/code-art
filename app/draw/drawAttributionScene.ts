@@ -11,7 +11,6 @@ import { dpr } from '../util/dpr';
 import { ceilToOdd } from '../util/ceilToOdd';
 import { delay } from '../util/delay';
 import type { AttributionPos } from '../model/attributionPos';
-import { noAttribution } from '../model/attributionPos';
 
 export async function drawAttributionScene(
     sceneParams: SceneParams,
@@ -54,22 +53,26 @@ export async function drawAttributionScene(
     gl.uniform2fv(gl.getUniformLocation(program, 'u_attrSizePx'), [attributionCanvasEl.width, attributionCanvasEl.height]);
     gl.uniform2fv(gl.getUniformLocation(program, 'u_selfAttrSizePx'), [selfAttrCanvasEl.width, selfAttrCanvasEl.height]);
 
-    const attrPos: AttributionPos = sceneParams.imgParams['output image'].attribution.val as AttributionPos;
+    const hasSourceAttr = sceneParams.imgParams.attribution.source.val;
+    const hasSelfAttr = sceneParams.imgParams.attribution['code-art'].val;
+    const attrPos: AttributionPos = sceneParams.imgParams.attribution.position.val as AttributionPos;
 
     gl.uniform2fv(gl.getUniformLocation(program, 'u_attrFromPx'),
-        attrPos === 'top 1' ? [0, 0]
+        !hasSourceAttr ? [codeCanvasEl.width + 100, codeCanvasEl.height + 100]
+            : attrPos === 'top 1' ? [0, 0]
             : attrPos === 'top 2' ? [codeCanvasEl.width - attributionCanvasEl.width, 0]
             : attrPos === 'bottom 1' ? [0, codeCanvasEl.height - attributionCanvasEl.height]
             : attrPos === 'bottom 2' ? [codeCanvasEl.width - attributionCanvasEl.width, codeCanvasEl.height - attributionCanvasEl.height]
-            : attrPos === noAttribution ? [codeCanvasEl.width + 100, codeCanvasEl.height + 100]
+            // : attrPos === noAttribution ? [codeCanvasEl.width + 100, codeCanvasEl.height + 100]
             : undefined as never
     );
     gl.uniform2fv(gl.getUniformLocation(program, 'u_selfAttrFromPx'),
-        attrPos === 'top 2' ? [0, 0]
+        !hasSelfAttr ? [codeCanvasEl.width + 100, codeCanvasEl.height + 100]
+            : attrPos === 'top 2' ? [0, 0]
             : attrPos === 'top 1' ? [codeCanvasEl.width - selfAttrCanvasEl.width, 0]
             : attrPos === 'bottom 2' ? [0, codeCanvasEl.height - selfAttrCanvasEl.height]
             : attrPos === 'bottom 1' ? [codeCanvasEl.width - selfAttrCanvasEl.width, codeCanvasEl.height - selfAttrCanvasEl.height]
-            : attrPos === noAttribution ? [codeCanvasEl.width + 100, codeCanvasEl.height + 100]
+            // : attrPos === noAttribution ? [codeCanvasEl.width + 100, codeCanvasEl.height + 100]
             : undefined as never
     );
     gl.uniform2fv(gl.getUniformLocation(program, 'u_blurRadiiPx'), [blurRadius, blurRadius]);

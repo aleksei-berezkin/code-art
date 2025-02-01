@@ -70,15 +70,20 @@
     text-align: right;
 }
 
-.img-params-menu .input-slider {
+.img-params-menu input[type='range'] {
     margin: 0;
     width: 100%;
 }
 
-.img-params-menu .input-select {
+.img-params-menu select {
     font: inherit;
     padding: 0.25em;
     width: 100%;
+}
+
+.img-params-menu input[type='checkbox'] {
+    margin-left: 0;
+    width: fit-content;
 }
 
 @media (max-width: 510px) {

@@ -19,7 +19,12 @@ export type ColorParam = {
     val: string,
 }
 
-export type ImgParam = SliderParam | ChoicesParam | ColorParam
+export type CheckboxParam = {
+    type: 'checkbox',
+    val: boolean,
+}
+
+export type ImgParam = SliderParam | ChoicesParam | ColorParam | CheckboxParam
 
 export type ImgParams = {
     angle: {
@@ -55,10 +60,14 @@ export type ImgParams = {
         near: ColorParam,
         far: ColorParam,
     },
+    attribution: {
+        position: ChoicesParam,
+        'code-art': CheckboxParam,
+        'source': CheckboxParam,
+    },
     'output image': {
         ratio: ChoicesParam,
         size: SliderParam,
-        attribution: ChoicesParam,
     },
 }
 

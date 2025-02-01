@@ -181,6 +181,21 @@ export async function generateSceneParams(currentImgParams: ImgParams | undefine
                 val: rgbToHex(farColor),
             },
         },
+        attribution: {
+            position: {
+                type: 'choices',
+                val: currentImgParams ? currentImgParams.attribution.position.val : attributionPos[3],
+                choices: attributionPos,
+            },
+            'code-art': {
+                type: 'checkbox',
+                val: true,
+            },
+            source: {
+                type: 'checkbox',
+                val: true,
+            },
+        },
         'output image': {
             size: {
                 type: 'slider',
@@ -193,11 +208,6 @@ export async function generateSceneParams(currentImgParams: ImgParams | undefine
                 type: 'choices',
                 val: currentImgParams ? currentImgParams['output image'].ratio.val : fitViewRatio,
                 choices: displayedRatios,
-            },
-            attribution: {
-                type: 'choices',
-                val: attributionPos[3],
-                choices: attributionPos,
             },
         },
     };
