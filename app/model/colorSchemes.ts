@@ -1,4 +1,4 @@
-import { hexToRgb } from './RGB';
+import { hexToRgb } from './RGB'
 
 export const colorSchemes = {
     'VS Code Dark+': {
@@ -78,12 +78,12 @@ export const colorSchemes = {
         keyword2: hexToRgb('#b67757'),
         default: hexToRgb('#abb0ab'),
     },
-};
+}
 
-export type ColorSchemeName = keyof typeof colorSchemes;
+export type ColorSchemeName = keyof typeof colorSchemes
 
-export const colorSchemeNames = Object.keys(colorSchemes) as ColorSchemeName[];
+export const colorSchemeNames = Object.keys(colorSchemes) as ColorSchemeName[]
 
-export type ColorScheme = (typeof colorSchemes)[ColorSchemeName];
+export type ColorScheme = (typeof colorSchemes)[ColorSchemeName]
 
-export type ColorKey = keyof ColorScheme;
+export type ColorKey = keyof ColorScheme

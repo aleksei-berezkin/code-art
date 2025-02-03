@@ -1,4 +1,4 @@
-import { dpr } from '../util/dpr';
+import { dpr } from '../util/dpr'
 
 const pad = {
     aboveAscent: .4,
@@ -9,29 +9,29 @@ const pad = {
 
 export async function rasterizeAttribution(text: string, fontSize: number, canvasEl: HTMLCanvasElement) {
     if (canvasEl.dataset.text === text && canvasEl.dataset.fontSize === String(fontSize)) {
-        return;
+        return
     }
 
-    const _fontSize = .8 * fontSize * dpr();
-    const fontCssStr = `300 ${_fontSize}px 'Ubuntu'`;
+    const _fontSize = .8 * fontSize * dpr()
+    const fontCssStr = `300 ${_fontSize}px 'Ubuntu'`
     await document.fonts.load(fontCssStr, text)
 
-    const ctx = canvasEl.getContext('2d')!;
+    const ctx = canvasEl.getContext('2d')!
 
-    ctx.font = fontCssStr;
-    const metrics = ctx.measureText(text);
+    ctx.font = fontCssStr
+    const metrics = ctx.measureText(text)
 
-    canvasEl.width = metrics.width + (pad.left + pad.right) * _fontSize;
-    canvasEl.height = pad.aboveAscent * _fontSize + metrics.actualBoundingBoxAscent + pad.belowBaseline * _fontSize;
+    canvasEl.width = metrics.width + (pad.left + pad.right) * _fontSize
+    canvasEl.height = pad.aboveAscent * _fontSize + metrics.actualBoundingBoxAscent + pad.belowBaseline * _fontSize
 
-    ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, canvasEl.width, canvasEl.height);
+    ctx.fillStyle = 'black'
+    ctx.fillRect(0, 0, canvasEl.width, canvasEl.height)
 
-    ctx.fillStyle = 'white';
-    ctx.font = fontCssStr;
+    ctx.fillStyle = 'white'
+    ctx.font = fontCssStr
 
-    ctx.fillText(text, pad.left * _fontSize, pad.aboveAscent * _fontSize + metrics.actualBoundingBoxAscent);
+    ctx.fillText(text, pad.left * _fontSize, pad.aboveAscent * _fontSize + metrics.actualBoundingBoxAscent)
 
-    canvasEl.dataset.text = text;
-    canvasEl.dataset.fontSize = String(fontSize);
+    canvasEl.dataset.text = text
+    canvasEl.dataset.fontSize = String(fontSize)
 }

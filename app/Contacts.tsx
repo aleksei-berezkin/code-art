@@ -1,8 +1,8 @@
 import './Contacts.css'
 
-import { Icon } from './Icon';
-import type { IconSize } from './IconSize';
-import { typedEntries } from './util/typedEntries';
+import { Icon } from './Icon'
+import type { IconSize } from './IconSize'
+import { typedEntries } from './util/typedEntries'
 
 const contacts = {
     github: 'https://github.com/aleksei-berezkin/code-art',

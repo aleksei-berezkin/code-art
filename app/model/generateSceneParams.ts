@@ -1,53 +1,53 @@
-import { pickRandom } from '../util/pickRandom';
-import type { Source } from './Source';
-import type { ImgParams } from './ImgParams';
-import { degToRad } from '../util/degToRad';
-import { colorSchemeNames } from './colorSchemes';
-import { rgbToHex } from './RGB';
-import { makePixelSpace, type PixelSpace } from './PixelSpace';
-import { getTxMax } from './getTxMax';
-import type { Mat4 } from '../util/matrices';
-import type { Size } from './Size';
-import { calcExtensions, type Extensions } from './Extensions';
-import { generateScrollFractions } from './generateScrollFractions';
-import { generateAngles } from './generateAngles';
-import type { WorkLimiter } from '../util/workLimiter';
-import type { AlphabetRaster } from './AlphabetRaster';
-import { fontFaces } from './fontFaces';
-import { isMinified } from './Lang';
-import { sourceSpecs } from './sourceSpecs';
-import { scoreFill } from './scoreFill';
-import { attributionPos } from './attributionPos';
-import { fitViewRatio, displayedRatios } from './ratios';
-import { generate3DifferentBrightColors } from '../util/generate3DifferentBrightColors';
-import { genAll } from '../util/genAll';
+import { pickRandom } from '../util/pickRandom'
+import type { Source } from './Source'
+import type { ImgParams } from './ImgParams'
+import { degToRad } from '../util/degToRad'
+import { colorSchemeNames } from './colorSchemes'
+import { rgbToHex } from './RGB'
+import { makePixelSpace, type PixelSpace } from './PixelSpace'
+import { getTxMax } from './getTxMax'
+import type { Mat4 } from '../util/matrices'
+import type { Size } from './Size'
+import { calcExtensions, type Extensions } from './Extensions'
+import { generateScrollFractions } from './generateScrollFractions'
+import { generateAngles } from './generateAngles'
+import type { WorkLimiter } from '../util/workLimiter'
+import type { AlphabetRaster } from './AlphabetRaster'
+import { fontFaces } from './fontFaces'
+import { isMinified } from './Lang'
+import { sourceSpecs } from './sourceSpecs'
+import { scoreFill } from './scoreFill'
+import { attributionPos } from './attributionPos'
+import { fitViewRatio, displayedRatios } from './ratios'
+import { generate3DifferentBrightColors } from '../util/generate3DifferentBrightColors'
+import { genAll } from '../util/genAll'
 
 export type SceneParams = {
     pixelSpace: PixelSpace,
     extensions: Extensions,
     txMat: Mat4,
     imgParams: ImgParams,
-};
+}
 
 export async function generateSceneParams(currentImgParams: ImgParams | undefined, source: Source, sizePx: Size, fontFace: string, fontSize: number, alphabetRaster: AlphabetRaster, workLimiter: WorkLimiter): Promise<SceneParams> {
-    const samplesCount = isMinified(source.spec.lang) ? 2 : 4;
+    const samplesCount = isMinified(source.spec.lang) ? 2 : 4
     const {angles, pixelSpace, txMat, extensions, scrollFraction} = (await genAll(async function* () {
         for (let i = 0; i < samplesCount; i++) {
-            const angles = generateAngles(isMinified(source.spec.lang));
-            const pixelSpace = makePixelSpace(sizePx);
-            const txMat = getTxMax(pixelSpace, angles.x, angles.y, angles.z);
-            const extensions = await calcExtensions(pixelSpace, angles.x, angles.y, angles.z, txMat, workLimiter);
+            const angles = generateAngles(isMinified(source.spec.lang))
+            const pixelSpace = makePixelSpace(sizePx)
+            const txMat = getTxMax(pixelSpace, angles.x, angles.y, angles.z)
+            const extensions = await calcExtensions(pixelSpace, angles.x, angles.y, angles.z, txMat, workLimiter)
 
             for (const scrollFraction of generateScrollFractions(source)) {
-                const score = await scoreFill(source, pixelSpace, extensions, txMat, scrollFraction, fontSize, alphabetRaster, workLimiter);
-                yield {angles, pixelSpace, txMat, extensions, scrollFraction, score};
+                const score = await scoreFill(source, pixelSpace, extensions, txMat, scrollFraction, fontSize, alphabetRaster, workLimiter)
+                yield {angles, pixelSpace, txMat, extensions, scrollFraction, score}
             }
         }
     }))
         .flatMap(p => p)
-        .reduce((p, q) => p.score > q.score ? p : q);
+        .reduce((p, q) => p.score > q.score ? p : q)
 
-    const [glowColor, nearColor, farColor] = generate3DifferentBrightColors();
+    const [glowColor, nearColor, farColor] = generate3DifferentBrightColors()
 
     const imgParams: ImgParams = {
         source: {
@@ -210,7 +210,7 @@ export async function generateSceneParams(currentImgParams: ImgParams | undefine
                 choices: displayedRatios,
             },
         },
-    };
+    }
 
-    return {pixelSpace, txMat, extensions, imgParams};
+    return {pixelSpace, txMat, extensions, imgParams}
 }

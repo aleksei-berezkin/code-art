@@ -1,4 +1,4 @@
-export const defaultMonospace = 'Browser default mono';
+export const defaultMonospace = 'Browser default mono'
 
 export const fontFaces = [
     'Anonymous Pro',
@@ -14,7 +14,7 @@ export const fontFaces = [
     'Share Tech Mono',
     'Ubuntu Mono',
     defaultMonospace,
-];
+]
 
 export const fontFacesForRandomScenes = fontFaces
-    .filter(f => f !== defaultMonospace);
+    .filter(f => f !== defaultMonospace)

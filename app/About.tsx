@@ -1,20 +1,20 @@
-import './About.css';
+import './About.css'
 
-import { createRef, useState } from 'react';
-import { Contacts } from './Contacts';
-import { Icon } from './Icon';
-import { fontFacesForRandomScenes } from './model/fontFaces';
-import { sourceSpecs } from './model/sourceSpecs';
-import { useStore } from './store';
-import { useLayerState } from './useLayerState';
-import { useElementHeight } from './useElementHeight';
+import { createRef, useState } from 'react'
+import { Contacts } from './Contacts'
+import { Icon } from './Icon'
+import { fontFacesForRandomScenes } from './model/fontFaces'
+import { sourceSpecs } from './model/sourceSpecs'
+import { useStore } from './store'
+import { useLayerState } from './useLayerState'
+import { useElementHeight } from './useElementHeight'
 
 export function About() {
     const layerState = useLayerState(useStore(state => state.openDialog === 'about'))
 
     const creditsInnerRef = createRef<HTMLDivElement>()
     const [creditsOpen, setCreditsOpen] = useState(false)
-    const creditsHeight = useElementHeight(creditsOpen, creditsInnerRef)
+    const creditsHeight = useElementHeight(creditsOpen, creditsInnerRef, '0')
 
     function toggleCredits() {
         setCreditsOpen(!creditsOpen)
@@ -96,10 +96,10 @@ declare const codeArtVersion: string
 
 function getDepLink(dep: string) {
     if (dep === 'node') {
-        return 'https://nodejs.org/';
+        return 'https://nodejs.org/'
     }
     if (dep === 'npm') {
-        return 'https://www.npmjs.com/';
+        return 'https://www.npmjs.com/'
     }
-    return `https://npmjs.com/package/${dep}`;
+    return `https://npmjs.com/package/${dep}`
 }

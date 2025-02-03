@@ -1,1 +1,1 @@
-export const dpr = () => window.devicePixelRatio || 1;
+export const dpr = () => window.devicePixelRatio || 1

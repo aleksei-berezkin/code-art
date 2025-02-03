@@ -16,7 +16,7 @@ import { sourceSpecs } from './model/sourceSpecs'
 
 export function ImgParamsMenu() {
     const rootRef = useRef<HTMLElement>(null)
-    
+
     const isOpen = useStore(state => state.openDialog === 'menu')
     const setOpenDialog = useStore(state => state.setOpenDialog)
 
@@ -242,5 +242,5 @@ type ParamProps = {
 }
 
 function getParamInputId(g: string, p: string) {
-    return `img-param__${[g, p].map(s => s.replace(/[^-\w]/g, '_')).join('__')}`;
+    return `img-param__${[g, p].map(s => s.replace(/[^-\w]/g, '_')).join('__')}`
 }

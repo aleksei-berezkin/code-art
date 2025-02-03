@@ -1,7 +1,7 @@
-import { useStore } from '../store';
-import { delay } from './delay';
+import { useStore } from '../store'
+import { delay } from './delay'
 
-type Cb = () => Promise<void>;
+type Cb = () => Promise<void>
 let nextCb: Cb | undefined
 
 let counter = 0

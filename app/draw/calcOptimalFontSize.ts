@@ -1,5 +1,5 @@
-import type { Size } from '../model/Size';
+import type { Size } from '../model/Size'
 
 export function calcOptimalFontSize(sizePx: Size) {
-    return Math.min(36, 18 + sizePx.w / 1280 * 18);
+    return Math.min(36, 18 + sizePx.w / 1280 * 18)
 }

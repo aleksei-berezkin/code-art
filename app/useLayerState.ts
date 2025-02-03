@@ -12,7 +12,7 @@ export function useLayerState(isOpen: boolean) {
         if (isOpen) {
             mount.current = false
             setLayerState('layer-fade-in')
-            let rafId = requestAnimationFrame(() => 
+            let rafId = requestAnimationFrame(() =>
                 rafId = requestAnimationFrame(() => setLayerState('layer-open'))
             )
             return () => cancelAnimationFrame(rafId)

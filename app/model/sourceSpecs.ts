@@ -1,4 +1,4 @@
-import type { Lang } from './Lang';
+import type { Lang } from './Lang'
 
 export type SourceSpec = {
     lang: Lang,
@@ -58,4 +58,4 @@ export const sourceSpecs: {[name: string]: SourceSpec} = {
         url: 'https://raw.githubusercontent.com/facebook/react/848e802d203e531daf2b9b0edb281a1eb6c5415d/packages/react-dom/src/client/ReactDOMHostConfig.js',
         credit: 'React',
     },
-};
+}

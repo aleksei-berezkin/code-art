@@ -1,7 +1,7 @@
 export async function genAll<Item>(generatorFn: () => AsyncGenerator<Item>) {
-    const items = [];
+    const items = []
     for await (const item of generatorFn()) {
-        items.push(item);
+        items.push(item)
     }
-    return items;
+    return items
 }

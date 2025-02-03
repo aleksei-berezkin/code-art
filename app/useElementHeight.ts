@@ -9,7 +9,7 @@ export function useElementHeight(isOpen: boolean, ref: React.RefObject<HTMLEleme
         } else {
             setHeight('0')
         }
-    }, [isOpen])
+    }, [isOpen, ref])
 
     return height
 }

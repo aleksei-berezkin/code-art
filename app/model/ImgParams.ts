@@ -84,27 +84,27 @@ export function getSliderLabel(val: number, unit: Unit | undefined) {
         : unit === 'log10%' ? `${roundTo2(10 ** val)}%`
         : String(roundTo2(val))
 
-    return s.replace(/-/, '\u2212');
+    return s.replace(/-/, '\u2212')
 }
 
 function roundTo2(n: number) {
-    return Math.round(n * 100) / 100;
+    return Math.round(n * 100) / 100
 }
 
 export function getSliderVal(sv: SliderParam) {
-    const u = sv.unit;
-    const v = sv.val;
+    const u = sv.unit
+    const v = sv.val
     if (u === 'rad') {
-        return v;
+        return v
     }
     if (u === '%') {
-        return v / 100;
+        return v / 100
     }
     if (u === 'log10') {
-        return 10**v;
+        return 10**v
     }
     if (u === 'log10%') {
-        return 10**(v - 2);
+        return 10**(v - 2)
     }
-    return v;
+    return v
 }

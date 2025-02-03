@@ -1,5 +1,5 @@
-import { asMat4, getRotateXMat, getRotateYMat, getRotateZMat, mul } from '../util/matrices';
-import type { PixelSpace } from './PixelSpace';
+import { asMat4, getRotateXMat, getRotateYMat, getRotateZMat, mul } from '../util/matrices'
+import type { PixelSpace } from './PixelSpace'
 
 export function getTxMax(pixelSpace: PixelSpace, xAngle: number, yAngle: number, zAngle: number) {
     // Transform in pixel space
@@ -8,7 +8,7 @@ export function getTxMax(pixelSpace: PixelSpace, xAngle: number, yAngle: number,
             getRotateXMat(xAngle),
             getRotateYMat(yAngle),
             getRotateZMat(zAngle),
-        );
+        )
 
     // Pixel space to clip space
     const toClipSpaceMat = asMat4([
@@ -20,7 +20,7 @@ export function getTxMax(pixelSpace: PixelSpace, xAngle: number, yAngle: number,
         0, 0, 2 / pixelSpace.zSpan, -1 - 2 * pixelSpace.zMin / pixelSpace.zSpan,
         // zMin(==-zBase)...0...zBase...zMax -> 0...+1...+2...(zSpan/zBase)
         0, 0, 1 / pixelSpace.zBase, 1,
-    ]);
+    ])
 
-    return mul(toClipSpaceMat, txMatPixels);
+    return mul(toClipSpaceMat, txMatPixels)
 }

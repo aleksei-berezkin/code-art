@@ -6,6 +6,7 @@
   "scripts": {
     "clean": "rm -rf ./out",
     "dev": "next dev",
+    "lint": "next lint",
     "build": "next build",
     "start": "next start",
     "analyze": "ANALYZE=true npm run build",
@@ -22,8 +23,12 @@
   },
   "homepage": "https://github.com/aleksei-berezkin/code-art#readme",
   "devDependencies": {
+    "@stylistic/eslint-plugin": "^3.0.1",
+    "@stylistic/eslint-plugin-ts": "^3.0.1",
     "@types/node": "22.10.6",
     "@types/react": "^19.0.7",
+    "eslint": "9.19.0",
+    "eslint-config-next": "15.1.6",
     "npm-run-all": "^4.1.5",
     "serve": "^14.2.4",
     "typescript": "^5.7.3"

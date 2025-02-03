@@ -2,22 +2,22 @@
 
 import './Main.css'
 
-import { About } from './About';
-import { delay, delayToAnimationFrame } from './util/delay';
-import { dpr } from './util/dpr';
-import { drawRandomScene, drawScene } from './draw/drawScene';
-import { fitViewRatio, getFractionFromDisplayedRatio } from './model/ratios';
-import { getSliderVal } from './model/ImgParams';
-import { ImgParamsMenu } from './ImgParamsMenu';
-import { Icon } from './Icon';
-import { submitTask } from './util/submitTask';
-import { type MouseEvent, type RefObject, useEffect, useRef, useState } from 'react';
-import { useStore } from './store';
-import { calcOptimalFontSize } from './draw/calcOptimalFontSize';
-import { getPixelSpaceSize } from './draw/getPixelSpaceSize';
+import { About } from './About'
+import { delay, delayToAnimationFrame } from './util/delay'
+import { dpr } from './util/dpr'
+import { drawRandomScene, drawScene } from './draw/drawScene'
+import { fitViewRatio, getFractionFromDisplayedRatio } from './model/ratios'
+import { getSliderVal } from './model/ImgParams'
+import { ImgParamsMenu } from './ImgParamsMenu'
+import { Icon } from './Icon'
+import { submitTask } from './util/submitTask'
+import { type MouseEvent, type RefObject, useEffect, useRef, useState } from 'react'
+import { useStore } from './store'
+import { calcOptimalFontSize } from './draw/calcOptimalFontSize'
+import { getPixelSpaceSize } from './draw/getPixelSpaceSize'
 
 export function Main() {
-    const mainRef = useRef<HTMLElement>(null);
+    const mainRef = useRef<HTMLElement>(null)
     useEffect(() => {
         function setMainSizeVars() {
             const rect = mainRef.current!.getBoundingClientRect()
@@ -81,6 +81,7 @@ function CodeCanvas({index, codeCanvasRef}: {index: 0 | 1, codeCanvasRef: RefObj
                     '--s': sizeFr && String(sizeFr),
                     '--a': ratio && ratio !== fitViewRatio && `calc(${getFractionFromDisplayedRatio(ratio)})`,
                     'opacity': opaque ? 1 : 0,
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- no better way to provide CSS custom props
                 } as any}
                 ref={codeCanvasRef} />
 }
@@ -148,7 +149,7 @@ function DownloadButton({codeCanvas0Ref, codeCanvas1Ref}: {codeCanvas0Ref: RefOb
             const objUrl = URL.createObjectURL(blob!)
             a.href = objUrl
             a.download = 'CodeArt.png'
-            a.click();
+            a.click()
             setTimeout(() => URL.revokeObjectURL(objUrl), 10_000)
         })
         runAnimation()
@@ -187,12 +188,10 @@ function useDrawing(
     codeCanvas0Ref: RefObject<HTMLCanvasElement | null>,
     codeCanvas1Ref: RefObject<HTMLCanvasElement | null>,
 ) {
-    const incGenerateCounter = useStore(state => state.incGenerateCounter)
-    const incDrawCounter = useStore(state => state.incDrawCounter)
-
     useEffect(() => {
-        incGenerateCounter()
+        useStore.getState().incGenerateCounter()
 
+        const incDrawCounter = useStore.getState().incDrawCounter
         window.addEventListener('resize',  incDrawCounter)
         return () => window.removeEventListener('resize', incDrawCounter)
     }, [])
@@ -204,86 +203,66 @@ function useDrawing(
     const prevDrawCounter = useRef(drawCounter)
 
     useEffect(() => {
-        if (generateCounter !== prevGenerateCounter.current) {
-            submitDrawRandomScene()
-        } else if (drawCounter !== prevDrawCounter.current) {
-            submitDrawScene()
-        }
+        const generate = generateCounter !== prevGenerateCounter.current
+        const draw = !generate && useStore.getState().imgParams && drawCounter !== prevDrawCounter.current
+
+        if (generate || draw)
+            submitTask(async () => {
+                const nextCanvasIndex = useStore.getState().currentCanvas ? 0 : 1
+                const nextCanvas = (nextCanvasIndex ? codeCanvas1Ref : codeCanvas0Ref).current!
+
+                const canvasSizeUpdated = await updateCanvasWidthHeightAccordingToClientRect(nextCanvas)
+                if (draw && canvasSizeUpdated) {
+                    const newFontSize = calcOptimalFontSize(getPixelSpaceSize(nextCanvas))
+                    useStore.getState().updateImgParams(draft => {
+                        draft.font.size.val = newFontSize
+                    })
+                }
+
+                if (generate)
+                    await drawRandomScene(
+                        useStore.getState().imgParams,
+                        nextCanvas,
+                        alphabetCanvasRef.current!,
+                        attributionCanvasRef.current!,
+                        selfAttrCanvasRef.current!,
+                        useStore.getState().setImgParams,
+                    )
+                else
+                    await drawScene(
+                        useStore.getState().imgParams!,
+                        nextCanvas,
+                        alphabetCanvasRef.current!,
+                        attributionCanvasRef.current!,
+                        selfAttrCanvasRef.current!,
+                    )
+
+                useStore.getState().setCurrentCanvas(nextCanvasIndex)
+            })
 
         prevGenerateCounter.current = generateCounter
         prevDrawCounter.current = drawCounter
-    }, [generateCounter, drawCounter])
+    }, [generateCounter, drawCounter, alphabetCanvasRef, attributionCanvasRef, selfAttrCanvasRef, codeCanvas1Ref, codeCanvas0Ref])
+}
 
-    function submitDrawRandomScene() {
-        submitTask(async () => {
-            const [nextIndex, nextCanvas] = getNextCanvas()
+async function updateCanvasWidthHeightAccordingToClientRect(codeCanvas: HTMLCanvasElement) {
+    // Make sure layout happened
+    // In Safari sizes may be not ready on mount, raf helps
+    await delayToAnimationFrame()
 
-            await updateCodeCanvasSize(nextCanvas)
+    const prevWidth = codeCanvas.width
+    const prevHeight = codeCanvas.height
 
-            await drawRandomScene(
-                useStore.getState().imgParams,
-                nextCanvas,
-                alphabetCanvasRef.current!,
-                attributionCanvasRef.current!,
-                selfAttrCanvasRef.current!,
-                useStore.getState().setImgParams,
-            )
+    const clientRect = codeCanvas.getBoundingClientRect()
 
-            useStore.getState().setCurrentCanvas(nextIndex)
-        })
+    const newWidth = clientRect.width * dpr()
+    const newHeight = clientRect.height * dpr()
+
+    if (prevWidth !== newWidth || prevHeight !== newHeight) {
+        codeCanvas.width = newWidth
+        codeCanvas.height = newHeight
+        return true
     }
 
-    function submitDrawScene() {
-        submitTask(async () => {
-            if (!useStore.getState().imgParams) return
-
-            const [nextIndex, nextCanvas] = getNextCanvas()
-
-            const canvasSizeChanged = await updateCodeCanvasSize(nextCanvas)
-            if (canvasSizeChanged) {
-                const newFontSize = calcOptimalFontSize(getPixelSpaceSize(nextCanvas))
-                useStore.getState().updateImgParams(draft => {
-                    draft.font.size.val = newFontSize
-                })
-            }
-
-            await drawScene(
-                useStore.getState().imgParams!,
-                nextCanvas,
-                alphabetCanvasRef.current!,
-                attributionCanvasRef.current!,
-                selfAttrCanvasRef.current!,
-            )
-
-            useStore.getState().setCurrentCanvas(nextIndex)
-        })
-    }
-
-    function getNextCanvas(): [0 | 1, HTMLCanvasElement] {
-        const index = useStore.getState().currentCanvas ? 0 : 1
-        const canvas = (index ? codeCanvas1Ref : codeCanvas0Ref).current!
-        return [index, canvas]
-    }
-
-    async function updateCodeCanvasSize(codeCanvas: HTMLCanvasElement) {
-        // Make sure layout happened
-        // In Safari sizes may be not ready on mount, raf helps
-        await delayToAnimationFrame()
-
-        const prevWidth = codeCanvas.width
-        const prevHeight = codeCanvas.height
-
-        const canvasRect = codeCanvas.getBoundingClientRect()
-
-        const newWidth = canvasRect.width * dpr()
-        const newHeight = canvasRect.height * dpr()
-
-        if (prevWidth !== newWidth || prevHeight !== newHeight) {
-            codeCanvas.width = newWidth
-            codeCanvas.height = newHeight
-            return true
-        }
-
-        return false
-    }
+    return false
 }

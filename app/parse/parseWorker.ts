@@ -1,37 +1,37 @@
-import type { ShortColorKey } from '../model/ShortColorKey';
-import type { ParseRequestData, ParseResponseData } from './parseProtocol';
-import type { Line, Lines, ParseResult } from '../model/ParseResult';
+import type { ShortColorKey } from '../model/ShortColorKey'
+import type { ParseRequestData, ParseResponseData } from './parseProtocol'
+import type { Line, Lines, ParseResult } from '../model/ParseResult'
 
-import type { Options, Token } from 'acorn';
-// @ts-ignore
-import * as acornLoose from 'acorn-loose';
-import * as acorn from 'acorn';
-import * as acornWalk from 'acorn-walk';
+import type { Options, Token } from 'acorn'
+// @ts-expect-error No typedefs
+import * as acornLoose from 'acorn-loose'
+import * as acorn from 'acorn'
+import * as acornWalk from 'acorn-walk'
 
 self.onmessage = async function (msg: {data: ParseRequestData}) {
-    const text = await (await fetch(msg.data.url)).text();
-    const parseResult = parse(text, msg.data.insertWraps);
+    const text = await (await fetch(msg.data.url)).text()
+    const parseResult = parse(text, msg.data.insertWraps)
     const respData: ParseResponseData = {
         url: msg.data.url,
         parseResult,
-    };
-    self.postMessage(respData);
-} 
+    }
+    self.postMessage(respData)
+}
 
 function parse(text: string, insertWraps: boolean): ParseResult {
-    const colorKeys: ShortColorKey[] = [];
+    const colorKeys: ShortColorKey[] = []
     function colorize(start: number, end: number, colorKey: ShortColorKey) {
         for (let i = start; i < end; i++) {
-            colorKeys[i] = colorKey;
+            colorKeys[i] = colorKey
         }
     }
 
-    const strPositions = new Set<number>();
+    const strPositions = new Set<number>()
 
     function addStrPositions(start: number, end: number) {
         if (insertWraps) {
             for (let i = start; i < end; i++) {
-                strPositions.add(i);
+                strPositions.add(i)
             }
         }
     }
@@ -39,121 +39,122 @@ function parse(text: string, insertWraps: boolean): ParseResult {
     const options: Options = {
         ecmaVersion: 'latest',
         onComment(isBlock, text, start, end) {
-            colorize(start, end, 'c');
+            colorize(start, end, 'c')
         },
         onToken(token: Token) {
-            let color: ShortColorKey;
+            let color: ShortColorKey
             if (acorn.tokTypes.num === token.type) {
-                color = 'n';
+                color = 'n'
             } else if ([acorn.tokTypes.string, acorn.tokTypes.template, acorn.tokTypes.backQuote].includes(token.type)) {
-                color = 's';
-                addStrPositions(token.start, token.end);
+                color = 's'
+                addStrPositions(token.start, token.end)
             } else if (acorn.tokTypes.name === token.type) {
-                color = 'N';
+                color = 'N'
             } else if (['class', 'const', 'false', 'function', 'in', 'let', 'new', 'null', 'of', 'this', 'true', 'undefined', 'var']
-                .includes(token.type.keyword)
+                .includes(token.type.keyword!)
             ) {
-                color = 'k';
+                color = 'k'
             } else if (token.type.keyword) {
-                color = 'K';
+                color = 'K'
             } else {
-                color = 'd';
+                color = 'd'
             }
 
-            colorize(token.start, token.end, color);
+            colorize(token.start, token.end, color)
         },
-    };
+    }
 
-    // noinspection JSUnusedGlobalSymbols
     acornWalk.simple(
         acornLoose.parse(text, options),
         {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             MemberExpression(node: any) {
                 if (!node.computed) {
-                    colorize(node.property.start, node.property.end, 'm');
+                    colorize(node.property.start, node.property.end, 'm')
                 }
             },
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             TemplateLiteral(node: any) {
-                addStrPositions(node.start, node.end);
+                addStrPositions(node.start, node.end)
             },
         },
-    );
+    )
 
-    const lines = getLines(text, strPositions, insertWraps);
+    const lines = getLines(text, strPositions, insertWraps)
     // This works best for scroll
     const longestLines = lines
         .map(([start, end]) => end - start)
         .sort((l, m) => m - l)
-        .slice(0, 20);
-    const lineLengthChars = longestLines.reduce((a, b) => a + b) / longestLines.length;
+        .slice(0, 20)
+    const lineLengthChars = longestLines.reduce((a, b) => a + b) / longestLines.length
 
     return {
         colorization: colorKeys,
         lines,
         lineLengthChars,
         alphabet: getAlphabet(text),
-    };
+    }
 }
 
 function getLines(text: string, strPositions: Set<number>, insertWraps: boolean): Lines {
-    const origLines = getOriginalLines(text);
+    const origLines = getOriginalLines(text)
     if (!insertWraps) {
-        return origLines;
+        return origLines
     }
 
-    return insertWrapsToLongLines(text, strPositions, origLines);
+    return insertWrapsToLongLines(text, strPositions, origLines)
 }
 
 function getOriginalLines(text: string): Lines {
-    const lines: ParseResult['lines'] = [];
-    let lastNewLineIndex = -1;
+    const lines: ParseResult['lines'] = []
+    let lastNewLineIndex = -1
     for ( ; ; ) {
-        const newlineIndex = text.indexOf('\n', lastNewLineIndex + 1);
+        const newlineIndex = text.indexOf('\n', lastNewLineIndex + 1)
         if (newlineIndex !== -1) {
-            lines.push([lastNewLineIndex + 1, newlineIndex]);
-            lastNewLineIndex = newlineIndex;
+            lines.push([lastNewLineIndex + 1, newlineIndex])
+            lastNewLineIndex = newlineIndex
         } else {
-            lines.push([lastNewLineIndex + 1, text.length]);
-            return lines;
+            lines.push([lastNewLineIndex + 1, text.length])
+            return lines
         }
     }
 }
 
-const targetLineLen = 400;
+const targetLineLen = 400
 
 function insertWrapsToLongLines(text: string, strPositions: Set<number>, lines: Lines): Lines {
     return lines
-        .flatMap(([start, end]) => [...splitLongLine(text, strPositions, start, end)]);
+        .flatMap(([start, end]) => [...splitLongLine(text, strPositions, start, end)])
 }
 
-const charsToSplitAfter = new Set(['(', '[', '{', ':', ',', ';']);
+const charsToSplitAfter = new Set(['(', '[', '{', ':', ',', ';'])
 
 function* splitLongLine(text: string, strPositions: Set<number>, start: number, endExclusive: number): Generator<Line> {
     if (start === endExclusive) {
-        return;
+        return
     }
 
     if (endExclusive - start <= targetLineLen) {
-        yield [start, endExclusive];
-        return;
+        yield [start, endExclusive]
+        return
     }
 
     for (let pos = start + targetLineLen - 1; pos < endExclusive - 1; pos++) {
         if (!strPositions.has(pos) && charsToSplitAfter.has(text[pos])) {
-            yield [start, pos + 1];
-            yield* splitLongLine(text, strPositions, pos + 1, endExclusive);
-            return;
+            yield [start, pos + 1]
+            yield* splitLongLine(text, strPositions, pos + 1, endExclusive)
+            return
         }
     }
 
-    yield [start, endExclusive];
+    yield [start, endExclusive]
 }
 
 function getAlphabet(source: string) {
-    const alphabet = new Set(source);
+    const alphabet = new Set(source)
     for (let ch = 0; ch < 32; ch++) {
-        alphabet.delete(String.fromCharCode(ch));
+        alphabet.delete(String.fromCharCode(ch))
     }
-    alphabet.add(' ');
-    return [...alphabet].sort().join('');
+    alphabet.add(' ')
+    return [...alphabet].sort().join('')
 }
