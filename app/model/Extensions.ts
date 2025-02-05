@@ -105,7 +105,7 @@ function runEdge(side: Side, pixelSpace: PixelSpace, currentExtensionsWritable: 
             const x = x1 + i / (samplesNum - 1) * (x2 - x1)
             const y = y1 + i / (samplesNum - 1) * (y2 - y1)
             const [_x, _y] = applyTx(txMat, x, y)
-            if (isVisibleInClipSpace(_x, _y)) {
+            if (isVisibleInClipSpace(_x, _y, .05)) {
                 visibleCount++
             }
         }
