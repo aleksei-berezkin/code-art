@@ -3,7 +3,7 @@ import type { Mat4 } from '../util/matrices'
 import { iterateCode } from './iterateCode'
 import { applyTx } from '../util/applyTx'
 import { isVisibleInClipSpace } from '../util/isVisibleInClipSpace'
-import { pluck } from '../util/pluck'
+import { clamp } from '../util/pluck'
 import type { ScrollFraction } from './ScrollFraction'
 import type { WorkLimiter } from '../util/workLimiter'
 import type { AlphabetRaster } from './AlphabetRaster'
@@ -34,7 +34,7 @@ export async function scoreFill(
         const [x, y, w] = applyTx(txMat, c.x + alphabetRaster.avgW / 2 / alphabetRaster.fontSizeRatio, c.baseline + alphabetRaster.maxAscent / 2 / alphabetRaster.fontSizeRatio)
         if (isVisibleInClipSpace(x, y)) {
             const [row, col] = [[y, rowsNum], [x, colsNum]]
-                .map(([coord, n]) => pluck(
+                .map(([coord, n]) => clamp(
                     0,
                     // -1..1 -> 0..n - 1
                     Math.floor((coord + 1) / 2 * n),

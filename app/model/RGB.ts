@@ -1,4 +1,4 @@
-import { pluck } from '../util/pluck'
+import { clamp } from '../util/pluck'
 
 // Each component 0..1
 export type RGB = [number, number, number]
@@ -22,7 +22,7 @@ export function rgbToHex(rgb: RGB): string {
         throw new Error(String(rgb))
     }
     return '#' + rgb
-        .map(c => toHexStrWithLeading(pluck(0, Math.round(c * 255), 255)))
+        .map(c => toHexStrWithLeading(clamp(0, Math.round(c * 255), 255)))
         .join('')
 }
 
