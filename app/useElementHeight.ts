@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 
+// TODO rewrite to ref function
 export function useElementHeight(isOpen: boolean, ref: React.RefObject<HTMLElement | null>, initial: string = '0') {
     const [height, setHeight] = useState(initial)
 

@@ -1,20 +1,18 @@
 import './About.css'
 
-import { createRef, useState } from 'react'
+import { useState } from 'react'
 import { Contacts } from './Contacts'
 import { Icon } from './Icon'
 import { fontFacesForRandomScenes } from './model/fontFaces'
 import { sourceSpecs } from './model/sourceSpecs'
 import { useStore } from './store'
 import { useLayerState } from './useLayerState'
-import { useElementHeight } from './useElementHeight'
 
 export function About() {
     const layerState = useLayerState(useStore(state => state.openDialog === 'about'))
 
-    const creditsInnerRef = createRef<HTMLDivElement>()
     const [creditsOpen, setCreditsOpen] = useState(false)
-    const creditsHeight = useElementHeight(creditsOpen, creditsInnerRef, '0')
+    const [creditsHeight, setCreditsHeight] = useState(0)
 
     function toggleCredits() {
         setCreditsOpen(!creditsOpen)
@@ -38,8 +36,8 @@ export function About() {
             <Contacts size='md' color='dark'/>
             <h2><button onClick={toggleCredits}><div className={`arrow-down-wrapper ${creditsOpen ? 'open' : ''}`}><Icon pic='arrow-down'/></div><span className='credits-text'>Credits</span></button></h2>
             {
-                <div className='credits' style={{height: creditsHeight}}>
-                    <div className='credits-inner' ref={creditsInnerRef} >
+                <div className='credits' style={{height: creditsOpen ? `${creditsHeight}px` : '0'}}>
+                    <div className='credits-inner' ref={el => setCreditsHeight(el?.clientHeight ?? creditsHeight)} >
                         <h3>Color schemes</h3>
                         <ul>
                             <li><a href='https://code.visualstudio.com/'>VS Code</a></li>
