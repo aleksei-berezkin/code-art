@@ -1,6 +1,6 @@
 import './ImgParamsMenu.css'
 
-import React, { useRef, type ChangeEvent } from 'react'
+import React, { useRef, useState, type ChangeEvent } from 'react'
 
 import { type ImgParamsSimple, type ImgParamsSimpleSlice, useStore } from './store'
 import { useShallow } from 'zustand/react/shallow'
@@ -10,7 +10,6 @@ import { getSliderLabel } from './model/ImgParams'
 import { Icon } from './Icon'
 import { Contacts } from './Contacts'
 import { useLayerState } from './useLayerState'
-import { useElementHeight } from './useElementHeight'
 import { sourceSpecs } from './model/sourceSpecs'
 
 
@@ -53,8 +52,10 @@ function GroupComponent({groupName}: {groupName: string}) {
         useStore.getState().toggleGroup(groupName)
     }
 
-    const groupBodyInnerRef = useRef<HTMLDivElement>(null)
-    const groupHeight = useElementHeight(isOpen, groupBodyInnerRef, 'auto' /* On mount with open group */)
+    const [groupHeight, setGroupHeight] = useState<number | undefined>(undefined)
+    const groupHeightStyleValue = isOpen
+        ? (groupHeight ?? 'auto' /* mount with group opened and groupHeight unknown yet */)
+        : 0
 
     return (
         <div className='group' role='region' aria-label={`Controls group: ${groupName}`}>
@@ -65,8 +66,8 @@ function GroupComponent({groupName}: {groupName: string}) {
                 <span className='group-button-txt'>{groupName}</span>
             </button>
 
-            <div className={`group-body ${isOpen ? 'open' : ''}`} style={{height: isOpen ? groupHeight : '0'}}>
-                <div className='group-body-inner' ref={groupBodyInnerRef}>
+            <div className={`group-body ${isOpen ? 'open' : ''}`} style={{height: groupHeightStyleValue}}>
+                <div className='group-body-inner' ref={el => { if (el) setGroupHeight(el.clientHeight) }}>
                 {
                     paramNames.map(paramName =>
                         <Parameter key={paramName} groupName={groupName} paramName={paramName} tabIndex={isOpen ? undefined : -1}/>
