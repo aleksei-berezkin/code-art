@@ -94,7 +94,8 @@
 .main > .round-btn {
     --btn-shadow-color: rgb(60 64 67 / 55%);
 
-    background: #ffffffc0;
+    background: var(--menu-bg-color);
+    backdrop-filter: var(--menu-backdrop-filter);
     border-radius: 50%;
     box-shadow: 3px 0 6px 0px var(--btn-shadow-color), -1px 4px 8px 1px var(--btn-shadow-color);
     color: #000d;

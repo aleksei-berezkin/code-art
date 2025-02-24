@@ -2,7 +2,8 @@
     --m: .9rem;
     --w: calc(min(80vw, 520px));
 
-    background-color: #ffffffe0;
+    background-color: var(--menu-bg-color);
+    backdrop-filter: var(--menu-backdrop-filter);
     border-radius: var(--bord-r-std);
     box-sizing: border-box;
     box-shadow: var(--menu-shadow);

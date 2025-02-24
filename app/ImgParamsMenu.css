@@ -2,7 +2,8 @@
     --menu-tx: var(--ic-tx);
     --pad-gr: calc(var(--pad-std) *.75);
 
-    background-color: #ffffffc0;
+    background-color: var(--menu-bg-color);
+    backdrop-filter: var(--menu-backdrop-filter);
     border-radius: var(--bord-r-std);
     box-sizing: border-box;
     box-shadow: var(--menu-shadow);
