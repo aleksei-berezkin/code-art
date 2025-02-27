@@ -68,19 +68,24 @@ void main() {
     float kWeight = 0.0;
     int kSz = u_mode == MODE_GLOW ? u_glowKSize : u_blurKSize;
 
-    for (int row = 0; row < _LOOP_SZ_; row++) {
-        if (row >= kSz) {
-            break;
-        }
-        for (int col = 0; col < _LOOP_SZ_; col++) {
-            if (col >= kSz) {
+    if (kSz > 1) {
+        for (int row = 0; row < _LOOP_SZ_; row++) {
+            if (row >= kSz) {
                 break;
             }
-            vec2 delta = -v_blurTexCoordsRadii + 2.0 * v_blurTexCoordsRadii * vec2(row, col) / float(kSz - 1);
-            float k = kernel(u_mode, row, col);
-            blurred += k * (texture(u_image, v_texCoords + delta).rgb - u_bg);
-            kWeight += k;
+            for (int col = 0; col < _LOOP_SZ_; col++) {
+                if (col >= kSz) {
+                    break;
+                }
+                vec2 delta = -v_blurTexCoordsRadii + 2.0 * v_blurTexCoordsRadii * vec2(row, col) / float(kSz - 1);
+                float k = kernel(u_mode, row, col);
+                blurred += k * (texture(u_image, v_texCoords + delta).rgb - u_bg);
+                kWeight += k;
+            }
         }
+    } else {
+        blurred = texture(u_image, v_texCoords).rgb - u_bg;
+        kWeight = 1.0;
     }
 
     blurred = blurred / kWeight;

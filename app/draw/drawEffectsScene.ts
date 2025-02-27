@@ -17,7 +17,7 @@ import type { WorkLimiter } from '../util/workLimiter'
 import type { DrawCodeResult } from './DrawCodeResult'
 import { getSceneBounds } from '../model/SceneBounds'
 
-const maxKernel = 25
+const maxKernel = 61
 
 export async function drawEffectsScene(
     sceneParams: SceneParams,
@@ -31,7 +31,10 @@ export async function drawEffectsScene(
     const { imgParams } = sceneParams
     const glowRadius = getSliderVal(imgParams.font.size) * getSliderVal(imgParams.glow.radius) / 2
     const glowKSize = ceilToOdd(glowRadius * .65 * dpr(), maxKernel)
-    const blurKSize = ceilToOdd(2.65 * imgParams.fade.blur.val * dpr(), maxKernel)
+
+    const blurValue = getSliderVal(imgParams.fade.blur)
+    const blurKSize = ceilToOdd(8 * blurValue * dpr(), maxKernel)
+
     const loopSize = Math.max(glowKSize, blurKSize)
 
     const fragmentShaderSourceProcessed = effectsFragmentShader

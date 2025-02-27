@@ -154,10 +154,10 @@ export async function generateSceneParams(currentImgParams: ImgParams | undefine
         fade: {
             blur: {
                 type: 'slider' as const,
-                min: 1,
-                val: 1.3 + Math.random(),
-                max: 3,
-                unit: 'log10%' as const,
+                min: 0,
+                val: 20 + 200 * Math.random(),
+                max: 1000,
+                unit: '%',
             },
             fade: {
                 type: 'slider',
