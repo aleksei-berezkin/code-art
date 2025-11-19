@@ -7,7 +7,8 @@
     "clean": "rm -rf ./out",
     "dev": "next dev",
     "lint": "next lint",
-    "build": "next build",
+    "build@typique": "npx typique --projectFile ./app/layout.tsx",
+    "build": "npm run build@typique && next build",
     "start": "next start",
     "analyze": "ANALYZE=true npm run build",
     "preview": "serve out -p 3000"
@@ -42,6 +43,7 @@
     "next": "^15.1.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "typique": "^0.1.1",
     "zustand": "^5.0.3"
   }
 }

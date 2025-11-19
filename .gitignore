@@ -110,3 +110,6 @@ dist
 
 # Other
 .DS_Store
+
+# Typique
+typique-output.css

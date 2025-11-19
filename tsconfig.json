@@ -15,6 +15,12 @@
     "plugins": [
       {
         "name": "next"
+      },
+      {
+        "name": "typique/ts-plugin",
+        "generatedNames": {
+          "pattern": "${contextName}"
+        }
       }
     ],
     "resolveJsonModule": true,

@@ -1,25 +1,59 @@
-import './Icon.css'
-
 import type { IconSize } from './IconSize'
+import type { Css, Var } from 'typique'
+import { sc } from './sc'
 
-type Pic = 'arrow-down' | 'close' | 'download' | 'menu' | 'reload' | 'github' | 'dev' | 'linked-in' | 'facebook' | 'twitter'
+// TODO arrow-down, 'arrowDown'
+type Pic = 'arrowDown' | 'close' | 'download' | 'menu' | 'reload' | 'github' | 'dev' | 'linked-in' | 'facebook' | 'twitter'
 
 const viewBoxes = {
-    'arrow-down': '6 8.59 12 7.41',
+    'arrowDown': '6 8.59 12 7.41',
     'dev': '0 32 448 448',
 } as {[pic in Pic]?: string}
 
 const defaultViewBox = '0 0 24 24'
 
 export function Icon({ pic, size='lg' }: { pic?: Pic, size?: IconSize }) {
+    const heightBaseVar = '--height-base' satisfies Var
+    const heightMulVar = '--height-mul' satisfies Var
+
     return (
         <svg
-            className={`ic ${pic} ${size}`}
+            className={
+                sc({ pic, size }, {
+                    _: 'icon-svg',
+                    pic: {
+                        arrowDown: 'icon-svg-pic-arrow-down',
+                    },
+                    size: {
+                        md: 'icon-svg-size-md',
+                        lg: 'icon-svg-size-lg',
+                    },
+                } satisfies Css<{
+                    fill: 'currentColor'
+                    height: `calc(var(${typeof heightBaseVar}) * var(${typeof heightMulVar}))`
+                    stroke: 'none'
+                    verticalAlign: 'bottom'
+
+                    [heightBaseVar]: 20
+                    [heightMulVar]: '1'
+
+                    '.$pic$arrowDown': {
+                        verticalAlign: 'baseline'
+                        [heightBaseVar]: 7.41
+                    }
+                    '.$size$md': {
+                        [heightMulVar]: '1.2'
+                    }
+                    '.$size$lg': {
+                        [heightMulVar]: '1.6'
+                    }
+                }>)
+            }
             viewBox={ (pic && viewBoxes[pic]) ?? defaultViewBox }
         >
             <title>{ pic ?? '' }</title>
             {
-                pic === 'arrow-down' ? <path d='M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6-1.41-1.41z'/>
+                pic === 'arrowDown' ? <path d='M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6-1.41-1.41z'/>
                     : pic === 'download' ? <path d='M18,15v3H6v-3H4v3c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2v-3H18z M17,11l-1.41-1.41L13,12.17V4h-2v8.17L8.41,9.59L7,11l5,5 L17,11z'/>
                     : pic === 'close' ? <path d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z'/>
                     : pic === 'menu' ? <path d='M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z'/>

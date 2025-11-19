@@ -1,8 +1,8 @@
-import './Contacts.css'
-
 import { Icon } from './Icon'
 import type { IconSize } from './IconSize'
 import { typedEntries } from './util/typedEntries'
+import type { Css, Var } from 'typique'
+import { sc } from './sc'
 
 const contacts = {
     github: 'https://github.com/aleksei-berezkin/code-art',
@@ -12,13 +12,57 @@ const contacts = {
     dev: 'https://dev.to/alekseiberezkin',
 }
 
-export function Contacts({ size, color }: { size: IconSize, color: 'light' | 'dark' }) {
-    return <ul className={`contacts ${size} ${color}`}>
+export function Contacts(props: { size: IconSize, color: 'light' | 'dark' }) {
+    const colVar = '--col' satisfies Var
+    const hoverColVar = '--hover-col' satisfies Var
+    const liMrVar = '--li-mr' satisfies Var
+
+    return <ul className={
+        sc(props, {
+            _: 'contacts-ul',
+            size: {
+                sm: 'contacts-ul-size-sm',
+            },
+            color: {
+                light: 'contacts-ul-color-light',
+                dark: 'contacts-ul-color-dark',
+            },
+        } satisfies Css<{
+            display: 'flex'
+            listStyle: 'none'
+            margin: 0
+            padding: 0
+            [liMrVar]: '.65em'
+            '.$size$sm': {
+                [liMrVar]: '.45em'
+            }
+            '& > li:not(:last-child)': {
+                marginRight: `var(${typeof liMrVar})`
+            }
+            '.$color$light': {
+                [colVar]: '#0006'
+                [hoverColVar]: '#0009'
+            }
+            '.$color$dark': {
+                [colVar]: '#00000098'
+                [hoverColVar]: '#000e'
+            }
+        }>
+    ) }>
         {
             typedEntries(contacts).map(([pic, url]) =>
                 <li key={url}>
-                    <a key={url} href={url} target='_blank' className='link'>
-                        <Icon pic={pic} size={size}/>
+                    <a key={url} href={url} target='_blank' className={ 'contacts-a' satisfies Css<{
+                        textDecoration: 'none'
+                        transition: `color var(--link-tx)`
+                        '&, &:visited': {
+                            color: `var(${typeof colVar})`
+                        }
+                        '&:hover': {
+                            color: `var(${typeof hoverColVar})`
+                        }
+                    }> }>
+                        <Icon pic={pic} size={props.size}/>
                     </a>
                 </li>
             )

@@ -1,15 +1,15 @@
-import './About.css'
-
 import { useState } from 'react'
 import { Contacts } from './Contacts'
 import { Icon } from './Icon'
 import { fontFacesForRandomScenes } from './model/fontFaces'
 import { sourceSpecs } from './model/sourceSpecs'
 import { useStore } from './store'
-import { useLayerState } from './useLayerState'
+import { useLayerStateClass } from './useLayerStateClass'
+import type { Css, Var } from 'typique'
+import { cc } from './cc'
 
 export function About() {
-    const layerState = useLayerState(useStore(state => state.openDialog === 'about'))
+    const layerState = useLayerStateClass(useStore(state => state.openDialog === 'about'))
 
     const [creditsOpen, setCreditsOpen] = useState(false)
     const [creditsHeight, setCreditsHeight] = useState(0)
@@ -18,13 +18,72 @@ export function About() {
         setCreditsOpen(!creditsOpen)
     }
 
-    if (layerState === 'layer-hidden') return undefined
+    if (!layerState) return undefined
 
-    return <section className={`about dialog-layer ${layerState}`}>
-        <button className='close-wr' onClick={() => useStore.getState().setOpenDialog(undefined)}>
+    const mVar = '--m' satisfies Var
+    const wVar = '--w' satisfies Var
+
+    return <section
+        className={ cc('about-section' satisfies
+            Css<{
+                [mVar]: '.9rem'
+                [wVar]: 'calc(min(80vw, 520px))'
+
+                backgroundColor: 'var(--menu-bg-color)'
+                backdropFilter: 'var(--menu-backdrop-filter)'
+                borderRadius: 'var(--bord-r-std)'
+                boxSizing: 'border-box'
+                boxShadow: 'var(--menu-shadow)'
+                left: `calc(50% - var(${typeof wVar}) * .5)`
+                position: 'absolute'
+                top: 'var(--pad-std)'
+                width: `var(${typeof wVar})`
+            }>,
+            'dialog-layer',
+            layerState,
+        )}
+    >
+        <button
+            className={
+                'about-button' satisfies Css<{
+                    color: 'var(--link-c)'
+                    position: 'absolute'
+                    padding: 'calc(var(--pad-std) * .75)'
+                    top: 0
+                    transition: 'color var(--link-tx)'
+                    right: 0
+                    '&:hover': {
+                        color: 'var(--link-c-h)'
+                    }
+                }>
+            }
+            onClick={() => useStore.getState().setOpenDialog(undefined)}
+        >
             <Icon pic='close'/>
         </button>
-        <div className='scroll-container'>
+        <div className={ 'about-div' satisfies Css<{
+            boxSizing: 'border-box'
+            maxHeight: `calc(var(--main-h) - 2 * var(--pad-std))`
+            overflow: 'scroll'
+            padding: 'var(--pad-std)'
+            '& h1': {
+                marginTop: 0
+                fontSize: '1.7rem'
+            }
+            '& h2, & h2, & h3, & p, & ul': {
+                marginTop: `var(${typeof mVar})`
+                marginBottom: `var(${typeof mVar})`
+            }
+            '& ul:last-child': {
+                marginBottom: 0
+            }
+            '& h2': {
+                fontSize: '1.35rem'
+            }
+            '& p, & li': {
+                lineHeight: '1.35em'
+            }
+        }> }>
             <h1>Code Art</h1>
             <p>Abstract code artworks for your creations</p>
             <h2>License</h2>
@@ -34,10 +93,25 @@ export function About() {
             </p>
             <h2>Any feedback is welcome</h2>
             <Contacts size='md' color='dark'/>
-            <h2><button onClick={toggleCredits}><div className={`arrow-down-wrapper ${creditsOpen ? 'open' : ''}`}><Icon pic='arrow-down'/></div><span className='credits-text'>Credits</span></button></h2>
+            <h2><button onClick={toggleCredits}><div className={`arrow-down-wrapper ${creditsOpen ? 'open' : ''}`}><Icon pic='arrowDown'/></div><span className={'about-span' satisfies Css<{paddingLeft: `var(${typeof mVar})`}>}>Credits</span></button></h2>
             {
-                <div className='credits' style={{height: creditsOpen ? `${creditsHeight}px` : '0'}}>
-                    <div className='credits-inner' ref={el => setCreditsHeight(el?.clientHeight ?? creditsHeight)} >
+                <div
+                    style={{height: creditsOpen ? `${creditsHeight}px` : '0'}}
+                    className={ 'about-div-0' satisfies Css<{
+                        height: 0
+                        overflow: 'hidden'
+                        transition: 'var(--main-tx)'
+                    }> }
+                >
+                    <div
+                        className={ 'about-div-1' satisfies Css<{
+                            '& > *:firstChild': {
+                                // Otherwise this margin would be outside the container
+                                marginTop: 0
+                            }
+                        }> }
+                        ref={el => setCreditsHeight(el?.clientHeight ?? creditsHeight)}
+                    >
                         <h3>Color schemes</h3>
                         <ul>
                             <li><a href='https://code.visualstudio.com/'>VS Code</a></li>
@@ -81,7 +155,10 @@ export function About() {
                             <li><a href='https://svgcrop.com/' target='_blank'>Crop SVG</a></li>
                             <li><a href='https://online-convert.com/' target='_blank'>Online converter</a></li>
                         </ul>
-                        <div className='version'>App version: {codeArtVersion}</div>
+                        <div className={ 'about-div-2' satisfies Css<{
+                            color: '#00000078'
+                            textAlign: 'center'
+                        }> }>App version: {codeArtVersion}</div>
                     </div>
                 </div>
             }

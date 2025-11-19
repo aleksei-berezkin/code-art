@@ -1,5 +1,3 @@
-import './ImgParamsMenu.css'
-
 import React, { useRef, useState, type ChangeEvent } from 'react'
 
 import { type ImgParamsSimple, type ImgParamsSimpleSlice, useStore } from './store'
@@ -9,9 +7,15 @@ import { type CheckboxParam, type ChoicesParam, type ColorParam, type GroupName,
 import { getSliderLabel } from './model/ImgParams'
 import { Icon } from './Icon'
 import { Contacts } from './Contacts'
-import { useLayerState } from './useLayerState'
+import { useLayerStateClass } from './useLayerStateClass'
 import { sourceSpecs } from './model/sourceSpecs'
+import { cc } from './cc'
+import type { Css, Var } from 'typique'
 
+declare const isNarrowQuery = '@media (max-width: 510px)'
+
+const menuTxVar = '--menu-tx' satisfies Var
+const gridGapVar = '--grid-gap' satisfies Var
 
 export function ImgParamsMenu() {
     const rootRef = useRef<HTMLElement>(null)
@@ -23,11 +27,35 @@ export function ImgParamsMenu() {
         imgParams ? Object.keys(imgParams) as GroupName[] : undefined
     ))
 
-    const layerState = useLayerState(isOpen)
+    const layerState = useLayerStateClass(isOpen)
 
-    if (layerState === 'layer-hidden') return undefined
+    if (!layerState) return undefined
 
-    return <aside className={`img-params-menu dialog-layer ${layerState}`} aria-label='Image params' ref={rootRef}>
+    return <aside aria-label='Image params' ref={rootRef} className={ cc(
+        'img-params-menu-aside' satisfies Css<{
+            [menuTxVar]: 'var(--ic-tx)'
+            [gridGapVar]: 'calc(var(--pad-std) *.75)'
+
+            backgroundColor: 'var(--menu-bg-color)'
+            backdropFilter: 'var(--menu-backdrop-filter)'
+            borderRadius: 'var(--bord-r-std)'
+            boxSizing: 'border-box'
+            boxShadow: 'var(--menu-shadow)'
+            left: 'var(--pad-std)'
+            margin: 0
+            maxHeight: 'calc(var(--main-h) - 3 * var(--pad-std) - var(--btn-size))'
+            overflowY: 'scroll'
+            paddingTop: 'var(--pad-std)'
+            position: 'absolute'
+            top: 'calc(var(--pad-std) * 2 + var(--btn-size))'
+
+            [isNarrowQuery]: {
+                maxWidth: `calc(100vw - 2 * var(--pad-std))`
+            }
+        }>,
+        'dialog-layer',
+        layerState,
+    ) }>
         <div>
         {
             groupNames!.map(groupName =>
@@ -36,10 +64,26 @@ export function ImgParamsMenu() {
         }
         </div>
 
-        <div className='footer-group'>
+        <footer className={ 'img-params-menu-footer' satisfies Css<{
+            alignItems: 'center'
+            display: 'flex'
+            flexDirection: 'column'
+            paddingBottom: 'var(--pad-std)'
+        }> }>
             <Contacts size='sm' color='light'/>
-            <button className='footer-about' onClick={() => setOpenDialog('about')}>about</button>
-        </div>
+            <button
+                onClick={() => setOpenDialog('about')}
+                className={ 'img-params-menu-button' satisfies Css<{
+                    color: `var(--link-c)`
+                    letterSpacing: '.04em'
+                    marginTop: `calc(var(${typeof gridGapVar}) * .7)`
+                    transition: `color var(--link-tx)`
+                    '&:hover': {
+                        color: 'var(--link-c-h)'
+                    }
+                }> }
+            >about</button>
+        </footer>
     </aside>
 }
 
@@ -57,17 +101,64 @@ function GroupComponent({groupName}: {groupName: string}) {
         ? (groupHeight ?? 'auto' /* mount with group opened and groupHeight unknown yet */)
         : 0
 
+    const labelWVar = '--label-w' satisfies Var
+    const inputWVar = '--input-w' satisfies Var
+
     return (
-        <div className='group' role='region' aria-label={`Controls group: ${groupName}`}>
-            <button className='group-button' aria-label={`Toggle group visibility: ${groupName}`} onClick={handleToggleGroup}>
+        <div role='region' aria-label={`Controls group: ${groupName}`} className={ 'group-component-div' satisfies Css<{
+            paddingBottom: `var(${typeof gridGapVar})`
+            paddingLeft: `var(--pad-std)`
+            paddingRight: `var(--pad-std)`
+        }> }>
+            <button aria-label={`Toggle group visibility: ${groupName}`} onClick={handleToggleGroup} className={ 'group-component-button' satisfies Css<{
+                transition: 'color var(--ic-tx), text-shadow var(--ic-tx)'
+                '&:hover': {
+                    color: '#000'
+                }
+                '&:active': {
+                    color: 'unset'
+                }
+            }> }>
                 <div className={`arrow-down-wrapper ${isOpen ? 'open' : ''}`}>
-                    <Icon pic='arrow-down' size='sm'/>
+                    <Icon pic='arrowDown' size='sm'/>
                 </div>
-                <span className='group-button-txt'>{groupName}</span>
+                <span className={ 'group-component-span' satisfies Css<{
+                    paddingLeft: '.5em'
+                    paddingRight: '1em'
+                }>} >{ groupName }</span>
             </button>
 
-            <div className={`group-body ${isOpen ? 'open' : ''}`} style={{height: groupHeightStyleValue}}>
-                <div className='group-body-inner' ref={el => { if (el) setGroupHeight(el.clientHeight) }}>
+            <div
+                style={{height: groupHeightStyleValue}}
+                className={ cc(
+                    'group-component-div-0' satisfies Css<{
+                        [labelWVar]: '3rem'
+                        [inputWVar]: '12rem'
+
+                        height: 0
+                        opacity: 0
+                        overflow: 'hidden'
+                        paddingLeft: 'calc(1.6em)'
+                        transition: `height var(${typeof menuTxVar}), opacity var(${typeof menuTxVar}), padding-top var(${typeof menuTxVar})`
+                    }>,
+                    isOpen && 'group-component-div-1' satisfies Css<{
+                        opacity: '1'
+                        paddingTop: `var(${typeof gridGapVar})`
+                    }>,
+                ) }
+            >
+                <div
+                    ref={el => { if (el) setGroupHeight(el.clientHeight) }}
+                    className={'group-component-div-2' satisfies Css<{
+                        display: 'grid'
+                        fontSize: '.9em'
+                        gap: `calc(var(${typeof gridGapVar}) * .75)`
+                        gridTemplateColumns: `auto var(${typeof labelWVar}) var(${typeof inputWVar}) var(${typeof labelWVar})`
+                        [isNarrowQuery]: {
+                            gridTemplateColumns: `auto minmax(auto, var(${typeof inputWVar}))`
+                        }
+                    }>}
+                >
                 {
                     paramNames.map(paramName =>
                         <Parameter key={paramName} groupName={groupName} paramName={paramName} tabIndex={isOpen ? undefined : -1}/>
@@ -87,7 +178,10 @@ function Parameter(paramProps: ParamProps) {
     )
 
     return <>
-        <div className='param-label-wr'>
+        <div className={'parameter-div' satisfies Css<{
+            alignItems: 'center'
+            display: 'flex'
+        }>}>
             <label htmlFor={getParamInputId(groupName, paramName)}>{paramName}</label>
         </div>
 
@@ -124,7 +218,16 @@ function SliderParamLabel<Bound extends 'min' | 'max'>({groupName, paramName, bo
     }))
 
     return (
-        <div className={`param-${bound}`}>
+        <div className={ cc(
+            'slider-param-label-div' satisfies Css<{
+                [isNarrowQuery]: {
+                    display: 'none'
+                }
+            }>,
+            bound === 'min' && 'slider-param-label-div-0' satisfies Css<{
+                textAlign: 'right'
+            }>,
+        ) }>
             {
                 sliderParam && getSliderLabel(sliderParam[bound], sliderParam.unit)
             }
@@ -154,6 +257,10 @@ function SliderParamComponent({groupName, paramName, tabIndex} : ParamProps) {
             min={min}
             step='any'
             value={val}
+            className={ 'slider-param-component' satisfies Css<{
+                margin: 0
+                width: '100%'
+            }> }
         />
     )
 }
@@ -179,6 +286,11 @@ function ChoicesParamComponent({groupName, paramName, tabIndex}: ParamProps) {
             onChange={handleChoiceChange}
             tabIndex={tabIndex}
             value={val}
+            className={ 'choices-param-component-select' satisfies Css<{
+                font: 'inherit'
+                padding: '0.25em'
+                width: '100%'
+            }> }
         >
         {
             choices.map(choice =>
@@ -233,6 +345,13 @@ function CheckboxParamComponent({groupName, paramName, tabIndex}: ParamProps) {
         tabIndex={tabIndex}
         type='checkbox'
         checked={val}
+        // TODO why not -input ?
+        className={
+            'checkbox-param-component' satisfies Css<{
+                marginLeft: 0
+                width: 'fit-content'
+            }>
+        }
     />
 }
 
