@@ -3,6 +3,7 @@ import type { IconSize } from './IconSize'
 import { typedEntries } from './util/typedEntries'
 import type { Css, Var } from 'typique'
 import { sc } from './sc'
+import type { ThemeVars } from './theme'
 
 const contacts = {
     github: 'https://github.com/aleksei-berezkin/code-art',
@@ -54,7 +55,7 @@ export function Contacts(props: { size: IconSize, color: 'light' | 'dark' }) {
                 <li key={url}>
                     <a key={url} href={url} target='_blank' className={ 'contacts-a' satisfies Css<{
                         textDecoration: 'none'
-                        transition: `color var(--link-tx)`
+                        transition: `color var(${ThemeVars['linkTx']})`
                         '&, &:visited': {
                             color: `var(${typeof colVar})`
                         }

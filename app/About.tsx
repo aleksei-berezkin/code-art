@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { Contacts } from './Contacts'
-import { Icon } from './Icon'
+import { arrowDownWrapperClass, Icon, wrOpenClass } from './Icon'
 import { fontFacesForRandomScenes } from './model/fontFaces'
 import { sourceSpecs } from './model/sourceSpecs'
 import { useStore } from './store'
 import { useLayerStateClass } from './useLayerStateClass'
 import type { Css, Var } from 'typique'
 import { cc } from './cc'
+import type { ThemeVars } from './theme'
+import { mainSizeVars, dialogLayerClass } from './Main'
 
 export function About() {
     const layerState = useLayerStateClass(useStore(state => state.openDialog === 'about'))
@@ -29,31 +31,31 @@ export function About() {
                 [mVar]: '.9rem'
                 [wVar]: 'calc(min(80vw, 520px))'
 
-                backgroundColor: 'var(--menu-bg-color)'
-                backdropFilter: 'var(--menu-backdrop-filter)'
-                borderRadius: 'var(--bord-r-std)'
+                backgroundColor: `var(${ThemeVars['menuBgCol']})`
+                backdropFilter: `var(${ThemeVars['menuBackdropFilter']})`
+                borderRadius: `var(${ThemeVars['borderRadiusStd']})`
                 boxSizing: 'border-box'
-                boxShadow: 'var(--menu-shadow)'
+                boxShadow: `var(${ThemeVars['menuShadow']})`
                 left: `calc(50% - var(${typeof wVar}) * .5)`
                 position: 'absolute'
-                top: 'var(--pad-std)'
+                top: `var(${ThemeVars['paddingStd']})`
                 width: `var(${typeof wVar})`
             }>,
-            'dialog-layer',
+            dialogLayerClass,
             layerState,
         )}
     >
         <button
             className={
                 'about-button' satisfies Css<{
-                    color: 'var(--link-c)'
+                    color: `var(${ThemeVars['linkCol']})`
                     position: 'absolute'
-                    padding: 'calc(var(--pad-std) * .75)'
+                    padding: `calc(var(${ThemeVars['paddingStd']}) * .75)`
                     top: 0
-                    transition: 'color var(--link-tx)'
+                    transition: `color var(${ThemeVars['linkTx']})`
                     right: 0
                     '&:hover': {
-                        color: 'var(--link-c-h)'
+                        color: `var(${ThemeVars['linkColHover']})`
                     }
                 }>
             }
@@ -63,9 +65,9 @@ export function About() {
         </button>
         <div className={ 'about-div' satisfies Css<{
             boxSizing: 'border-box'
-            maxHeight: `calc(var(--main-h) - 2 * var(--pad-std))`
+            maxHeight: `calc(var(${typeof mainSizeVars.h}) - 2 * var(${ThemeVars['paddingStd']}))`
             overflow: 'scroll'
-            padding: 'var(--pad-std)'
+            padding: `var(${ThemeVars['paddingStd']})`
             '& h1': {
                 marginTop: 0
                 fontSize: '1.7rem'
@@ -93,20 +95,30 @@ export function About() {
             </p>
             <h2>Any feedback is welcome</h2>
             <Contacts size='md' color='dark'/>
-            <h2><button onClick={toggleCredits}><div className={`arrow-down-wrapper ${creditsOpen ? 'open' : ''}`}><Icon pic='arrowDown'/></div><span className={'about-span' satisfies Css<{paddingLeft: `var(${typeof mVar})`}>}>Credits</span></button></h2>
+            <h2>
+                <button onClick={toggleCredits}>
+                    <div className={cc(arrowDownWrapperClass, creditsOpen && wrOpenClass)}>
+                        <Icon pic='arrowDown'/>
+                    </div>
+                    <span className={'about-span' satisfies Css<{paddingLeft: `var(${typeof mVar})`}>}>
+                        Credits
+                    </span>
+                </button>
+            </h2>
             {
                 <div
                     style={{height: creditsOpen ? `${creditsHeight}px` : '0'}}
                     className={ 'about-div-0' satisfies Css<{
                         height: 0
                         overflow: 'hidden'
-                        transition: 'var(--main-tx)'
+                        transition: `height var(${ThemeVars['mainTx']})`
                     }> }
                 >
                     <div
                         className={ 'about-div-1' satisfies Css<{
-                            '& > *:firstChild': {
-                                // Otherwise this margin would be outside the container
+                            '& > *:first-child': {
+                                // Otherwise this margin would be outside this container
+                                // and clientHeight won't include it
                                 marginTop: 0
                             }
                         }> }

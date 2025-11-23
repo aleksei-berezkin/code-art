@@ -1,8 +1,9 @@
 import type { IconSize } from './IconSize'
 import type { Css, Var } from 'typique'
 import { sc } from './sc'
+import type { ThemeVars } from './theme'
 
-// TODO arrow-down, 'arrowDown'
+// TODO .$arrow-down not working, replaced with 'arrowDown'
 type Pic = 'arrowDown' | 'close' | 'download' | 'menu' | 'reload' | 'github' | 'dev' | 'linked-in' | 'facebook' | 'twitter'
 
 const viewBoxes = {
@@ -68,3 +69,11 @@ export function Icon({ pic, size='lg' }: { pic?: Pic, size?: IconSize }) {
         </svg>
     )
 }
+
+export const [arrowDownWrapperClass, wrOpenClass] = ['arrow-down-wrapper', 'wr-open'] satisfies Css<{
+    display: 'inline-block';
+    transition: `transform var(${ThemeVars['iconTx']})`
+    '.$1': {
+        transform: 'rotate(-180deg)'
+    }
+}>

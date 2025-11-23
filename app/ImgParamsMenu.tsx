@@ -5,12 +5,14 @@ import { useShallow } from 'zustand/react/shallow'
 
 import { type CheckboxParam, type ChoicesParam, type ColorParam, type GroupName, type ImgParams, type SliderParam } from './model/ImgParams'
 import { getSliderLabel } from './model/ImgParams'
-import { Icon } from './Icon'
+import { arrowDownWrapperClass, Icon, wrOpenClass } from './Icon'
 import { Contacts } from './Contacts'
 import { useLayerStateClass } from './useLayerStateClass'
 import { sourceSpecs } from './model/sourceSpecs'
 import { cc } from './cc'
 import type { Css, Var } from 'typique'
+import type { ThemeVars } from './theme'
+import { dialogLayerClass, mainSizeVars } from './Main'
 
 declare const isNarrowQuery = '@media (max-width: 510px)'
 
@@ -33,27 +35,27 @@ export function ImgParamsMenu() {
 
     return <aside aria-label='Image params' ref={rootRef} className={ cc(
         'img-params-menu-aside' satisfies Css<{
-            [menuTxVar]: 'var(--ic-tx)'
-            [gridGapVar]: 'calc(var(--pad-std) *.75)'
+            [menuTxVar]: `var(${ThemeVars['iconTx']})`
+            [gridGapVar]: `calc(var(${ThemeVars['paddingStd']}) *.75)`
 
-            backgroundColor: 'var(--menu-bg-color)'
-            backdropFilter: 'var(--menu-backdrop-filter)'
-            borderRadius: 'var(--bord-r-std)'
+            backgroundColor: `var(${ThemeVars['menuBgCol']})`
+            backdropFilter: `var(${ThemeVars['menuBackdropFilter']})`
+            borderRadius: `var(${ThemeVars['borderRadiusStd']})`
             boxSizing: 'border-box'
-            boxShadow: 'var(--menu-shadow)'
-            left: 'var(--pad-std)'
+            boxShadow: `var(${ThemeVars['menuShadow']})`
+            left: `var(${ThemeVars['paddingStd']})`
             margin: 0
-            maxHeight: 'calc(var(--main-h) - 3 * var(--pad-std) - var(--btn-size))'
+            maxHeight: `calc(var(${typeof mainSizeVars.h}) - 3 * var(${ThemeVars['paddingStd']}) - var(${ThemeVars['buttonSize']}))`
             overflowY: 'scroll'
-            paddingTop: 'var(--pad-std)'
+            paddingTop: `var(${ThemeVars['paddingStd']})`
             position: 'absolute'
-            top: 'calc(var(--pad-std) * 2 + var(--btn-size))'
+            top: `calc(var(${ThemeVars['paddingStd']}) * 2 + var(${ThemeVars['buttonSize']}))`
 
             [isNarrowQuery]: {
-                maxWidth: `calc(100vw - 2 * var(--pad-std))`
+                maxWidth: `calc(100vw - 2 * var(${ThemeVars['paddingStd']}))`
             }
         }>,
-        'dialog-layer',
+        dialogLayerClass,
         layerState,
     ) }>
         <div>
@@ -68,18 +70,18 @@ export function ImgParamsMenu() {
             alignItems: 'center'
             display: 'flex'
             flexDirection: 'column'
-            paddingBottom: 'var(--pad-std)'
+            paddingBottom: `var(${ThemeVars['paddingStd']})`
         }> }>
             <Contacts size='sm' color='light'/>
             <button
                 onClick={() => setOpenDialog('about')}
                 className={ 'img-params-menu-button' satisfies Css<{
-                    color: `var(--link-c)`
+                    color: `var(${ThemeVars['linkCol']})`
                     letterSpacing: '.04em'
                     marginTop: `calc(var(${typeof gridGapVar}) * .7)`
-                    transition: `color var(--link-tx)`
+                    transition: `color var(${ThemeVars['linkTx']})`
                     '&:hover': {
-                        color: 'var(--link-c-h)'
+                        color: `var(${ThemeVars['linkColHover']})`
                     }
                 }> }
             >about</button>
@@ -107,11 +109,11 @@ function GroupComponent({groupName}: {groupName: string}) {
     return (
         <div role='region' aria-label={`Controls group: ${groupName}`} className={ 'group-component-div' satisfies Css<{
             paddingBottom: `var(${typeof gridGapVar})`
-            paddingLeft: `var(--pad-std)`
-            paddingRight: `var(--pad-std)`
+            paddingLeft: `var(${ThemeVars['paddingStd']})`
+            paddingRight: `var(${ThemeVars['paddingStd']})`
         }> }>
             <button aria-label={`Toggle group visibility: ${groupName}`} onClick={handleToggleGroup} className={ 'group-component-button' satisfies Css<{
-                transition: 'color var(--ic-tx), text-shadow var(--ic-tx)'
+                transition: `color var(${ThemeVars['iconTx']}), text-shadow var(${ThemeVars['iconTx']})`
                 '&:hover': {
                     color: '#000'
                 }
@@ -119,7 +121,7 @@ function GroupComponent({groupName}: {groupName: string}) {
                     color: 'unset'
                 }
             }> }>
-                <div className={`arrow-down-wrapper ${isOpen ? 'open' : ''}`}>
+                <div className={cc(arrowDownWrapperClass, isOpen && wrOpenClass)}>
                     <Icon pic='arrowDown' size='sm'/>
                 </div>
                 <span className={ 'group-component-span' satisfies Css<{
