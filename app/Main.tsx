@@ -16,10 +16,10 @@ import { getPixelSpaceSize } from './draw/getPixelSpaceSize'
 
 // TODO imports before 'use client'
 import type { Var, Css } from 'typique'
-import { cc } from './cc'
 import { themeVars, type ThemeVars } from './theme'
 import { parseMs } from './util/parseMs'
 import { centeredAbsClass, type centeredAbsVar } from './centeredAbs'
+import { cc } from 'typique/util'
 
 export const mainSizeVars = {
     // We can't use vh in mobile browsers because it may result in vertical scroll

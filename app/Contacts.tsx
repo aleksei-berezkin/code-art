@@ -2,8 +2,8 @@ import { Icon } from './Icon'
 import type { IconSize } from './IconSize'
 import { typedEntries } from './util/typedEntries'
 import type { Css, Var } from 'typique'
-import { sc } from './sc'
 import type { ThemeVars } from './theme'
+import { co } from 'typique/util'
 
 const contacts = {
     github: 'https://github.com/aleksei-berezkin/code-art',
@@ -19,7 +19,7 @@ export function Contacts(props: { size: IconSize, color: 'light' | 'dark' }) {
     const liMrVar = '--li-mr' satisfies Var
 
     return <ul className={
-        sc(props, {
+        co(props, {
             _: 'contacts-ul',
             size: {
                 sm: 'contacts-ul-size-sm',

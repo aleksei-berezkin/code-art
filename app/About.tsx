@@ -6,9 +6,9 @@ import { sourceSpecs } from './model/sourceSpecs'
 import { useStore } from './store'
 import { useLayerStateClass } from './useLayerStateClass'
 import type { Css, Var } from 'typique'
-import { cc } from './cc'
 import type { ThemeVars } from './theme'
 import { mainSizeVars, dialogLayerClass } from './Main'
+import { cc } from 'typique/util'
 
 export function About() {
     const layerState = useLayerStateClass(useStore(state => state.openDialog === 'about'))

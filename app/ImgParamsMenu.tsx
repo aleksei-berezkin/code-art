@@ -9,10 +9,10 @@ import { arrowDownWrapperClass, Icon, wrOpenClass } from './Icon'
 import { Contacts } from './Contacts'
 import { useLayerStateClass } from './useLayerStateClass'
 import { sourceSpecs } from './model/sourceSpecs'
-import { cc } from './cc'
 import type { Css, Var } from 'typique'
 import type { ThemeVars } from './theme'
 import { dialogLayerClass, mainSizeVars } from './Main'
+import { cc } from 'typique/util'
 
 declare const isNarrowQuery = '@media (max-width: 510px)'
 

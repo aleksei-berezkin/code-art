@@ -1,7 +1,7 @@
 import type { IconSize } from './IconSize'
 import type { Css, Var } from 'typique'
-import { sc } from './sc'
 import type { ThemeVars } from './theme'
+import { co } from 'typique/util'
 
 // TODO .$arrow-down not working, replaced with 'arrowDown'
 type Pic = 'arrowDown' | 'close' | 'download' | 'menu' | 'reload' | 'github' | 'dev' | 'linked-in' | 'facebook' | 'twitter'
@@ -20,7 +20,7 @@ export function Icon({ pic, size='lg' }: { pic?: Pic, size?: IconSize }) {
     return (
         <svg
             className={
-                sc({ pic, size }, {
+                co({ pic, size }, {
                     _: 'icon-svg',
                     pic: {
                         arrowDown: 'icon-svg-pic-arrow-down',
